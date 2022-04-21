@@ -34,7 +34,6 @@ actions:
       highly_sensitive:
         rds: output/data/data_processed.rds
         vaxlong: output/data/data_vaxlong.rds
-   
 
   skim_process:
     run: r:latest analysis/data_skim.R output/data/data_processed.rds output/data_properties
@@ -89,4 +88,447 @@ actions:
         csv: output/match/A/report/*.csv
         png: output/match/A/report/*.png
         html: output/match/A/report/*.html
+
+  ## # # # # # # # # # # # # # # # # # # # 
+  ## matching set A 
+  ## # # # # # # # # # # # # # # # # # # # 
+  ## ### Overall models (''all'') 
+
+  km_A_all_postest:
+    run: r:latest analysis/km.R A all postest
+    needs:
+    - match_A
+    - data_selection
+    outputs:
+      moderately_sensitive:
+        txt: output/match/A/km/all/postest/*.txt
+        csv: output/match/A/km/all/postest/*.csv
+        png: output/match/A/km/all/postest/*.png
+
+  km_A_all_covidemergency:
+    run: r:latest analysis/km.R A all covidemergency
+    needs:
+    - match_A
+    - data_selection
+    outputs:
+      moderately_sensitive:
+        txt: output/match/A/km/all/covidemergency/*.txt
+        csv: output/match/A/km/all/covidemergency/*.csv
+        png: output/match/A/km/all/covidemergency/*.png
+
+  km_A_all_covidadmittedproxy1:
+    run: r:latest analysis/km.R A all covidadmittedproxy1
+    needs:
+    - match_A
+    - data_selection
+    outputs:
+      moderately_sensitive:
+        txt: output/match/A/km/all/covidadmittedproxy1/*.txt
+        csv: output/match/A/km/all/covidadmittedproxy1/*.csv
+        png: output/match/A/km/all/covidadmittedproxy1/*.png
+
+  km_A_all_covidadmitted:
+    run: r:latest analysis/km.R A all covidadmitted
+    needs:
+    - match_A
+    - data_selection
+    outputs:
+      moderately_sensitive:
+        txt: output/match/A/km/all/covidadmitted/*.txt
+        csv: output/match/A/km/all/covidadmitted/*.csv
+        png: output/match/A/km/all/covidadmitted/*.png
+
+  km_A_all_noncovidadmitted:
+    run: r:latest analysis/km.R A all noncovidadmitted
+    needs:
+    - match_A
+    - data_selection
+    outputs:
+      moderately_sensitive:
+        txt: output/match/A/km/all/noncovidadmitted/*.txt
+        csv: output/match/A/km/all/noncovidadmitted/*.csv
+        png: output/match/A/km/all/noncovidadmitted/*.png
+
+  km_A_all_coviddeath:
+    run: r:latest analysis/km.R A all coviddeath
+    needs:
+    - match_A
+    - data_selection
+    outputs:
+      moderately_sensitive:
+        txt: output/match/A/km/all/coviddeath/*.txt
+        csv: output/match/A/km/all/coviddeath/*.csv
+        png: output/match/A/km/all/coviddeath/*.png
+
+  km_A_all_noncoviddeath:
+    run: r:latest analysis/km.R A all noncoviddeath
+    needs:
+    - match_A
+    - data_selection
+    outputs:
+      moderately_sensitive:
+        txt: output/match/A/km/all/noncoviddeath/*.txt
+        csv: output/match/A/km/all/noncoviddeath/*.csv
+        png: output/match/A/km/all/noncoviddeath/*.png
+
+  ## ### Models by primary course (''vax12_type'') 
+
+  km_A_vax12_type_postest:
+    run: r:latest analysis/km.R A vax12_type postest
+    needs:
+    - match_A
+    - data_selection
+    outputs:
+      moderately_sensitive:
+        txt: output/match/A/km/vax12_type/postest/*.txt
+        csv: output/match/A/km/vax12_type/postest/*.csv
+        png: output/match/A/km/vax12_type/postest/*.png
+
+  km_A_vax12_type_covidemergency:
+    run: r:latest analysis/km.R A vax12_type covidemergency
+    needs:
+    - match_A
+    - data_selection
+    outputs:
+      moderately_sensitive:
+        txt: output/match/A/km/vax12_type/covidemergency/*.txt
+        csv: output/match/A/km/vax12_type/covidemergency/*.csv
+        png: output/match/A/km/vax12_type/covidemergency/*.png
+
+  km_A_vax12_type_covidadmittedproxy1:
+    run: r:latest analysis/km.R A vax12_type covidadmittedproxy1
+    needs:
+    - match_A
+    - data_selection
+    outputs:
+      moderately_sensitive:
+        txt: output/match/A/km/vax12_type/covidadmittedproxy1/*.txt
+        csv: output/match/A/km/vax12_type/covidadmittedproxy1/*.csv
+        png: output/match/A/km/vax12_type/covidadmittedproxy1/*.png
+
+  km_A_vax12_type_covidadmitted:
+    run: r:latest analysis/km.R A vax12_type covidadmitted
+    needs:
+    - match_A
+    - data_selection
+    outputs:
+      moderately_sensitive:
+        txt: output/match/A/km/vax12_type/covidadmitted/*.txt
+        csv: output/match/A/km/vax12_type/covidadmitted/*.csv
+        png: output/match/A/km/vax12_type/covidadmitted/*.png
+
+  km_A_vax12_type_noncovidadmitted:
+    run: r:latest analysis/km.R A vax12_type noncovidadmitted
+    needs:
+    - match_A
+    - data_selection
+    outputs:
+      moderately_sensitive:
+        txt: output/match/A/km/vax12_type/noncovidadmitted/*.txt
+        csv: output/match/A/km/vax12_type/noncovidadmitted/*.csv
+        png: output/match/A/km/vax12_type/noncovidadmitted/*.png
+
+  km_A_vax12_type_coviddeath:
+    run: r:latest analysis/km.R A vax12_type coviddeath
+    needs:
+    - match_A
+    - data_selection
+    outputs:
+      moderately_sensitive:
+        txt: output/match/A/km/vax12_type/coviddeath/*.txt
+        csv: output/match/A/km/vax12_type/coviddeath/*.csv
+        png: output/match/A/km/vax12_type/coviddeath/*.png
+
+  km_A_vax12_type_noncoviddeath:
+    run: r:latest analysis/km.R A vax12_type noncoviddeath
+    needs:
+    - match_A
+    - data_selection
+    outputs:
+      moderately_sensitive:
+        txt: output/match/A/km/vax12_type/noncoviddeath/*.txt
+        csv: output/match/A/km/vax12_type/noncoviddeath/*.csv
+        png: output/match/A/km/vax12_type/noncoviddeath/*.png
+
+  ## ### Models by clinically vulnerable group (''cev_cv'') 
+
+  km_A_cev_cv_postest:
+    run: r:latest analysis/km.R A cev_cv postest
+    needs:
+    - match_A
+    - data_selection
+    outputs:
+      moderately_sensitive:
+        txt: output/match/A/km/cev_cv/postest/*.txt
+        csv: output/match/A/km/cev_cv/postest/*.csv
+        png: output/match/A/km/cev_cv/postest/*.png
+
+  km_A_cev_cv_covidemergency:
+    run: r:latest analysis/km.R A cev_cv covidemergency
+    needs:
+    - match_A
+    - data_selection
+    outputs:
+      moderately_sensitive:
+        txt: output/match/A/km/cev_cv/covidemergency/*.txt
+        csv: output/match/A/km/cev_cv/covidemergency/*.csv
+        png: output/match/A/km/cev_cv/covidemergency/*.png
+
+  km_A_cev_cv_covidadmittedproxy1:
+    run: r:latest analysis/km.R A cev_cv covidadmittedproxy1
+    needs:
+    - match_A
+    - data_selection
+    outputs:
+      moderately_sensitive:
+        txt: output/match/A/km/cev_cv/covidadmittedproxy1/*.txt
+        csv: output/match/A/km/cev_cv/covidadmittedproxy1/*.csv
+        png: output/match/A/km/cev_cv/covidadmittedproxy1/*.png
+
+  km_A_cev_cv_covidadmitted:
+    run: r:latest analysis/km.R A cev_cv covidadmitted
+    needs:
+    - match_A
+    - data_selection
+    outputs:
+      moderately_sensitive:
+        txt: output/match/A/km/cev_cv/covidadmitted/*.txt
+        csv: output/match/A/km/cev_cv/covidadmitted/*.csv
+        png: output/match/A/km/cev_cv/covidadmitted/*.png
+
+  km_A_cev_cv_noncovidadmitted:
+    run: r:latest analysis/km.R A cev_cv noncovidadmitted
+    needs:
+    - match_A
+    - data_selection
+    outputs:
+      moderately_sensitive:
+        txt: output/match/A/km/cev_cv/noncovidadmitted/*.txt
+        csv: output/match/A/km/cev_cv/noncovidadmitted/*.csv
+        png: output/match/A/km/cev_cv/noncovidadmitted/*.png
+
+  km_A_cev_cv_coviddeath:
+    run: r:latest analysis/km.R A cev_cv coviddeath
+    needs:
+    - match_A
+    - data_selection
+    outputs:
+      moderately_sensitive:
+        txt: output/match/A/km/cev_cv/coviddeath/*.txt
+        csv: output/match/A/km/cev_cv/coviddeath/*.csv
+        png: output/match/A/km/cev_cv/coviddeath/*.png
+
+  km_A_cev_cv_noncoviddeath:
+    run: r:latest analysis/km.R A cev_cv noncoviddeath
+    needs:
+    - match_A
+    - data_selection
+    outputs:
+      moderately_sensitive:
+        txt: output/match/A/km/cev_cv/noncoviddeath/*.txt
+        csv: output/match/A/km/cev_cv/noncoviddeath/*.csv
+        png: output/match/A/km/cev_cv/noncoviddeath/*.png
+
+  ## ### Models by prior infection (''prior_covid_infection'') 
+
+  km_A_prior_covid_infection_postest:
+    run: r:latest analysis/km.R A prior_covid_infection postest
+    needs:
+    - match_A
+    - data_selection
+    outputs:
+      moderately_sensitive:
+        txt: output/match/A/km/prior_covid_infection/postest/*.txt
+        csv: output/match/A/km/prior_covid_infection/postest/*.csv
+        png: output/match/A/km/prior_covid_infection/postest/*.png
+
+  km_A_prior_covid_infection_covidemergency:
+    run: r:latest analysis/km.R A prior_covid_infection covidemergency
+    needs:
+    - match_A
+    - data_selection
+    outputs:
+      moderately_sensitive:
+        txt: output/match/A/km/prior_covid_infection/covidemergency/*.txt
+        csv: output/match/A/km/prior_covid_infection/covidemergency/*.csv
+        png: output/match/A/km/prior_covid_infection/covidemergency/*.png
+
+  km_A_prior_covid_infection_covidadmittedproxy1:
+    run: r:latest analysis/km.R A prior_covid_infection covidadmittedproxy1
+    needs:
+    - match_A
+    - data_selection
+    outputs:
+      moderately_sensitive:
+        txt: output/match/A/km/prior_covid_infection/covidadmittedproxy1/*.txt
+        csv: output/match/A/km/prior_covid_infection/covidadmittedproxy1/*.csv
+        png: output/match/A/km/prior_covid_infection/covidadmittedproxy1/*.png
+
+  km_A_prior_covid_infection_covidadmitted:
+    run: r:latest analysis/km.R A prior_covid_infection covidadmitted
+    needs:
+    - match_A
+    - data_selection
+    outputs:
+      moderately_sensitive:
+        txt: output/match/A/km/prior_covid_infection/covidadmitted/*.txt
+        csv: output/match/A/km/prior_covid_infection/covidadmitted/*.csv
+        png: output/match/A/km/prior_covid_infection/covidadmitted/*.png
+
+  km_A_prior_covid_infection_noncovidadmitted:
+    run: r:latest analysis/km.R A prior_covid_infection noncovidadmitted
+    needs:
+    - match_A
+    - data_selection
+    outputs:
+      moderately_sensitive:
+        txt: output/match/A/km/prior_covid_infection/noncovidadmitted/*.txt
+        csv: output/match/A/km/prior_covid_infection/noncovidadmitted/*.csv
+        png: output/match/A/km/prior_covid_infection/noncovidadmitted/*.png
+
+  km_A_prior_covid_infection_coviddeath:
+    run: r:latest analysis/km.R A prior_covid_infection coviddeath
+    needs:
+    - match_A
+    - data_selection
+    outputs:
+      moderately_sensitive:
+        txt: output/match/A/km/prior_covid_infection/coviddeath/*.txt
+        csv: output/match/A/km/prior_covid_infection/coviddeath/*.csv
+        png: output/match/A/km/prior_covid_infection/coviddeath/*.png
+
+  km_A_prior_covid_infection_noncoviddeath:
+    run: r:latest analysis/km.R A prior_covid_infection noncoviddeath
+    needs:
+    - match_A
+    - data_selection
+    outputs:
+      moderately_sensitive:
+        txt: output/match/A/km/prior_covid_infection/noncoviddeath/*.txt
+        csv: output/match/A/km/prior_covid_infection/noncoviddeath/*.csv
+        png: output/match/A/km/prior_covid_infection/noncoviddeath/*.png
+
+  ## ### Models by age (''age65plus'') 
+
+  km_A_age65plus_postest:
+    run: r:latest analysis/km.R A age65plus postest
+    needs:
+    - match_A
+    - data_selection
+    outputs:
+      moderately_sensitive:
+        txt: output/match/A/km/age65plus/postest/*.txt
+        csv: output/match/A/km/age65plus/postest/*.csv
+        png: output/match/A/km/age65plus/postest/*.png
+
+  km_A_age65plus_covidemergency:
+    run: r:latest analysis/km.R A age65plus covidemergency
+    needs:
+    - match_A
+    - data_selection
+    outputs:
+      moderately_sensitive:
+        txt: output/match/A/km/age65plus/covidemergency/*.txt
+        csv: output/match/A/km/age65plus/covidemergency/*.csv
+        png: output/match/A/km/age65plus/covidemergency/*.png
+
+  km_A_age65plus_covidadmittedproxy1:
+    run: r:latest analysis/km.R A age65plus covidadmittedproxy1
+    needs:
+    - match_A
+    - data_selection
+    outputs:
+      moderately_sensitive:
+        txt: output/match/A/km/age65plus/covidadmittedproxy1/*.txt
+        csv: output/match/A/km/age65plus/covidadmittedproxy1/*.csv
+        png: output/match/A/km/age65plus/covidadmittedproxy1/*.png
+
+  km_A_age65plus_covidadmitted:
+    run: r:latest analysis/km.R A age65plus covidadmitted
+    needs:
+    - match_A
+    - data_selection
+    outputs:
+      moderately_sensitive:
+        txt: output/match/A/km/age65plus/covidadmitted/*.txt
+        csv: output/match/A/km/age65plus/covidadmitted/*.csv
+        png: output/match/A/km/age65plus/covidadmitted/*.png
+
+  km_A_age65plus_noncovidadmitted:
+    run: r:latest analysis/km.R A age65plus noncovidadmitted
+    needs:
+    - match_A
+    - data_selection
+    outputs:
+      moderately_sensitive:
+        txt: output/match/A/km/age65plus/noncovidadmitted/*.txt
+        csv: output/match/A/km/age65plus/noncovidadmitted/*.csv
+        png: output/match/A/km/age65plus/noncovidadmitted/*.png
+
+  km_A_age65plus_coviddeath:
+    run: r:latest analysis/km.R A age65plus coviddeath
+    needs:
+    - match_A
+    - data_selection
+    outputs:
+      moderately_sensitive:
+        txt: output/match/A/km/age65plus/coviddeath/*.txt
+        csv: output/match/A/km/age65plus/coviddeath/*.csv
+        png: output/match/A/km/age65plus/coviddeath/*.png
+
+  km_A_age65plus_noncoviddeath:
+    run: r:latest analysis/km.R A age65plus noncoviddeath
+    needs:
+    - match_A
+    - data_selection
+    outputs:
+      moderately_sensitive:
+        txt: output/match/A/km/age65plus/noncoviddeath/*.txt
+        csv: output/match/A/km/age65plus/noncoviddeath/*.csv
+        png: output/match/A/km/age65plus/noncoviddeath/*.png
+
+  ## # # # # # # # # # # # # # # # # # # # 
+  ## Combine KM estimates across outcomes and subgroups 
+  ## # # # # # # # # # # # # # # # # # # # 
+
+  km_combine_A:
+    run: r:latest analysis/km_combine.R A
+    needs:
+    - km_A_all_postest
+    - km_A_all_covidemergency
+    - km_A_all_covidadmittedproxy1
+    - km_A_all_covidadmitted
+    - km_A_all_coviddeath
+    - km_A_all_noncoviddeath
+    - km_A_vax12_type_postest
+    - km_A_vax12_type_covidemergency
+    - km_A_vax12_type_covidadmittedproxy1
+    - km_A_vax12_type_covidadmitted
+    - km_A_vax12_type_coviddeath
+    - km_A_vax12_type_noncoviddeath
+    - km_A_prior_covid_infection_postest
+    - km_A_prior_covid_infection_covidemergency
+    - km_A_prior_covid_infection_covidadmittedproxy1
+    - km_A_prior_covid_infection_covidadmitted
+    - km_A_prior_covid_infection_coviddeath
+    - km_A_prior_covid_infection_noncoviddeath
+    - km_A_age65plus_postest
+    - km_A_age65plus_covidemergency
+    - km_A_age65plus_covidadmittedproxy1
+    - km_A_age65plus_covidadmitted
+    - km_A_age65plus_coviddeath
+    - km_A_age65plus_noncoviddeath
+    - km_A_cev_cv_postest
+    - km_A_cev_cv_covidemergency
+    - km_A_cev_cv_covidadmittedproxy1
+    - km_A_cev_cv_covidadmitted
+    - km_A_cev_cv_coviddeath
+    - km_A_cev_cv_noncoviddeath
+    outputs:
+      moderately_sensitive:
+        csv: output/match/A/km/combined/*.csv
+
+  ## # # # # # # # # # # # # # # # # # # # 
+  ## End 
+  ## # # # # # # # # # # # # # # # # # # # 
 
