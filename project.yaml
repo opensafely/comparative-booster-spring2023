@@ -138,17 +138,6 @@ actions:
         csv: output/match/A/km/all/covidadmitted/*.csv
         png: output/match/A/km/all/covidadmitted/*.png
 
-  km_A_all_noncovidadmitted:
-    run: r:latest analysis/km.R A all noncovidadmitted
-    needs:
-    - match_A
-    - data_selection
-    outputs:
-      moderately_sensitive:
-        txt: output/match/A/km/all/noncovidadmitted/*.txt
-        csv: output/match/A/km/all/noncovidadmitted/*.csv
-        png: output/match/A/km/all/noncovidadmitted/*.png
-
   km_A_all_coviddeath:
     run: r:latest analysis/km.R A all coviddeath
     needs:
@@ -216,17 +205,6 @@ actions:
         txt: output/match/A/km/vax12_type/covidadmitted/*.txt
         csv: output/match/A/km/vax12_type/covidadmitted/*.csv
         png: output/match/A/km/vax12_type/covidadmitted/*.png
-
-  km_A_vax12_type_noncovidadmitted:
-    run: r:latest analysis/km.R A vax12_type noncovidadmitted
-    needs:
-    - match_A
-    - data_selection
-    outputs:
-      moderately_sensitive:
-        txt: output/match/A/km/vax12_type/noncovidadmitted/*.txt
-        csv: output/match/A/km/vax12_type/noncovidadmitted/*.csv
-        png: output/match/A/km/vax12_type/noncovidadmitted/*.png
 
   km_A_vax12_type_coviddeath:
     run: r:latest analysis/km.R A vax12_type coviddeath
@@ -296,17 +274,6 @@ actions:
         csv: output/match/A/km/cev_cv/covidadmitted/*.csv
         png: output/match/A/km/cev_cv/covidadmitted/*.png
 
-  km_A_cev_cv_noncovidadmitted:
-    run: r:latest analysis/km.R A cev_cv noncovidadmitted
-    needs:
-    - match_A
-    - data_selection
-    outputs:
-      moderately_sensitive:
-        txt: output/match/A/km/cev_cv/noncovidadmitted/*.txt
-        csv: output/match/A/km/cev_cv/noncovidadmitted/*.csv
-        png: output/match/A/km/cev_cv/noncovidadmitted/*.png
-
   km_A_cev_cv_coviddeath:
     run: r:latest analysis/km.R A cev_cv coviddeath
     needs:
@@ -375,17 +342,6 @@ actions:
         csv: output/match/A/km/prior_covid_infection/covidadmitted/*.csv
         png: output/match/A/km/prior_covid_infection/covidadmitted/*.png
 
-  km_A_prior_covid_infection_noncovidadmitted:
-    run: r:latest analysis/km.R A prior_covid_infection noncovidadmitted
-    needs:
-    - match_A
-    - data_selection
-    outputs:
-      moderately_sensitive:
-        txt: output/match/A/km/prior_covid_infection/noncovidadmitted/*.txt
-        csv: output/match/A/km/prior_covid_infection/noncovidadmitted/*.csv
-        png: output/match/A/km/prior_covid_infection/noncovidadmitted/*.png
-
   km_A_prior_covid_infection_coviddeath:
     run: r:latest analysis/km.R A prior_covid_infection coviddeath
     needs:
@@ -453,17 +409,6 @@ actions:
         txt: output/match/A/km/age65plus/covidadmitted/*.txt
         csv: output/match/A/km/age65plus/covidadmitted/*.csv
         png: output/match/A/km/age65plus/covidadmitted/*.png
-
-  km_A_age65plus_noncovidadmitted:
-    run: r:latest analysis/km.R A age65plus noncovidadmitted
-    needs:
-    - match_A
-    - data_selection
-    outputs:
-      moderately_sensitive:
-        txt: output/match/A/km/age65plus/noncovidadmitted/*.txt
-        csv: output/match/A/km/age65plus/noncovidadmitted/*.csv
-        png: output/match/A/km/age65plus/noncovidadmitted/*.png
 
   km_A_age65plus_coviddeath:
     run: r:latest analysis/km.R A age65plus coviddeath
