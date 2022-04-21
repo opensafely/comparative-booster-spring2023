@@ -67,7 +67,7 @@ maxfup <- max(postbaselinecuts)
 recoder <-
   list(
     subgroups = c(
-      `Main` = "main",
+      `Main` = "all",
       `Primary vaccine course` = "vax12_type",
       `Age` = "age65plus",
       `Prior SARS-CoV-2 infection status` = "prior_covid_infection",

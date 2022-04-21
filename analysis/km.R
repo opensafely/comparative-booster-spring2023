@@ -96,9 +96,9 @@ data_matched <-
   ) %>%
   #filter(patient_id %in% data_matchstatus$patient_id[data_matchstatus$matched]) %>%
   left_join(
-    data_matchstatus %>% filter(matched),
+    data_matchstatus %>% filter(matched) %>% select(-vax3_date),
     .,
-    by= c("patient_id", "vax3_date")
+    by= c("patient_id")
   ) %>%
   mutate(
 

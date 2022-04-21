@@ -20,13 +20,10 @@ if(length(args)==0){
   # use for interactive testing
   removeobjects <- FALSE
   matchset <- "A"
-  #subgroup <- "all"
-  subgroup <- "vax12_type"
 
 } else {
   removeobjects <- TRUE
   matchset <- args[[1]]
-  subgroup <- args[[2]]
 
 }
 
@@ -46,15 +43,17 @@ source(here("lib", "design", "design.R"))
 
 
 output_dir <- here("output", "match", matchset, "km", "combined")
+fs::dir_create(output_dir)
 
 if(Sys.getenv("OPENSAFELY_BACKEND") %in% c("", "expectations")){
   metaparams <-
     expand_grid(
       outcome = factor(c("postest", "coviddeath")),
       subgroup = factor(recoder$subgroup),
+      #treatment = recoder$treatment
     ) %>%
     mutate(
-      treatment_descr = fct_recode(as.character(treatment),  !!!recoder$treatment),
+      #treatment_descr = fct_recode(as.character(treatment),  !!!recoder$treatment),
       outcome_descr = fct_recode(as.character(outcome),  !!!recoder$outcome),
       subgroup_descr = fct_recode(subgroup,  !!!recoder$subgroup),
     )
@@ -62,10 +61,11 @@ if(Sys.getenv("OPENSAFELY_BACKEND") %in% c("", "expectations")){
   metaparams <-
     expand_grid(
       outcome = factor(c("postest", "covidemergency", "covidadmittedproxy1", "covidadmitted", "coviddeath", "noncoviddeath")),
-      subgroup = factor(recode_subgroup),
+      subgroup = factor(recoder$subgroup),
+      #treatment = recoder$treatment
     ) %>%
     mutate(
-      treatment_descr = fct_recode(as.character(treatment),  !!!recoder$treatment),
+      #treatment_descr = fct_recode(as.character(treatment),  !!!recoder$treatment),
       outcome_descr = fct_recode(as.character(outcome),  !!!recoder$outcome),
       subgroup_descr = fct_recode(subgroup,  !!!recoder$subgroup),
     )
@@ -74,7 +74,11 @@ if(Sys.getenv("OPENSAFELY_BACKEND") %in% c("", "expectations")){
 
 km_estimates <- metaparams %>%
   mutate(
-    data = pmap(list(matchset, outcome, subgroup), function(matchset, outcome, subgroup) read_csv(here("output", "match", matchset, "km", subgroup, outcome, glue("km_estimates.csv"))))
+    data = pmap(list(matchset, subgroup, outcome), function(matchset, subgroup, outcome) {
+      dat <- read_csv(here("output", "match", matchset, "km", subgroup, outcome, glue("km_estimates.csv")))
+      dat %>% select(-all_of(c(subgroup)))
+    }
+    )
   ) %>%
   unnest(data)
 
@@ -84,7 +88,11 @@ write_csv(km_estimates, fs::path(output_dir, "km_estimates.csv"))
 
 km_contrasts_daily <- metaparams %>%
   mutate(
-    data = pmap(list(matchset, outcome, subgroup), function(matchset, outcome, subgroup) read_csv(here("output", "match", matchset, "km", subgroup, outcome, glue("km_contrasts_daily.csv"))))
+    data = pmap(list(matchset, outcome, subgroup), function(matchset, outcome, subgroup){
+        dat <- read_csv(here("output", "match", matchset, "km", subgroup, outcome, glue("km_contrasts_daily.csv")))
+        dat %>% select(-all_of(subgroup))
+      }
+    )
   ) %>%
   unnest(data)
 
@@ -94,7 +102,11 @@ write_csv(km_contrasts_daily, fs::path(output_dir, "km_contrasts_daily.csv"))
 
 km_contrasts_overall <- metaparams %>%
   mutate(
-    data = pmap(list(matchset, outcome, subgroup), function(matchset, outcome, subgroup) read_csv(here("output", "match", matchset, "km", subgroup, outcome, glue("km_contrasts_overall.csv"))))
+    data = pmap(list(matchset, outcome, subgroup), function(matchset, outcome, subgroup) {
+        dat <- read_csv(here("output", "match", matchset, "km", subgroup, outcome, glue("km_contrasts_overall.csv")))
+        dat %>% select(-all_of(subgroup))
+      }
+    )
   ) %>%
   unnest(data)
 
