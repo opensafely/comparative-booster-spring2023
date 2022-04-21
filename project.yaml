@@ -529,6 +529,21 @@ actions:
         csv: output/match/A/km/combined/*.csv
 
   ## # # # # # # # # # # # # # # # # # # # 
+  ## Files for release 
+  ## # # # # # # # # # # # # # # # # # # # 
+
+  release_objects:
+    run: r:latest analysis/release_objects.R
+    needs:
+    - data_selection
+    - match_report_A
+    - km_combine_A
+    outputs:
+      moderately_sensitive:
+        txt: output/files-for-release.txt
+        csv: output/release-objects/*/*.csv
+
+  ## # # # # # # # # # # # # # # # # # # # 
   ## End 
   ## # # # # # # # # # # # # # # # # # # # 
 

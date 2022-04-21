@@ -338,6 +338,21 @@ actions_list <- splice(
     outcomes=c("postest", "covidemergency", "covidadmittedproxy1", "covidadmitted", "coviddeath", "noncoviddeath")
   ),
 
+  comment("# # # # # # # # # # # # # # # # # # #", "Files for release", "# # # # # # # # # # # # # # # # # # #"),
+
+  action(
+    name = "release_objects",
+    run = "r:latest analysis/release_objects.R",
+    needs = list(
+      "data_selection",
+      "match_report_A",
+      "km_combine_A"
+    ),
+    moderately_sensitive = lst(
+      txt = "output/files-for-release.txt",
+      csv = "output/release-objects/*/*.csv",
+    )
+  ),
 
 comment("# # # # # # # # # # # # # # # # # # #", "End", "# # # # # # # # # # # # # # # # # # #")
 
