@@ -35,3 +35,32 @@ actions:
         rds: output/data/data_processed.rds
         vaxlong: output/data/data_vaxlong.rds
    
+
+  skim_process:
+    run: r:latest analysis/data_skim.R output/data/data_processed.rds output/data_properties
+    needs:
+    - data_process
+    outputs:
+      moderately_sensitive:
+        cohort: output/data_properties/data_processed*.txt
+
+  data_selection:
+    run: r:latest analysis/data_selection.R
+    needs:
+    - data_process
+    outputs:
+      highly_sensitive:
+        feather: output/data/data_cohort.feather
+        cohortrds: output/data/data_cohort.rds
+        criteriards: output/data/data_inclusioncriteria.rds
+      moderately_sensitive:
+        flow: output/data/flowchart.csv
+
+  skim_selection:
+    run: r:latest analysis/data_skim.R output/data/data_cohort.rds output/data_properties
+    needs:
+    - data_selection
+    outputs:
+      moderately_sensitive:
+        cohort: output/data_properties/data_cohort*.txt
+

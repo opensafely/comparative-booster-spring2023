@@ -107,6 +107,18 @@ actions_list <- splice(
     )
   ),
 
+  # action(
+  #   name = "extract_report",
+  #   run = "cohort-report:v3.0.0 output/input.feather",
+  #   needs = list("extract"),
+  #   config = list(output_path = "output/data/reports/extract/"),
+  #   moderately_sensitive = lst(
+  #     html = "output/data/reports/extract/*.html",
+  #     png = "output/data/reports/extract/*.png",
+  #   )
+  # ),
+
+
   action(
     name = "data_process",
     run = "r:latest analysis/data_process.R",
@@ -114,6 +126,40 @@ actions_list <- splice(
     highly_sensitive = lst(
       rds = "output/data/data_processed.rds",
       vaxlong = "output/data/data_vaxlong.rds"
+    )
+  ),
+
+  action(
+    name = "skim_process",
+    run = "r:latest analysis/data_skim.R",
+    arguments = c("output/data/data_processed.rds", "output/data_properties"),
+    needs = list("data_process"),
+    moderately_sensitive = lst(
+      cohort = "output/data_properties/data_processed*.txt"
+    )
+  ),
+
+  action(
+    name = "data_selection",
+    run = "r:latest analysis/data_selection.R",
+    needs = list("data_process"),
+    highly_sensitive = lst(
+      feather = "output/data/data_cohort.feather",
+      cohortrds = "output/data/data_cohort.rds",
+      criteriards = "output/data/data_inclusioncriteria.rds"
+    ),
+    moderately_sensitive = lst(
+      flow = "output/data/flowchart.csv"
+    )
+  ),
+
+  action(
+    name = "skim_selection",
+    run = "r:latest analysis/data_skim.R",
+    arguments = c("output/data/data_cohort.rds", "output/data_properties"),
+    needs = list("data_selection"),
+    moderately_sensitive = lst(
+      cohort = "output/data_properties/data_cohort*.txt"
     )
   ),
 
