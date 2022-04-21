@@ -193,7 +193,7 @@ action_km_combine <- function(
 ## defaults ----
 defaults_list <- lst(
   version = "3.0",
-  expectations= lst(population_size=100000L)
+  expectations= lst(population_size=1000L)
 )
 
 ## actions ----
@@ -397,6 +397,7 @@ actions_list <- splice(
       csv = "output/release-objects/*/*.csv",
     )
   ),
+
 
 comment("# # # # # # # # # # # # # # # # # # #", "End", "# # # # # # # # # # # # # # # # # # #")
 
