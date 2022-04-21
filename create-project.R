@@ -76,7 +76,7 @@ action_match <- function(matchset){
     ),
 
     action(
-      name = glue("match_{matchset}_report"),
+      name = glue("match_report_{matchset}"),
       run = "r:latest analysis/match_report.R",
       arguments = c(matchset),
       needs = list("data_selection",  glue("match_{matchset}")),

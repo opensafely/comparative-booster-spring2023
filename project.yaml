@@ -77,7 +77,7 @@ actions:
       moderately_sensitive:
         txt: output/match/A/*.txt
 
-  match_A_report:
+  match_report_A:
     run: r:latest analysis/match_report.R A
     needs:
     - data_selection
