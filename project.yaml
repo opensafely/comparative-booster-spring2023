@@ -3,10 +3,41 @@ version: '3.0'
 expectations:
   population_size: 1000
 
+  population_size: 100000
+
 actions:
 
   generate_study_population:
+  ## # # # # # # # # # # # # # # # # # # # 
+  ## DO NOT EDIT project.yaml DIRECTLY 
+  ## This file is created by create-project.R 
+  ## Edit and run create-project.R to update the project.yaml 
+  ## # # # # # # # # # # # # # # # # # # # 
+  ## # # # # # # # # # # # # # # # # # # # 
+  ## Pre-server scripts 
+  ## # # # # # # # # # # # # # # # # # # # 
+  ## # # # # # # # # # # # # # # # # # # # 
+  ## Extract and tidy 
+  ## # # # # # # # # # # # # # # # # # # # 
+
+  extract:
     run: cohortextractor:latest generate_cohort --study-definition study_definition
+      --output-format feather
+    needs: []
+    outputs:
+      highly_sensitive:
+        cohort: output/input.feather
+
+  extract_report:
+    run: cohort-report:v3.0.0 output/input.feather
+    needs:
+    - extract
+    outputs:
+      moderately_sensitive:
+        html: output/data/reports/extract/*.html
+        png: output/data/reports/extract/*.png
+    config:
+      output_path: output/data/reports/extract/
     outputs:
       highly_sensitive:
         cohort: output/input.csv
