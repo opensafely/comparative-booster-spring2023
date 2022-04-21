@@ -56,6 +56,42 @@ action <- function(
 
 
 ## match action function ----
+
+action_match <- function(matchset){
+
+  splice(
+
+    action(
+      name = glue("match_{matchset}"),
+      run = "r:latest analysis/match.R",
+      arguments = c(matchset),
+      needs = list("data_selection"),
+      highly_sensitive = lst(
+        rds = glue("output/match/{matchset}/*.rds")
+      ),
+      moderately_sensitive = lst(
+        txt = glue("output/match/{matchset}/*.txt"),
+        #csv = glue("output/match/{matchset}/*.csv"),
+      )
+    ),
+
+    action(
+      name = glue("match_{matchset}_report"),
+      run = "r:latest analysis/match_report.R",
+      arguments = c(matchset),
+      needs = list("data_selection",  glue("match_{matchset}")),
+      moderately_sensitive = lst(
+        txt = glue("output/match/{matchset}/report/*.txt"),
+        csv = glue("output/match/{matchset}/report/*.csv"),
+        png = glue("output/match/{matchset}/report/*.png"),
+        html = glue("output/match/{matchset}/report/*.html")
+      )
+    )
+  )
+
+
+}
+
 # specify project ----
 
 ## defaults ----
@@ -163,9 +199,25 @@ actions_list <- splice(
     )
   ),
 
+
+  # action(
+  #   name = "cohort_report",
+  #   run = "cohort-report:v3.0.0 output/data/data_cohort.feather",
+  #   needs = list("data_selection"),
+  #   config = list(output_path = "output/data/reports/cohort/"),
+  #   moderately_sensitive = lst(
+  #     html = "output/data/reports/cohort/*.html",
+  #     png = "output/data/reports/cohort/*.png",
+  #   )
+  # ),
+
     moderately_sensitive = lst(
     )
   ),
+
+  comment("# # # # # # # # # # # # # # # # # # #", "Matching", "# # # # # # # # # # # # # # # # # # #"),
+
+  action_match("A"),
 
 
 comment("# # # # # # # # # # # # # # # # # # #", "End", "# # # # # # # # # # # # # # # # # # #")
