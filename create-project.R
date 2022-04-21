@@ -141,6 +141,53 @@ action_km_combine <- function(
 }
 
 
+
+## model action function ----
+# action_model <- function(
+#     matchset, outcome, subgroup
+# ){
+#
+#   splice(
+#
+#     action(
+#       name = glue("km_{matchset}_{subgroup}_{outcome}"),
+#       run = glue("r:latest analysis/model.R"),
+#       arguments = c(matchset, subgroup, outcome),
+#       needs = list(
+#         glue("match_{matchset}"),
+#         "data_selection",
+#         "data_process"
+#       ),
+#       highly_sensitive = lst(
+#         rds = glue("output/match/{matchset}/model/{subgroup}/{outcome}/*.rds")
+#       ),
+#       moderately_sensitive = lst(
+#         txt = glue("output/match/{matchset}/model/{subgroup}/{outcome}/*.txt"),
+#         csv = glue("output/match/{matchset}/model/{subgroup}/{outcome}/*.csv"),
+#         png = glue("output/match/{matchset}/model/{subgroup}/{outcome}/*.png"),
+#       )
+#     ),
+#
+#     action(
+#       name = glue("model_report_{matchset}_{subgroup}_{outcome}"),
+#       run = glue("r:latest analysis/model_report.R"),
+#       arguments = c(treatment, outcome, subgroup),
+#       needs = list(
+#         "data_selection",
+#         glue("model_{matchset}_{subgroup}_{outcome}"),
+#         glue("match_{matchset}")
+#
+#       ),
+#       moderately_sensitive = lst(
+#         csv = glue("output/match/{matchset}/models/{subgroup}/{outcome}/report/*.csv"),
+#         #svg = glue("output/match/{matchset}/models/{subgroup}/{outcome}/report/*.svg"),
+#         png = glue("output/match/{matchset}/models/{subgroup}/{outcome}/report/*.png")
+#       )
+#     )
+#   )
+# }
+
+
 # specify project ----
 
 ## defaults ----
@@ -260,9 +307,6 @@ actions_list <- splice(
   #   )
   # ),
 
-    moderately_sensitive = lst(
-    )
-  ),
 
   comment("# # # # # # # # # # # # # # # # # # #", "Matching", "# # # # # # # # # # # # # # # # # # #"),
 
