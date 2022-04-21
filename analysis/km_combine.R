@@ -110,4 +110,4 @@ km_contrasts_overall <- metaparams %>%
   ) %>%
   unnest(data)
 
-write_csv(km_contrasts_overall, fs::path(output_dir, "km_contrasts_all.csv"))
+write_csv(km_contrasts_overall, fs::path(output_dir, "km_contrasts_overall.csv"))
