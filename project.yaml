@@ -64,3 +64,29 @@ actions:
       moderately_sensitive:
         cohort: output/data_properties/data_cohort*.txt
 
+  ## # # # # # # # # # # # # # # # # # # # 
+  ## Matching 
+  ## # # # # # # # # # # # # # # # # # # # 
+
+  match_A:
+    run: r:latest analysis/match.R A
+    needs:
+    - data_selection
+    outputs:
+      highly_sensitive:
+        rds: output/match/A/*.rds
+      moderately_sensitive:
+        txt: output/match/A/*.txt
+
+  match_A_report:
+    run: r:latest analysis/match_report.R A
+    needs:
+    - data_selection
+    - match_A
+    outputs:
+      moderately_sensitive:
+        txt: output/match/A/report/*.txt
+        csv: output/match/A/report/*.csv
+        png: output/match/A/report/*.png
+        html: output/match/A/report/*.html
+
