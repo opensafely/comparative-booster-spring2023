@@ -227,7 +227,7 @@ data_processed <- data_extract %>%
 
     prior_tests_cat = cut(prior_covid_test_frequency, breaks=c(0, 1, 2, 3, Inf), labels=c("0", "1", "2", "3+"), right=FALSE),
 
-    prior_covid_infection = !is.na(positive_test_0_date)  | !is.na(covidemergency_0_date) | !is.na(admitted_covid_0_date) | !is.na(primary_care_covid_case_0_date),
+    prior_covid_infection = !is.na(postest_0_date)  | !is.na(covidemergency_0_date) | !is.na(covidadmitted_0_date) | !is.na(primary_care_covid_case_0_date),
 
 
     #covidemergency_1_date = pmin(covidemergency_1_date, covidadmitted_1_date, na.rm=TRUE),
@@ -235,14 +235,14 @@ data_processed <- data_extract %>%
 
 
     # latest covid event before study start
-    anycovid_0_date = pmax(positive_test_0_date, covidemergency_0_date, admitted_covid_0_date, na.rm=TRUE),
+    anycovid_0_date = pmax(postest_0_date, covidemergency_0_date, covidadmitted_0_date, na.rm=TRUE),
 
     covidadmittedproxy1_date = covidemergencyhosp_date,
-    covidadmittedproxy2_date = if_else((positive_test_date<=covid_vax_disease_3_date) & (positive_test_date>=covid_vax_disease_3_date-14), emergencyhosp_date, as.Date(NA)),
-    #covidadmittedproxy3_date = if_else((positive_test_date<=covid_vax_disease_3_date) & (positive_test_date>=covid_vax_disease_3_date-14), respemergencyhosp_date, as.Date(NA)),
+    covidadmittedproxy2_date = if_else((postest_date<=covid_vax_disease_3_date) & (postest_date>=covid_vax_disease_3_date-14), emergencyhosp_date, as.Date(NA)),
+    #covidadmittedproxy3_date = if_else((postest_date<=covid_vax_disease_3_date) & (postest_date>=covid_vax_disease_3_date-14), respemergencyhosp_date, as.Date(NA)),
 
     # earliest covid event after study start
-    anycovid_date = pmin(positive_test_date, covidemergency_date, admitted_covid_date, coviddeath_date, na.rm=TRUE),
+    anycovid_date = pmin(postest_date, covidemergency_date, covidadmitted_date, coviddeath_date, na.rm=TRUE),
 
     noncoviddeath_date = if_else(!is.na(death_date) & is.na(coviddeath_date), death_date, as.Date(NA_character_)),
 
