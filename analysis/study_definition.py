@@ -400,7 +400,7 @@ study = StudyDefinition(
 
   
   # positive covid test
-  positive_test_0_date=patients.with_test_result_in_sgss(
+  postest_0_date=patients.with_test_result_in_sgss(
       pathogen="SARS-CoV-2",
       test_result="positive",
       returning="date",
@@ -420,7 +420,7 @@ study = StudyDefinition(
   ),
   
     # Positive covid admission prior to study start date
-  admitted_covid_0_date=patients.admitted_to_hospital(
+  covidadmitted_0_date=patients.admitted_to_hospital(
     returning="date_admitted",
     with_admission_method=["21", "22", "23", "24", "25", "2A", "2B", "2C", "2D", "28"],
     with_these_diagnoses=codelists.covid_icd10,
@@ -869,7 +869,7 @@ study = StudyDefinition(
   ),
   
   # positive covid test
-  positive_test_date=patients.with_test_result_in_sgss(
+  postest_date=patients.with_test_result_in_sgss(
       pathogen="SARS-CoV-2",
       test_result="positive",
       returning="date",
@@ -962,7 +962,7 @@ study = StudyDefinition(
   ),
   
   # Positive covid admission prior to study start date
-  admitted_covid_date=patients.admitted_to_hospital(
+  covidadmitted_date=patients.admitted_to_hospital(
     returning="date_admitted",
     with_admission_method=["21", "22", "23", "24", "25", "2A", "2B", "2C", "2D", "28"],
     with_these_diagnoses=codelists.covid_icd10,
