@@ -34,8 +34,4 @@ actions:
       highly_sensitive:
         rds: output/data/data_processed.rds
         vaxlong: output/data/data_vaxlong.rds
-    outputs:
-      moderately_sensitive:
-    config:
-    outputs:
-      highly_sensitive:
+   
