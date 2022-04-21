@@ -26,8 +26,14 @@ actions:
       highly_sensitive:
         cohort: output/input.feather
 
+  data_process:
+    run: r:latest analysis/data_process.R
     needs:
     - extract
+    outputs:
+      highly_sensitive:
+        rds: output/data/data_processed.rds
+        vaxlong: output/data/data_vaxlong.rds
     outputs:
       moderately_sensitive:
     config:

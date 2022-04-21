@@ -108,7 +108,15 @@ actions_list <- splice(
   ),
 
   action(
+    name = "data_process",
+    run = "r:latest analysis/data_process.R",
     needs = list("extract"),
+    highly_sensitive = lst(
+      rds = "output/data/data_processed.rds",
+      vaxlong = "output/data/data_vaxlong.rds"
+    )
+  ),
+
     moderately_sensitive = lst(
     )
   ),
