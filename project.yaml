@@ -26,16 +26,10 @@ actions:
       highly_sensitive:
         cohort: output/input.feather
 
-  extract_report:
-    run: cohort-report:v3.0.0 output/input.feather
     needs:
     - extract
     outputs:
       moderately_sensitive:
-        html: output/data/reports/extract/*.html
-        png: output/data/reports/extract/*.png
     config:
-      output_path: output/data/reports/extract/
     outputs:
       highly_sensitive:
-        cohort: output/input.csv

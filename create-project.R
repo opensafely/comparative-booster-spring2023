@@ -108,13 +108,8 @@ actions_list <- splice(
   ),
 
   action(
-    name = "extract_report",
-    run = "cohort-report:v3.0.0 output/input.feather",
     needs = list("extract"),
-    config = list(output_path = "output/data/reports/extract/"),
     moderately_sensitive = lst(
-      html = "output/data/reports/extract/*.html",
-      png = "output/data/reports/extract/*.png",
     )
   ),
 
