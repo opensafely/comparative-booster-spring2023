@@ -270,12 +270,14 @@ km_incidence <-
     cml.rate = cml.event / cml.atrisk,
 
     risk = 1 - surv,
+    risk.ll = 1 - surv.ul,
+    risk.ul = 1 - surv.ll
   ) %>%
   select(
     !!subgroup_sym,
     treatment,
     time, interval,
-    surv, surv.se, risk, n.atrisk, n.event, n.censor, sumerand, rate, cml.atrisk, cml.event, cml.censor, cml.sumerand, cml.rate
+    surv, surv.se, surv.ll, surv.ul, risk, risk.ll, risk.ul, n.atrisk, n.event, n.censor, sumerand, rate, cml.atrisk, cml.event, cml.censor, cml.sumerand, cml.rate
   )
 
 
@@ -306,7 +308,11 @@ kmcontrast <- function(data, cuts=NULL){
       sumerand = sum(sumerand),
       surv = last(surv),
       surv.se = surv * sqrt(cml.sumerand), #greenwood standard error
+      surv.ll = last(surv.ll),
+      surv.ul = last(surv.ul),
       risk = last(risk),
+      risk.ll = last(risk.ul),
+      risk.ul = last(risk.ll),
       rate = n.event/persontime,
     ) %>%
     ungroup() %>%
@@ -314,7 +320,7 @@ kmcontrast <- function(data, cuts=NULL){
       id_cols= c(subgroup, "period_start", "period_end", "period",  "interval"),
       names_from=treatment,
       names_glue="{.value}_{treatment}",
-      values_from=c(surv, surv.se, risk, n.atrisk, n.event, n.censor, rate, cml.atrisk, cml.event, cml.censor, cml.rate)
+      values_from=c(surv, surv.se, surv.ll, surv.ul, risk, risk.ll, risk.ul, n.atrisk, n.event, n.censor, rate, cml.atrisk, cml.event, cml.censor, cml.rate)
     ) %>%
     mutate(
       n.nonevent_0 = n.atrisk_0 - n.event_0,
