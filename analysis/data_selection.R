@@ -18,8 +18,6 @@ source(here("lib", "functions", "utility.R"))
 # Import design elements
 source(here("lib", "design", "design.R"))
 
-## import command-line arguments ----
-args <- commandArgs(trailingOnly=TRUE)
 
 ## create output directories ----
 fs::dir_create(here("output", "data"))

@@ -3,19 +3,6 @@
 # Purpose: To gather level 4 files ("moderately sensitive") place in a single directory for easy review and release
 # # # # # # # # # # # # # # # # # # # # #
 
-# import command-line arguments ----
-
-args <- commandArgs(trailingOnly=TRUE)
-
-
-if(length(args)==0){
-  # use for interactive testing
-  removeobs <- FALSE
-} else {
-  removeobs <- TRUE
-}
-
-
 ## Import libraries ----
 library('tidyverse')
 library('here')
