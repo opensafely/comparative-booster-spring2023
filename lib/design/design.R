@@ -101,7 +101,7 @@ recoder <-
       `Aged 18-64` = "FALSE",
       `Aged 65 and over` = "TRUE"
     ),
-    prior_covid_infection <- c(
+    prior_covid_infection = c(
       `No prior SARS-CoV-2 infection` = "FALSE",
       `Prior SARS-CoV-2 infection` = "TRUE"
     )
