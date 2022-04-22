@@ -210,18 +210,19 @@ data_surv_rounded <-
   mutate(
     # Use ceiling not round. This is slightly biased upwards,
     # but means there's no disclosure risk at the boundaries (0 and 1) where masking would otherwise be threshold/2
+    lagtime = lag(time,1L,0),
     surv = ceiling_any(surv, 1/floor(max(n.risk, na.rm=TRUE)/(threshold))),
     surv.ll = ceiling_any(surv.ll, 1/floor(max(n.risk, na.rm=TRUE)/(threshold))),
     surv.ul = ceiling_any(surv.ul, 1/floor(max(n.risk, na.rm=TRUE)/(threshold))),
     cml.event = ceiling_any(cumsum(replace_na(n.event, 0)), threshold),
     cml.censor = ceiling_any(cumsum(replace_na(n.censor, 0)), threshold),
-    n.event = c(NA, diff(cml.event)),
-    n.censor = c(NA, diff(cml.censor)),
-    n.risk = lag(ceiling_any(max(n.risk, na.rm=TRUE), threshold) - (cml.event + cml.censor)),
+    n.event = diff(c(0,cml.event)),
+    n.censor = diff(c(0,cml.censor)),
+    n.risk = ceiling_any(max(n.risk, na.rm=TRUE), threshold) - lag(cml.event + cml.censor,1,0),
     sumerand = n.event / ((n.risk - n.event) * n.risk),
-    surv.se = surv * sqrt(cumsum(sumerand)),
+    surv.se = surv * sqrt(cumsum(replace_na(sumerand, 0))),
   ) %>%
-  select(!!subgroup_sym, treatment, treatment_descr, time, leadtime, interval, surv, surv.se, surv.ll, surv.ul, n.risk, n.event, n.censor, sumerand)
+  select(!!subgroup_sym, treatment, treatment_descr, time, lagtime, leadtime, interval, surv, surv.se, surv.ll, surv.ul, n.risk, n.event, n.censor, sumerand)
 
 
 write_csv(data_surv_rounded, fs::path(output_dir, "km_estimates.csv"))
