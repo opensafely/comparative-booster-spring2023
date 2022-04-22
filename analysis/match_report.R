@@ -378,14 +378,16 @@ data_flowchart_match <-
     c7 = c6 & matched,
   ) %>%
   select(-patient_id, -matched) %>%
+  group_by(vax3_type) %>%
   summarise(
     across(.fns=sum)
   ) %>%
   pivot_longer(
-    cols=everything(),
+    cols=-vax3_type,
     names_to="criteria",
     values_to="n"
   ) %>%
+  group_by(vax3_type) %>%
   mutate(
     n_exclude = lag(n) - n,
     pct_exclude = n_exclude/lag(n),

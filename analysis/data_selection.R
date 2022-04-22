@@ -34,6 +34,7 @@ data_processed <- read_rds(here("output", "data", "data_processed.rds"))
 data_criteria <- data_processed %>%
   transmute(
     patient_id,
+    vax3_type,
     has_age = !is.na(age),
     has_sex = !is.na(sex) & !(sex %in% c("I", "U")),
     has_imd = !is.na(imd),
@@ -89,6 +90,7 @@ arrow::write_feather(data_cohort, here("output", "data", "data_cohort.feather"))
 data_inclusioncriteria <- data_criteria %>%
   transmute(
     patient_id,
+    vax3_type,
     c0 = vax1_afterfirstvaxdate & vax3_afterstartdate & vax3_beforeenddate & has_expectedvax3type,
     c1 = c0 & (has_age & has_sex & has_imd & has_ethnicity & has_region),
     c2 = c1 & (has_vaxgap12 & has_vaxgap23 & has_knownvax1 & has_knownvax2 & vax12_homologous),
@@ -96,21 +98,24 @@ data_inclusioncriteria <- data_criteria %>%
     c4 = c3 & (isnot_carehomeresident & isnot_endoflife & isnot_housebound),
     c5 = c4 & (has_norecentcovid),
     c6 = c5 & (isnot_inhospitalunplanned),
-  )
+  ) %>%
+  filter(c0)
 
 write_rds(data_inclusioncriteria, here("output", "data", "data_inclusioncriteria.rds"), compress="gz")
 
 data_flowchart <-
   data_inclusioncriteria %>%
   select(-patient_id) %>%
+  group_by(vax3_type) %>%
   summarise(
     across(.fns=sum)
   ) %>%
   pivot_longer(
-    cols=everything(),
+    cols=-vax3_type,
     names_to="criteria",
     values_to="n"
   ) %>%
+  group_by(vax3_type) %>%
   mutate(
     n_exclude = lag(n) - n,
     pct_exclude = n_exclude/lag(n),
