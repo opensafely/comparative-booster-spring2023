@@ -72,11 +72,18 @@ if(Sys.getenv("OPENSAFELY_BACKEND") %in% c("", "expectations")){
 }
 
 
+# create lookup -- quasiquotation not working as expected inside pmap, so can't use fct_recode(var, !!!recoder$var) as anticipated
+subgroup_level_lookup <- map_dfr(recoder, ~ tibble(subgroup_level=., subgroup_level_descr=names(.)), .id="variable")
+
 km_estimates <- metaparams %>%
   mutate(
     data = pmap(list(matchset, subgroup, outcome), function(matchset, subgroup, outcome) {
       dat <- read_csv(here("output", "match", matchset, "km", subgroup, outcome, glue("km_estimates.csv")))
-      dat %>% add_column(subgroup_level = as.character(.[[subgroup]]), .before=1) %>% select(-all_of(subgroup))
+      subgroup <- as.character(subgroup)
+      dat[[subgroup]] <- as.character(dat[[subgroup]])
+      lookup <- subgroup_level_lookup[subgroup_level_lookup$variable==subgroup,]
+      right_join(lookup, dat, by=c("subgroup_level"=subgroup)) %>%
+        select(-variable)
     })
   ) %>%
   unnest(data)
@@ -84,12 +91,14 @@ km_estimates <- metaparams %>%
 write_csv(km_estimates, fs::path(output_dir, "km_estimates.csv"))
 
 
-
 km_contrasts_daily <- metaparams %>%
   mutate(
     data = pmap(list(matchset, outcome, subgroup), function(matchset, outcome, subgroup){
         dat <- read_csv(here("output", "match", matchset, "km", subgroup, outcome, glue("km_contrasts_daily.csv")))
-        dat %>% add_column(subgroup_level = as.character(.[[subgroup]]), .before=1) %>% select(-all_of(subgroup))
+        subgroup <- as.character(subgroup)
+        dat[[subgroup]] <- as.character(dat[[subgroup]])
+        lookup <- subgroup_level_lookup[subgroup_level_lookup$variable==subgroup,]
+        right_join(lookup, dat, by=c("subgroup_level"=subgroup)) %>% select(-variable)
       }
     )
   ) %>%
@@ -103,7 +112,10 @@ km_contrasts_overall <- metaparams %>%
   mutate(
     data = pmap(list(matchset, outcome, subgroup), function(matchset, outcome, subgroup) {
         dat <- read_csv(here("output", "match", matchset, "km", subgroup, outcome, glue("km_contrasts_overall.csv")))
-        dat %>% add_column(subgroup_level = as.character(.[[subgroup]]), .before=1) %>% select(-all_of(subgroup))
+        subgroup <- as.character(subgroup)
+        dat[[subgroup]] <- as.character(dat[[subgroup]])
+        lookup <- subgroup_level_lookup[subgroup_level_lookup$variable==subgroup,]
+        right_join(lookup, dat, by=c("subgroup_level"=subgroup)) %>% select(-variable)
       }
     )
   ) %>%

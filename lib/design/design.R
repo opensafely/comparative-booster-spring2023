@@ -92,7 +92,7 @@ recoder <-
       "Non-COVID-19 death" = "noncoviddeath",
       "All-cause death" = "death"
     ),
-
+    all = c(`Main` = "all"),
     vax12_type = c(
       `BNT162b2` = "pfizer-pfizer",
       `ChAdOx1-S` = "az-az"
@@ -100,6 +100,11 @@ recoder <-
     age65plus = c(
       `Aged 18-64` = "FALSE",
       `Aged 65 and over` = "TRUE"
+    ),
+    cev_cv = c(
+      "Clinically extremely vulnerable" = "Clinically extremely vulnerable",
+      "Clinically at-risk" = "Clinically at-risk",
+      "Not clinically at-risk" = "Not clinically at-risk"
     ),
     prior_covid_infection = c(
       `No prior SARS-CoV-2 infection` = "FALSE",
