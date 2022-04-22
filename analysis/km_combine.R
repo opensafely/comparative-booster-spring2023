@@ -45,31 +45,17 @@ source(here("lib", "design", "design.R"))
 output_dir <- here("output", "match", matchset, "km", "combined")
 fs::dir_create(output_dir)
 
-if(Sys.getenv("OPENSAFELY_BACKEND") %in% c("", "expectations")){
-  metaparams <-
-    expand_grid(
-      outcome = factor(c("postest", "coviddeath")),
-      subgroup = factor(recoder$subgroup),
-      #treatment = recoder$treatment
-    ) %>%
-    mutate(
-      #treatment_descr = fct_recode(as.character(treatment),  !!!recoder$treatment),
-      outcome_descr = fct_recode(as.character(outcome),  !!!recoder$outcome),
-      subgroup_descr = fct_recode(subgroup,  !!!recoder$subgroup),
-    )
-} else {
-  metaparams <-
-    expand_grid(
-      outcome = factor(c("postest", "covidemergency", "covidadmittedproxy1", "covidadmitted", "coviddeath", "noncoviddeath")),
-      subgroup = factor(recoder$subgroup),
-      #treatment = recoder$treatment
-    ) %>%
-    mutate(
-      #treatment_descr = fct_recode(as.character(treatment),  !!!recoder$treatment),
-      outcome_descr = fct_recode(as.character(outcome),  !!!recoder$outcome),
-      subgroup_descr = fct_recode(subgroup,  !!!recoder$subgroup),
-    )
-}
+metaparams <-
+  expand_grid(
+    outcome = factor(c("postest", "covidemergency", "covidadmittedproxy1", "covidadmitted", "coviddeath", "noncoviddeath")),
+    subgroup = factor(recoder$subgroup),
+    #treatment = recoder$treatment
+  ) %>%
+  mutate(
+    #treatment_descr = fct_recode(as.character(treatment),  !!!recoder$treatment),
+    outcome_descr = fct_recode(as.character(outcome),  !!!recoder$outcome),
+    subgroup_descr = fct_recode(subgroup,  !!!recoder$subgroup),
+  )
 
 
 # create lookup -- quasiquotation not working as expected inside pmap, so can't use fct_recode(var, !!!recoder$var) as anticipated
@@ -78,7 +64,7 @@ subgroup_level_lookup <- map_dfr(recoder, ~ tibble(subgroup_level=., subgroup_le
 km_estimates <- metaparams %>%
   mutate(
     data = pmap(list(matchset, subgroup, outcome), function(matchset, subgroup, outcome) {
-      dat <- read_csv(here("output", "match", matchset, "km", subgroup, outcome, glue("km_estimates.csv")))
+      dat <- read_csv(here("output", "match", matchset, "km", subgroup, outcome, glue("km_estimates.csv")), na="NA")
       subgroup <- as.character(subgroup)
       dat[[subgroup]] <- as.character(dat[[subgroup]])
       lookup <- subgroup_level_lookup[subgroup_level_lookup$variable==subgroup,]
@@ -94,7 +80,7 @@ write_csv(km_estimates, fs::path(output_dir, "km_estimates.csv"))
 km_contrasts_daily <- metaparams %>%
   mutate(
     data = pmap(list(matchset, outcome, subgroup), function(matchset, outcome, subgroup){
-        dat <- read_csv(here("output", "match", matchset, "km", subgroup, outcome, glue("km_contrasts_daily.csv")))
+        dat <- read_csv(here("output", "match", matchset, "km", subgroup, outcome, glue("km_contrasts_daily.csv")), na="NA")
         subgroup <- as.character(subgroup)
         dat[[subgroup]] <- as.character(dat[[subgroup]])
         lookup <- subgroup_level_lookup[subgroup_level_lookup$variable==subgroup,]
@@ -111,7 +97,7 @@ write_csv(km_contrasts_daily, fs::path(output_dir, "km_contrasts_daily.csv"))
 km_contrasts_overall <- metaparams %>%
   mutate(
     data = pmap(list(matchset, outcome, subgroup), function(matchset, outcome, subgroup) {
-        dat <- read_csv(here("output", "match", matchset, "km", subgroup, outcome, glue("km_contrasts_overall.csv")))
+        dat <- read_csv(here("output", "match", matchset, "km", subgroup, outcome, glue("km_contrasts_overall.csv")), na="NA")
         subgroup <- as.character(subgroup)
         dat[[subgroup]] <- as.character(dat[[subgroup]])
         lookup <- subgroup_level_lookup[subgroup_level_lookup$variable==subgroup,]
