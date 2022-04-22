@@ -1,42 +1,57 @@
 library('here')
 
-
-action_match <- function(matchset){
+action_ls <- function(...){
+  # provide files to source, separated by a comma
+  # for any files with no arguments needed
   pre_ls <- ls(envir = globalenv())
-  commandArgs <- function(...) c(matchset)
-  source(here("analysis", "match.R"))
-  source(here("analysis", "match_report.R"))
+  filelist <- list(...)
+  lapply(filelist, source)
   post_ls <- ls(envir = globalenv())
   rm(list=post_ls[!(post_ls %in% pre_ls)], envir = globalenv())
-
 }
 
-action_km <- function(matchset, subgroup, outcome){
+
+compose_action <- function(...){
+  # returns a function that sources one or more scripts on a set of arguments
+  .files <- list(...)
+  fun <- function(...){
     pre_ls <- ls(envir = globalenv())
-    commandArgs <- function(...) c(matchset, subgroup, outcome)
-    source(here("analysis", "km.R"))
+    .args <- c(...)
+    .GlobalEnv$commandArgs <- function(...) .args
+    lapply(.files, source)
     post_ls <- ls(envir = globalenv())
     rm(list=post_ls[!(post_ls %in% pre_ls)], envir = globalenv())
+  }
+
+  fun
 }
 
-action_km_combine <- function(matchset){
-  pre_ls <- ls(envir = globalenv())
-  commandArgs <- function(...) c(matchset)
-  source(here("analysis", "km_combine.R"))
-  post_ls <- ls(envir = globalenv())
-  rm(list=post_ls[!(post_ls %in% pre_ls)], envir = globalenv())
-}
+action_match <- compose_action(
+  here("analysis", "match.R"),
+  here("analysis", "match_report.R")
+)
 
-local({
-  pre_ls <- ls(envir = globalenv())
-  source(here("analysis", "data_process.R"))
-  source(here("analysis", "data_selection.R"))
-  post_ls <- ls(envir = globalenv())
-  rm(list=post_ls[!(post_ls %in% pre_ls)], envir = globalenv())
-})
+action_km <- compose_action(
+    here("analysis", "km.R")
+)
+# action_km <- function(matchset, subgroup, outcome){
+#     pre_ls <- ls(envir = globalenv())
+#     Args <<- c(matchset, subgroup, outcome)
+#     source(here("analysis", "km.R"))
+#     post_ls <- ls(envir = globalenv())
+#     rm(list=post_ls[!(post_ls %in% pre_ls)], envir = globalenv())
+# }
+
+action_km_combine <- compose_action(
+  here("analysis", "km_combine.R")
+)
+
+action_ls(
+  here("analysis", "data_process.R"),
+  here("analysis", "data_selection.R")
+)
 
 action_match("A")
-
 action_km("A", "all", "postest")
 action_km("A", "all", "covidemergency")
 action_km("A", "all", "covidadmittedproxy1")
@@ -89,9 +104,7 @@ action_km("A", "age65plus", "noncoviddeath")
 
 action_km_combine("A")
 
-local({
-  pre_ls <- ls(envir = globalenv())
-  source(here("analysis", "release_objects.R"))
-  post_ls <- ls(envir = globalenv())
-  rm(list=post_ls[!(post_ls %in% pre_ls)], envir = globalenv())
-})
+action_ls(
+  here("analysis", "release_objects.R")
+)
+
