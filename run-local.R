@@ -19,6 +19,14 @@ action_km <- function(matchset, subgroup, outcome){
     rm(list=post_ls[!(post_ls %in% pre_ls)], envir = globalenv())
 }
 
+action_km_combine <- function(matchset){
+  pre_ls <- ls(envir = globalenv())
+  commandArgs <- function(...) c(matchset)
+  source(here("analysis", "km_combine.R"))
+  post_ls <- ls(envir = globalenv())
+  rm(list=post_ls[!(post_ls %in% pre_ls)], envir = globalenv())
+}
+
 local({
   pre_ls <- ls(envir = globalenv())
   source(here("analysis", "data_process.R"))
@@ -28,6 +36,7 @@ local({
 })
 
 action_match("A")
+
 action_km("A", "all", "postest")
 action_km("A", "all", "covidemergency")
 action_km("A", "all", "covidadmittedproxy1")
@@ -78,5 +87,11 @@ action_km("A", "age65plus", "covidadmitted")
 action_km("A", "age65plus", "coviddeath")
 action_km("A", "age65plus", "noncoviddeath")
 
+action_km_combine("A")
 
-
+local({
+  pre_ls <- ls(envir = globalenv())
+  source(here("analysis", "release_objects.R"))
+  post_ls <- ls(envir = globalenv())
+  rm(list=post_ls[!(post_ls %in% pre_ls)], envir = globalenv())
+})
