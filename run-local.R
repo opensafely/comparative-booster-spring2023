@@ -34,13 +34,6 @@ action_match <- compose_action(
 action_km <- compose_action(
     here("analysis", "km.R")
 )
-# action_km <- function(matchset, subgroup, outcome){
-#     pre_ls <- ls(envir = globalenv())
-#     Args <<- c(matchset, subgroup, outcome)
-#     source(here("analysis", "km.R"))
-#     post_ls <- ls(envir = globalenv())
-#     rm(list=post_ls[!(post_ls %in% pre_ls)], envir = globalenv())
-# }
 
 action_km_combine <- compose_action(
   here("analysis", "km_combine.R")
