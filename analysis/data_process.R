@@ -222,7 +222,7 @@ data_processed <- data_extract %>%
     ),
 
     # subgroups
-    all=factor(""),
+    all=factor(" "),
     age65plus=age>=65,
 
     prior_tests_cat = cut(prior_covid_test_frequency, breaks=c(0, 1, 2, 3, Inf), labels=c("0", "1", "2", "3+"), right=FALSE),

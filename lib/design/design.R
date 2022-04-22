@@ -67,7 +67,7 @@ maxfup <- max(postbaselinecuts)
 recoder <-
   list(
     subgroups = c(
-      `Main` = "all",
+      `Main` = " ",
       `Primary vaccine course` = "vax12_type",
       `Age` = "age65plus",
       `Prior SARS-CoV-2 infection status` = "prior_covid_infection",
@@ -92,7 +92,7 @@ recoder <-
       "Non-COVID-19 death" = "noncoviddeath",
       "All-cause death" = "death"
     ),
-    all = c(`Main` = "all"),
+    all = c(`Main` = " "),
     vax12_type = c(
       `BNT162b2` = "pfizer-pfizer",
       `ChAdOx1-S` = "az-az"
@@ -111,23 +111,6 @@ recoder <-
       `Prior SARS-CoV-2 infection` = "TRUE"
     )
   )
-
-
-
-## lookups for subgroup analyses ----
-## NOTE: subgroups must belong to the exact matching set (or be exactly matched by other variables)
-subgroups <-
-  list(
-    main = c("all"),
-    vax12_type = c(
-      `BNT162b2` = "pfizer-pfizer",
-      `ChAdOx1` = "az-az"
-    ),
-    age65plus = c(TRUE, FALSE),
-    prior_covid_infection = c(TRUE, FALSE)
-  )
-
-
 
 ## model formulae ----
 
