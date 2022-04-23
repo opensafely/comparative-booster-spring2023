@@ -972,6 +972,17 @@ study = StudyDefinition(
     date_format="YYYY-MM-DD",
     find_first_match_in_period=True,
   ),
+  
+  covidadmitted_ccdays = patients.admitted_to_hospital(
+        returning = "days_in_critical_care",
+        find_first_match_in_period = True,
+        with_admission_method=["21", "22", "23", "24", "25", "2A", "2B", "2C", "2D", "28"],
+        with_these_diagnoses=codelists.covid_icd10,
+        on_or_after="covid_vax_disease_3_date",
+        return_expectations={
+        "category": {"ratios": {"0": 0.75, "1": 0.20,  "2": 0.05}},
+        "incidence": 0.5,
+      },
 
   
   # Covid-related death

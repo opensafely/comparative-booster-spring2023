@@ -58,7 +58,7 @@ sim_list = lst(
   ),
 
   age = bn_node(
-    ~as.integer(rnorm(n=..n, mean=60, sd=15))
+    ~as.integer(rnorm(n=..n, mean=60, sd=14))
   ),
 
   age_august2021 = bn_node(~age),
@@ -306,6 +306,11 @@ sim_list = lst(
   covidadmitted_day = bn_node(
     ~as.integer(runif(n=..n, covid_vax_disease_3_day, covid_vax_disease_3_day+100)),
     missing_rate = ~0.7
+  ),
+
+  covidadmitted_ccdays = bn_node(
+    ~as.integer(rpois(n=..n, 0.5)),
+    missing_rate = ~is.na(covidadmitted_day)
   ),
 
   admitted_unplanned_day = bn_node(
