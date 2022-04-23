@@ -51,6 +51,9 @@ knitr::opts_chunk$set(
   fig.pos = 'H' #to stop figures floating around when rendering to pdf
 )
 
+## Import custom user functions from lib
+source(here("lib", "functions", "utility.R"))
+
 ## Import design elements
 source(here("lib", "design", "design.R"))
 
@@ -65,20 +68,20 @@ match_smd <-  read_csv(here("output", "release-objects", matchset, "match_smd.cs
 
 km_estimates <- read_csv(here("output", "release-objects", matchset, "km_estimates.csv")) %>% 
   mutate(
-    outcome_descr = fct_recode(as.character(outcome),  !!!recoder$outcome),
-    subgroup_descr = fct_recode(subgroup,  !!!recoder$subgroup),
+    outcome_descr = fct_recoderelevel(as.character(outcome),  recoder$outcome),
+    subgroup_descr = fct_recoderelevel(subgroup,  recoder$subgroup),
     subgroup_level_descr = replace_na(subgroup_level_descr, "")
   )
 km_contrasts_daily <- read_csv(here("output", "release-objects", matchset, "km_contrasts_daily.csv")) %>% 
   mutate(
-    outcome_descr = fct_recode(as.character(outcome),  !!!recoder$outcome),
-    subgroup_descr = fct_recode(subgroup,  !!!recoder$subgroup),
+    outcome_descr = fct_recoderelevel(as.character(outcome),  recoder$outcome),
+    subgroup_descr = fct_recoderelevel(subgroup,  recoder$subgroup),
     subgroup_level_descr = replace_na(subgroup_level_descr, "")
   )
 km_contrasts_overall <- read_csv(here("output", "release-objects", matchset, "km_contrasts_overall.csv")) %>% 
   mutate(
-    outcome_descr = fct_recode(as.character(outcome),  !!!recoder$outcome),
-    subgroup_descr = fct_recode(subgroup,  !!!recoder$subgroup),
+    outcome_descr = fct_recoderelevel(as.character(outcome),  recoder$outcome),
+    subgroup_descr = fct_recoderelevel(subgroup,  recoder$subgroup),
     subgroup_level_descr = replace_na(subgroup_level_descr, "")
   )
 
@@ -95,9 +98,6 @@ km_contrasts_overall <- read_csv(here("output", "release-objects", matchset, "km
     set_names(., .)
 
 ```
-
-
-
 
 
 \newpage
@@ -119,7 +119,7 @@ We considered all adults aged $\ge$ 18 years who received a booster dose of BNT1
 
 ## Matching 
 
-BNT162b2 booster recipients were matched with MOderna booster recipients on the following characteristics: date of booster dose; primary course vaccine brand; date of second vaccine dose, within 7 days; NHS region (East of England, Midlands, London, North East and Yorkshire, North West, South East, South West); evidence of prior SARS-CoV-2 infection (positive SARS-CoV-2 test, "probable" infection documented in primary care, or COVID-19 hospital admission); clinical risk groups used for prioritisation (clinically extremely vulnerable, clinically at-risk, neither); age, within 3 years; and age groups used by JCVI for prioritisation. 
+BNT162b2 booster recipients were matched with Moderna booster recipients on the following characteristics: date of booster dose; primary course vaccine brand; date of second vaccine dose, within 7 days; NHS region (East of England, Midlands, London, North East and Yorkshire, North West, South East, South West); evidence of prior SARS-CoV-2 infection (positive SARS-CoV-2 test, "probable" infection documented in primary care, or COVID-19 hospital admission); clinical risk groups used for prioritisation (clinically extremely vulnerable, clinically at-risk, neither); age, within 3 years; and age groups used by JCVI for prioritisation. 
 These matching criteria ensure that treatment groups are also matched within JCVI priority group.
 
 ## Outcomes
@@ -163,7 +163,7 @@ This study will follow the STROBE-RECORD reporting guidelines.
 
 ## Study population and matching
 
-`r label_number(1, big.mark=",")(filter(match_flowchart, crit=="c0") %>% pull(n) %>% sum)` adults registered at a TPP practice received a booster vaccination of either BNT162b2 (`r label_number(1, big.mark=",")(filter(match_flowchart, crit=="c0", vax3_type=="pfizer") %>% pull(n))`) or Moderna (`r label_number(1, big.mark=",")(filter(match_flowchart, crit=="c0", vax3_type=="moderna") %>% pull(n))`) during the study period, with `r label_number(1, big.mark=",")(filter(match_flowchart, crit=="c6", vax3_type="pfizer") %>% pull(n))` (`r label_percent(0.1)(filter(match_flowchart, crit=="c6", vax3_type="pfizer") %>% pull(pct_all))`) and `r label_number(1, big.mark=",")(filter(match_flowchart, crit=="c6", vax3_type="pfizer") %>% pull(n))` (`r label_percent(0.1)(filter(match_flowchart, crit=="c6", vax3_type="moderna") %>% pull(pct_all))`) eligible for matching. `r label_number(1, big.mark=",")(filter(match_flowchart, crit=="c7", vax3_type="pfizer") %>% pull(n))` were successfully matched in each group, `r label_percent(0.1)(filter(match_flowchart, crit=="c7", vax3_type="pfizer") %>% pull(pct_step))` and `r label_percent(0.1)(filter(match_flowchart, crit=="c7", vax3_type="moderna") %>% pull(pct_step))` respectively (Table 1, Figure 1).
+`r label_number(1, big.mark=",")(filter(match_flowchart, crit=="c0") %>% pull(n) %>% sum)` adults registered at a TPP practice received a booster vaccination of either BNT162b2 (`r label_number(1, big.mark=",")(filter(match_flowchart, crit=="c0", vax3_type=="pfizer") %>% pull(n))`) or Moderna (`r label_number(1, big.mark=",")(filter(match_flowchart, crit=="c0", vax3_type=="moderna") %>% pull(n))`) during the study period, with `r label_number(1, big.mark=",")(filter(match_flowchart, crit=="c6", vax3_type=="pfizer") %>% pull(n))` (`r label_percent(0.1)(filter(match_flowchart, crit=="c6", vax3_type=="pfizer") %>% pull(pct_all))`) and `r label_number(1, big.mark=",")(filter(match_flowchart, crit=="c6", vax3_type=="pfizer") %>% pull(n))` (`r label_percent(0.1)(filter(match_flowchart, crit=="c6", vax3_type=="moderna") %>% pull(pct_all))`) eligible for matching. `r label_number(1, big.mark=",")(filter(match_flowchart, crit=="c7", vax3_type=="pfizer") %>% pull(n))` were successfully matched in each group, `r label_percent(0.1)(filter(match_flowchart, crit=="c7", vax3_type=="pfizer") %>% pull(pct_step))` and `r label_percent(0.1)(filter(match_flowchart, crit=="c7", vax3_type=="moderna") %>% pull(pct_step))` respectively (Table 1, Figure 1).
 
 
 #### Table 1: inclusion criteria
@@ -234,8 +234,8 @@ xmax <- max(match_coverage$vax3_date )+1
 plot_coverage_cumuln <-
   match_coverage %>%
   mutate(
-    treatment_descr = fct_recode(as.character(treatment), !!!recoder$treatment),
-    status_descr = fct_recode(as.character(status), !!!recoder$status),
+    treatment_descr = fct_recoderelevel(as.character(treatment), recoder$treatment),
+    status_descr = fct_recoderelevel(as.character(status), recoder$status),
     cumuln = cumuln*((treatment*2) - 1)
   ) %>%
   ggplot()+
@@ -431,6 +431,42 @@ plot_km <- km_estimates %>%
 plot_km
 ```
 
+# Supplement
+
+## JCVI vaccine priority groups
+
+The Joint Committee on Vaccine and Immunisation (JCVI) priority groups were defined as follows:
+
+
+```{r, table-jcvi, echo=FALSE, message=FALSE, warning=FALSE}
+
+tibble(
+  `Priority group` = c("1", "2", "3", "4", "5", "6", "7", "8", "9", "10a", "10b"),
+  `Description` = c(
+    "Residents in a care home for older adults\nStaff working in care homes for older adults",
+    "All those 80 years of age and over\nFrontline health and social care workers",
+    "All those 75-79 years of age",
+    "All those 70-74 years of age\nIndividuals aged 16-69 in a high risk group",
+    "All those 65-69 years of age",
+    "Adults aged 16-64 years in an at-risk group",
+    "All those 60-64 years of age",
+    "All those 55-59 years of age",
+    "All those 50-54 years of age",
+    "All those 40-49 years of age",
+    "All those 18-39 years of age"
+  )
+) %>%
+mutate(Description = str_replace_all(Description, "\n", "<br>")) %>% 
+gt() %>% 
+fmt_markdown(columns = TRUE)
+
+
+```
+
+See original priority groups here: https://assets.publishing.service.gov.uk/government/uploads/system/uploads/attachment_data/file/1007737/Greenbook_chapter_14a_30July2021.pdf#page=15
+See revised priority groups here: https://www.england.nhs.uk/coronavirus/wp-content/uploads/sites/52/2021/07/C1327-covid-19-vaccination-autumn-winter-phase-3-planning.pdf
+
+Note that we excluded care home residents and health care workers in our analysis, so members of JCVI group 1 are not included and JCVI group 2 includes only those aged 80 and over. The original priority group list has 9 groups, with a 10th group implicitly defined as "everybody else". Here we explicitly define this group, and split into two (10a and 10b) because of the earlier booster eligibility in the 40-49 group from 15 November 2021 onwards. (https://www.gov.uk/government/news/jcvi-issues-advice-on-covid-19-booster-vaccines-for-those-aged-40-to-49-and-second-doses-for-16-to-17-year-olds)
 
 
 \newpage

@@ -202,7 +202,7 @@ data_surv <-
   unnest(surv_obj_tidy) %>%
   #ungroup() %>%
   mutate(
-    treatment_descr = fct_recode(as.character(treatment), !!!recoder$treatment)
+    treatment_descr = fct_recoderelevel(as.character(treatment), recoder$treatment)
   )
 
 data_surv_rounded <-
