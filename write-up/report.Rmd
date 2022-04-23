@@ -51,6 +51,9 @@ knitr::opts_chunk$set(
   fig.pos = 'H' #to stop figures floating around when rendering to pdf
 )
 
+## Import custom user functions from lib
+source(here("lib", "functions", "utility.R"))
+
 ## Import design elements
 source(here("lib", "design", "design.R"))
 
@@ -65,20 +68,20 @@ match_smd <-  read_csv(here("output", "release-objects", matchset, "match_smd.cs
 
 km_estimates <- read_csv(here("output", "release-objects", matchset, "km_estimates.csv")) %>% 
   mutate(
-    outcome_descr = fct_recode(as.character(outcome),  !!!recoder$outcome),
-    subgroup_descr = fct_recode(subgroup,  !!!recoder$subgroup),
+    outcome_descr = fct_recoderelevel(as.character(outcome),  recoder$outcome),
+    subgroup_descr = fct_recoderelevel(subgroup,  recoder$subgroup),
     subgroup_level_descr = replace_na(subgroup_level_descr, "")
   )
 km_contrasts_daily <- read_csv(here("output", "release-objects", matchset, "km_contrasts_daily.csv")) %>% 
   mutate(
-    outcome_descr = fct_recode(as.character(outcome),  !!!recoder$outcome),
-    subgroup_descr = fct_recode(subgroup,  !!!recoder$subgroup),
+    outcome_descr = fct_recoderelevel(as.character(outcome),  recoder$outcome),
+    subgroup_descr = fct_recoderelevel(subgroup,  recoder$subgroup),
     subgroup_level_descr = replace_na(subgroup_level_descr, "")
   )
 km_contrasts_overall <- read_csv(here("output", "release-objects", matchset, "km_contrasts_overall.csv")) %>% 
   mutate(
-    outcome_descr = fct_recode(as.character(outcome),  !!!recoder$outcome),
-    subgroup_descr = fct_recode(subgroup,  !!!recoder$subgroup),
+    outcome_descr = fct_recoderelevel(as.character(outcome),  recoder$outcome),
+    subgroup_descr = fct_recoderelevel(subgroup,  recoder$subgroup),
     subgroup_level_descr = replace_na(subgroup_level_descr, "")
   )
 
@@ -160,7 +163,7 @@ This study will follow the STROBE-RECORD reporting guidelines.
 
 ## Study population and matching
 
-`r label_number(1, big.mark=",")(filter(match_flowchart, crit=="c0") %>% pull(n) %>% sum)` adults registered at a TPP practice received a booster vaccination of either BNT162b2 (`r label_number(1, big.mark=",")(filter(match_flowchart, crit=="c0", vax3_type=="pfizer") %>% pull(n))`) or Moderna (`r label_number(1, big.mark=",")(filter(match_flowchart, crit=="c0", vax3_type=="moderna") %>% pull(n))`) during the study period, with `r label_number(1, big.mark=",")(filter(match_flowchart, crit=="c6", vax3_type="pfizer") %>% pull(n))` (`r label_percent(0.1)(filter(match_flowchart, crit=="c6", vax3_type="pfizer") %>% pull(pct_all))`) and `r label_number(1, big.mark=",")(filter(match_flowchart, crit=="c6", vax3_type="pfizer") %>% pull(n))` (`r label_percent(0.1)(filter(match_flowchart, crit=="c6", vax3_type="moderna") %>% pull(pct_all))`) eligible for matching. `r label_number(1, big.mark=",")(filter(match_flowchart, crit=="c7", vax3_type="pfizer") %>% pull(n))` were successfully matched in each group, `r label_percent(0.1)(filter(match_flowchart, crit=="c7", vax3_type="pfizer") %>% pull(pct_step))` and `r label_percent(0.1)(filter(match_flowchart, crit=="c7", vax3_type="moderna") %>% pull(pct_step))` respectively (Table 1, Figure 1).
+`r label_number(1, big.mark=",")(filter(match_flowchart, crit=="c0") %>% pull(n) %>% sum)` adults registered at a TPP practice received a booster vaccination of either BNT162b2 (`r label_number(1, big.mark=",")(filter(match_flowchart, crit=="c0", vax3_type=="pfizer") %>% pull(n))`) or Moderna (`r label_number(1, big.mark=",")(filter(match_flowchart, crit=="c0", vax3_type=="moderna") %>% pull(n))`) during the study period, with `r label_number(1, big.mark=",")(filter(match_flowchart, crit=="c6", vax3_type=="pfizer") %>% pull(n))` (`r label_percent(0.1)(filter(match_flowchart, crit=="c6", vax3_type=="pfizer") %>% pull(pct_all))`) and `r label_number(1, big.mark=",")(filter(match_flowchart, crit=="c6", vax3_type=="pfizer") %>% pull(n))` (`r label_percent(0.1)(filter(match_flowchart, crit=="c6", vax3_type=="moderna") %>% pull(pct_all))`) eligible for matching. `r label_number(1, big.mark=",")(filter(match_flowchart, crit=="c7", vax3_type=="pfizer") %>% pull(n))` were successfully matched in each group, `r label_percent(0.1)(filter(match_flowchart, crit=="c7", vax3_type=="pfizer") %>% pull(pct_step))` and `r label_percent(0.1)(filter(match_flowchart, crit=="c7", vax3_type=="moderna") %>% pull(pct_step))` respectively (Table 1, Figure 1).
 
 
 #### Table 1: inclusion criteria
@@ -231,8 +234,8 @@ xmax <- max(match_coverage$vax3_date )+1
 plot_coverage_cumuln <-
   match_coverage %>%
   mutate(
-    treatment_descr = fct_recode(as.character(treatment), !!!recoder$treatment),
-    status_descr = fct_recode(as.character(status), !!!recoder$status),
+    treatment_descr = fct_recoderelevel(as.character(treatment), recoder$treatment),
+    status_descr = fct_recoderelevel(as.character(status), recoder$status),
     cumuln = cumuln*((treatment*2) - 1)
   ) %>%
   ggplot()+

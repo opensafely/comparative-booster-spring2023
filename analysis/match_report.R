@@ -100,7 +100,7 @@ data_coverage <-
   ungroup() %>%
   mutate(
     status = factor(status, levels=c("unmatched", "matched")),
-    status_descr = fct_recode(status, !!!recoder$status)
+    status_descr = fct_recoderelevel(status, recoder$status)
   ) %>%
   arrange(treatment, status_descr, vax3_date)
 
@@ -118,7 +118,7 @@ xmax <- max(data_coverage$vax3_date )+1
 plot_coverage_n <-
   data_coverage %>%
   mutate(
-    treatment_descr = fct_recode(as.character(treatment), !!!recoder$treatment),
+    treatment_descr = fct_recoderelevel(as.character(treatment), recoder$treatment),
     n=n*((treatment*2) - 1)
   ) %>%
   ggplot()+
@@ -174,7 +174,7 @@ ggsave(plot_coverage_n, filename="coverage_count.png", path=output_dir)
 plot_coverage_cumuln <-
   data_coverage %>%
   mutate(
-    treatment_descr = fct_recode(as.character(treatment), !!!recoder$treatment),
+    treatment_descr = fct_recoderelevel(as.character(treatment), recoder$treatment),
     cumuln=cumuln*((treatment*2) - 1)
   ) %>%
   ggplot()+
@@ -286,7 +286,7 @@ tab_summary_baseline <-
   data_matched_baseline %>%
   mutate(
     N = 1L,
-    treatment_descr = fct_recode(as.character(treatment), !!!recoder$treatment),
+    treatment_descr = fct_recoderelevel(as.character(treatment), recoder$treatment),
   ) %>%
   select(
     treatment_descr,
