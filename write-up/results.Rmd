@@ -1,0 +1,438 @@
+---
+title: "Comparative effectiveness of BNT162b2 versus Moderna booster doses in England: preliminary report"
+output:
+  html_document:
+    self_contained: yes
+  pdf_document:
+    toc: no
+  bookdown::html_document2:
+    number_sections: no
+    toc: no
+  rtf_document:
+    toc: no
+  word_document: default
+bibliography: references.bib
+csl: vancouver.csl
+link-citations: yes
+zotero: yes
+header-includes:
+- \usepackage{float} 
+- \floatplacement{figure}{H}
+- \usepackage{caption}
+- \captionsetup[figure]{labelformat=empty}
+- \captionsetup[table]{labelformat=empty}
+---
+
+```{r setup, include=FALSE}
+
+library('tidyverse')
+library('here')
+library('glue')
+library('lubridate')
+library('gt')
+library('patchwork')
+library('scales')
+
+# remotes::install_github("https://github.com/wjchulme/osutils")
+# library('osutils')
+
+# where are the outputs (ie the inputs for this manuscript!) saved?
+output_dir_os <- here("output", "release-objects")
+#output_dir_os <- here("released_output", "release-objects")
+
+# where should we put the objects created within this rmd script?
+output_dir_rmd <- here("write-up", "figures")
+fs::dir_create(output_dir_rmd)
+
+# only applicable if `self-contained: yes` option is enables in yaml header
+knitr::opts_chunk$set(
+  echo = TRUE,
+  fig.path = paste0(output_dir_rmd, "/"),
+  fig.pos = 'H' #to stop figures floating around when rendering to pdf
+)
+
+## Import design elements
+source(here("lib", "design", "design.R"))
+
+matchset <- "A"
+
+match_flowchart <-  read_csv(here("output", "release-objects", matchset, "match_flowchart.csv"))
+match_coverage <- read_csv(here("output", "release-objects", matchset, "match_coverage.csv"))
+
+match_table1 <- read_csv(here("output", "release-objects", matchset, "match_table1.csv"))
+match_table1by <- read_csv(here("output", "release-objects", matchset, "match_table1by.csv"))
+match_smd <-  read_csv(here("output", "release-objects", matchset, "match_smd.csv"))
+
+km_estimates <- read_csv(here("output", "release-objects", matchset, "km_estimates.csv")) %>% 
+  mutate(
+    outcome_descr = fct_recode(as.character(outcome),  !!!recoder$outcome),
+    subgroup_descr = fct_recode(subgroup,  !!!recoder$subgroup),
+    subgroup_level_descr = replace_na(subgroup_level_descr, "")
+  )
+km_contrasts_daily <- read_csv(here("output", "release-objects", matchset, "km_contrasts_daily.csv")) %>% 
+  mutate(
+    outcome_descr = fct_recode(as.character(outcome),  !!!recoder$outcome),
+    subgroup_descr = fct_recode(subgroup,  !!!recoder$subgroup),
+    subgroup_level_descr = replace_na(subgroup_level_descr, "")
+  )
+km_contrasts_overall <- read_csv(here("output", "release-objects", matchset, "km_contrasts_overall.csv")) %>% 
+  mutate(
+    outcome_descr = fct_recode(as.character(outcome),  !!!recoder$outcome),
+    subgroup_descr = fct_recode(subgroup,  !!!recoder$subgroup),
+    subgroup_level_descr = replace_na(subgroup_level_descr, "")
+  )
+
+
+  outcomes <- 
+    c(
+      "postest",
+      #"covidemergency",
+      "covidadmitted",
+      #"covidcc",
+      "coviddeath",
+      "noncoviddeath"
+    ) %>% 
+    set_names(., .)
+
+```
+
+
+
+
+
+\newpage
+
+## Overview
+
+The UK COVID-19 vaccination programme delivered its first "booster" doses in September 2021, initially in groups at high risk of severe disease then across the adult population. The BNT162b2 Pfizer-BioNTech vaccine was used initially, with Moderna mRNA-1273 subsequently also used. The concurrent administration BNT162b2 and Moderna vaccines for boosting in England enables a direct comparison of their effectiveness. We used the OpenSAFELY-TPP database, covering 40% of English primary care practices in England and linked to national coronavirus surveillance, hospital episodes, and death registry data, to compare the effectiveness of BNT162b2 versus Moderna in boosted adults between `r format(as.Date(study_dates$studystart_date), "%e %B")` and `r format(as.Date(study_dates$studyend_date), "%e %B %Y")`, during which time both vaccine brands were being used.
+
+
+## Methods
+
+## Data source
+
+All data were linked, stored and analysed securely within the OpenSAFELY platform: <https://opensafely.org/>. With the approval of NHS England, primary care records managed by the GP software provider TPP were linked, using NHS numbers, to A&E attendance and in-patient hospital spell records via NHS Digital's Hospital Episode Statistics (HES), national coronavirus testing records via the Second Generation Surveillance System (SGSS), and national death registry records from the Office for National Statistics (ONS). COVID-19 vaccination history is available in the GP record directly via the National Immunisation Management System (NIMS). 
+
+## Eligibility criteria
+
+We considered all adults aged $\ge$ 18 years who received a booster dose of BNT162b2 or Moderna between `r format(as.Date(study_dates$studystart_date), "%e %B")` and `r format(as.Date(study_dates$studyrend_date), "%e %B %Y")` inclusive (the "recruitment period"). People were eligible for matching if: they were registered at a GP practice using TPP's SystmOne clinical information system at the time of boosting; received a two-dose primary vaccination course of either BNT162b2 or ChAdOx1-S (mixed dosing and Moderna mRNA-1273 were not considered due to small numbers); not a health or social care worker, not resident in a care or nursing home; not medically housebound or receiving end-of-life care; no evidence of SARS-CoV-2 infection or COVID-19 disease within the previous 90 days; not undergoing an unplanned hospital admission; complete information on sex, ethnicity, deprivation, and NHS region.
+
+## Matching 
+
+BNT162b2 booster recipients were matched with MOderna booster recipients on the following characteristics: date of booster dose; primary course vaccine brand; date of second vaccine dose, within 7 days; NHS region (East of England, Midlands, London, North East and Yorkshire, North West, South East, South West); evidence of prior SARS-CoV-2 infection (positive SARS-CoV-2 test, "probable" infection documented in primary care, or COVID-19 hospital admission); clinical risk groups used for prioritisation (clinically extremely vulnerable, clinically at-risk, neither); age, within 3 years; and age groups used by JCVI for prioritisation. 
+These matching criteria ensure that treatment groups are also matched within JCVI priority group.
+
+## Outcomes
+
+The following outcomes were considered: 
+* Positive SARS-CoV-2 test, identified using SGSS testing records and based on swab date. Both polymerase chain reaction (PCR) and lateral flow test results are included, without differentiation between symptomatic and asymptomatic infection. 
+* COVID-19 A&E attendances were identified using HES emergency care records with U07.1 ("COVID-19, virus identified") or U07.2 ("COVID-19, virus not identified") ICD-10 diagnosis codes @emergenc.
+* COVID-19 hospital admission, identified using HES in-patient hospital records with U07.1 or U07.2 ICD-10 reason for admission codes. 
+* COVID-19 death. Deaths were classified as from COVID-19 if deaths with the U07.1 or U07.2 ICD-10 codes were mentioned anywhere on the death certificate (i.e., as an underlying or contributing cause of death).
+* Non-COVID-19 death.
+
+
+
+<!--# COVID-19 related A&E attendance and critical/intensive care admission we also considered but there were doubts over data the reliability of event ascertainment in these cases. -->
+
+<!--#
+
+## Follow-up
+
+Each person was followed from the day of boosting (i.e., time zero) until the earliest of outcome, death, practice de-registration, 10 weeks, or `r format(as.Date(study_dates$followupend_date), "%e %B %Y")`.
+
+## Statistical Analysis
+
+We estimated Kaplan-Meier cumulative incidence curves separately by vaccine brand, and compared groups using the 10-week risk differences and risk ratios. 
+
+
+<!-- [The primary estimand is the average treatment effect in the recruited population. To estimate this, expected cumulative incidence rates are estimated for each participant assuming treatment was received by everyone in both treatment groups at time zero. These curves are then averaged over all participants to give the marginal cumulative incidence. This is repeated assuming nobody is treated in either group, and their difference taken. Calculating standard errors for these quantities is challenging, whether approached analytically (due to complex variance components) or computationally (via bootstrapping, due to the large sample sizes involved) and are therefore not reported. ] -->
+
+## Subgroup analyses
+
+We also estimated comparative effectiveness separately in the following subgroups: primary vaccine course; age (18-64 or $\ge$ 65 years); clinically extremely vulnerable or not; evidence of prior SARS-CoV-2 infection or not.
+
+
+## Software, code, and reproducibility
+
+Data management and analyses were conducted in Python version 3.8.10 and R version 4.0.2. All code is shared openly for review and re-use under MIT open license at <https://github.com/opensafely/comparative-booster>. The supplementary materials provide further details of the codelists and data sources used for all variables in the study. Detailed pseudonymised patient data is potentially re-identifiable and therefore not shared. Any reported figures based on counts below 6 are redacted or rounded for disclosure control.
+
+This study will follow the STROBE-RECORD reporting guidelines.
+
+# Results
+
+## Study population and matching
+
+`r label_number(1, big.mark=",")(filter(match_flowchart, crit=="c0") %>% pull(n) %>% sum)` adults registered at a TPP practice received a booster vaccination of either BNT162b2 (`r label_number(1, big.mark=",")(filter(match_flowchart, crit=="c0", vax3_type=="pfizer") %>% pull(n))`) or Moderna (`r label_number(1, big.mark=",")(filter(match_flowchart, crit=="c0", vax3_type=="moderna") %>% pull(n))`) during the study period, with `r label_number(1, big.mark=",")(filter(match_flowchart, crit=="c6", vax3_type="pfizer") %>% pull(n))` (`r label_percent(0.1)(filter(match_flowchart, crit=="c6", vax3_type="pfizer") %>% pull(pct_all))`) and `r label_number(1, big.mark=",")(filter(match_flowchart, crit=="c6", vax3_type="pfizer") %>% pull(n))` (`r label_percent(0.1)(filter(match_flowchart, crit=="c6", vax3_type="moderna") %>% pull(pct_all))`) eligible for matching. `r label_number(1, big.mark=",")(filter(match_flowchart, crit=="c7", vax3_type="pfizer") %>% pull(n))` were successfully matched in each group, `r label_percent(0.1)(filter(match_flowchart, crit=="c7", vax3_type="pfizer") %>% pull(pct_step))` and `r label_percent(0.1)(filter(match_flowchart, crit=="c7", vax3_type="moderna") %>% pull(pct_step))` respectively (Table 1, Figure 1).
+
+
+#### Table 1: inclusion criteria
+
+```{r table-flowchart, echo=FALSE, warning=FALSE, message=FALSE}
+
+match_flowchart %>%
+  select(-crit) %>%
+   pivot_wider(
+    id_cols = c(criteria, vax3_type),
+    names_from = vax3_type,
+    values_from = c(n, n_exclude, pct_all)
+  ) %>%
+  gt() %>%
+  cols_label(
+    criteria = "",
+    
+    n_pfizer = "N",
+    n_moderna = "N",
+
+    n_exclude_pfizer = "N excluded",
+    n_exclude_moderna = "N excluded",
+    
+    pct_all_pfizer = "% remaining",
+    pct_all_moderna = "% remaining",
+  ) %>%
+  tab_spanner(
+    label = "BNT162b2",
+    columns = ends_with("pfizer")
+  ) %>%
+   tab_spanner(
+    label = "Moderna mRNA-1273",
+    columns = ends_with("moderna")
+  ) %>%
+  # tab_spanner(
+  #   label = "mRNA-1273",
+  #   columns = ends_with("moderna")
+  # ) %>%
+  fmt_percent(
+    columns = starts_with(c("pct_")),
+    decimals = 1
+  ) %>%
+  fmt_number(
+    columns = starts_with(c("n_")),
+    decimals= 0
+  ) %>%
+  fmt_missing(
+    everything(),
+    missing_text="-"
+  ) %>%
+  tab_style(
+    style=cell_text(whitespace ="pre-wrap"),
+    #style=cell_text(style ="italic"),
+    locations = cells_body(columns = "criteria")
+  )
+```
+
+
+\newpage 
+#### Figure 1: Cumulative matching success
+
+```{r, figure-matchingsuccess, echo=FALSE, message=FALSE, warning=FALSE, out.width='90%', out.height='50%', results='asis', out.extra=''}
+#read_rds(fs::path(output_dir_os, "descriptive", "vaxdate", "plot_vaxdate_stack.rds"))
+
+xmin <- min(match_coverage$vax3_date )
+xmax <- max(match_coverage$vax3_date )+1
+
+plot_coverage_cumuln <-
+  match_coverage %>%
+  mutate(
+    treatment_descr = fct_recode(as.character(treatment), !!!recoder$treatment),
+    status_descr = fct_recode(as.character(status), !!!recoder$status),
+    cumuln = cumuln*((treatment*2) - 1)
+  ) %>%
+  ggplot()+
+  geom_col(
+    aes(
+      x=vax3_date+0.5,
+      y=cumuln,
+      group=paste0(treatment,status_descr),
+      fill=treatment_descr,
+      alpha=status_descr,
+      colour=NULL
+    ),
+    position=position_stack(reverse=TRUE),
+    width=1
+  )+
+  geom_rect(xmin=xmin, xmax= xmax+1, ymin=-6, ymax=6, fill="grey", colour="transparent")+
+  scale_x_date(
+    breaks = unique(lubridate::ceiling_date(match_coverage$vax3_date, "1 month")),
+    limits = c(xmin-1, NA),
+    labels = scales::label_date("%d/%m"),
+    expand = expansion(add=1),
+  )+
+  scale_y_continuous(
+    labels = ~scales::label_number(accuracy = 1, big.mark=",")(abs(.)),
+    expand = expansion(c(0, NA))
+  )+
+  scale_fill_brewer(type="qual", palette="Set2")+
+  scale_colour_brewer(type="qual", palette="Set2")+
+  scale_alpha_discrete(range= c(0.8,0.4))+
+  labs(
+    x="Date",
+    y="Cumulative booster vaccines",
+    colour=NULL,
+    fill=NULL,
+    alpha=NULL
+  ) +
+  theme_minimal()+
+  theme(
+    axis.line.x.bottom = element_line(),
+    axis.text.x.top=element_text(hjust=0),
+    strip.text.y.right = element_text(angle = 0),
+    axis.ticks.x=element_line(),
+    legend.position = "bottom"
+  )+
+  NULL
+
+plot_coverage_cumuln
+cat("  \n\n")
+```
+
+\newpage
+
+#### Table 2: baseline characteristics
+
+```{r table-table1, echo=FALSE, warning=FALSE, message=FALSE}
+table1 <- 
+  match_table1 %>%
+  #filter(outcome %in% outcomes) %>%
+  group_by(variable) %>%
+  mutate(
+    label = if_else(row_number()==1, label, str_c("&nbsp;&nbsp;&nbsp;", label)),
+  ) %>%
+  mutate(
+    across(
+      starts_with("stat_"),
+      ~if_else(is.na(.x) & row_number()==1, "", .x)
+    )
+  ) %>%
+  ungroup() %>%
+  mutate(
+    order = cumsum(lag(variable, 1, first(variable))!=variable)
+  ) %>%
+  select(
+    variable, var_label, label, starts_with("stat_"), order
+  ) %>%
+  rename(!!!set_names(match_table1by$by_col, match_table1by$by_chr))
+
+
+table1 %>%
+  gt(groupname_col="treatment_descr") %>%
+  fmt_markdown(columns = "label") %>%
+  tab_style(
+    style = list(
+      cell_fill(color = "gray96")
+    ),
+    locations = cells_body(
+      rows = order%%2 == 0
+    )
+  ) %>%
+  tab_style(
+    style = list(
+      cell_text(weight = "bold")
+    ),
+    locations = cells_column_labels(everything())
+  ) %>%
+  cols_label(
+     label=md("Characteristic")
+  ) %>%
+  cols_hide(c("variable", "var_label", "order"))
+```
+
+
+## Estimated comparative effectiveness
+
+### Main analysis
+
+#### Table 3: Kaplan-Meier cumulative incidence estimates
+
+```{r table-km, echo=FALSE, warning=FALSE, message=FALSE}
+
+km_contrasts_overall %>%
+  transmute(
+    outcome_descr,
+    subgroup_descr,
+    subgroup_level_descr,
+    n.atrisk=n.atrisk_0,
+    cml.atrisk_0=label_number(1)(cml.atrisk_0/7), 
+    cml.atrisk_1=label_number(1)(cml.atrisk_1/7),
+    n.event_0, 
+    n.event_1,
+    riskCI_0 = paste0(label_number(0.01)(risk_0), " (", label_number(0.01)(risk.ll_0), "-", label_number(0.01)(risk.ul_0), ")"),
+    riskCI_1 = paste0(label_number(0.01)(risk_1), " (", label_number(0.01)(risk.ll_1), "-", label_number(0.01)(risk.ul_1), ")"),
+    kmrdCI = paste0(label_number(0.01)(kmrd), " (", label_number(0.01)(kmrd.ll), "-", label_number(0.01)(kmrd.ul), ")"),
+    kmrr = paste0(label_number(0.01)(kmrr)),
+  ) %>%
+  gt(groupname_col="outcome_descr") %>%
+  cols_label(
+    
+    outcome_descr = "Outcome",
+    subgroup_descr = "Subgroup",
+    subgroup_level_descr = "Subgroup",
+    
+    n.atrisk = "N per group",
+    
+    cml.atrisk_0 = "Person-weeks", 
+    cml.atrisk_1 = "Person-weeks", 
+    
+    n.event_0 = "Events",
+    n.event_1 = "Events",
+    
+    riskCI_0 = "KM risk (95% CI)",
+    riskCI_1 = "KM risk (95% CI)",
+    
+    kmrdCI = "Risk-difference (95% CI)",
+    kmrr = "Relative-risk"
+  ) %>%
+  tab_spanner(
+    label = "BNT162b2",
+    columns = ends_with("_0")
+  ) %>%
+   tab_spanner(
+    label = "Moderna",
+    columns = ends_with("_1")
+  )  %>%
+   tab_spanner(
+    label = "Comparison",
+    columns = starts_with("km")
+  ) 
+  
+```
+
+#### Figure 3: Kaplan-Meier cumulative incidence estimates
+
+```{r, figure-km, echo=FALSE, message=FALSE, warning=FALSE, out.width='90%', out.height='50%', results='asis', out.extra=''}
+plot_km <- km_estimates %>%
+  filter(
+    subgroup=="all",
+    outcome %in% outcomes
+  ) %>%
+  ggplot(aes(group=treatment_descr, colour=treatment_descr, fill=treatment_descr)) +
+  geom_step(aes(x=time, y=1-surv))+
+  geom_rect(aes(xmin=time, xmax=leadtime, ymin=1-surv.ll, ymax=1-surv.ul), alpha=0.1, colour="transparent")+
+  facet_grid(rows=vars(outcome_descr))+
+  scale_color_brewer(type="qual", palette="Set1", na.value="grey") +
+  scale_fill_brewer(type="qual", palette="Set1", guide="none", na.value="grey") +
+  scale_x_continuous(breaks = seq(0,600,14))+
+  scale_y_continuous(expand = expansion(mult=c(0,0.01)))+
+  coord_cartesian(xlim=c(0, NA))+
+  labs(
+    x="Days",
+    y="Cumulative incidence",
+    colour=NULL,
+    title=NULL
+  )+
+  theme_minimal()+
+  theme(
+    axis.line.x = element_line(colour = "black"),
+    panel.grid.minor.x = element_blank(),
+    legend.position=c(.05,.95),
+    legend.justification = c(0,1),
+  )
+
+plot_km
+```
+
+
+
+\newpage
+
+## References

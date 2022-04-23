@@ -335,6 +335,7 @@ bn <- bn_create(sim_list, known_variables = known_variables)
 bn_plot(bn)
 bn_plot(bn, connected_only=TRUE)
 
+set.seed(10)
 
 dummydata <-bn_simulate(bn, pop_size = population_size, keep_all = FALSE, .id="patient_id")
 
