@@ -229,7 +229,7 @@ data_processed <- data_extract %>%
 
     prior_covid_infection = !is.na(postest_0_date)  | !is.na(covidemergency_0_date) | !is.na(covidadmitted_0_date) | !is.na(primary_care_covid_case_0_date),
 
-    covidemergency_1_date = pmin(covidemergency_1_date, covidadmitted_1_date, na.rm=TRUE),
+    covidemergency_date = pmin(covidemergency_date, covidadmitted_date, na.rm=TRUE),
 
     # latest covid event before study start
     anycovid_0_date = pmax(postest_0_date, covidemergency_0_date, covidadmitted_0_date, na.rm=TRUE),
