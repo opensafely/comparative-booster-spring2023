@@ -309,7 +309,7 @@ sim_list = lst(
   ),
 
   covidadmitted_ccdays = bn_node(
-    ~as.integer(rpois(n=..n, 0.5)),
+    ~as.factor(as.integer(rpois(n=..n, 0.5))),
     missing_rate = ~is.na(covidadmitted_day)
   ),
 

@@ -45,7 +45,7 @@ if(Sys.getenv("OPENSAFELY_BACKEND") %in% c("", "expectations")){
 
   data_custom_dummy <- read_feather(here("lib", "dummydata", "dummyinput.feather")) %>%
     mutate(
-     msoa = sample(factor(c("1", "2")), size=n(), replace=TRUE) # override msoa so matching success more likely
+      msoa = sample(factor(c("1", "2")), size=n(), replace=TRUE), # override msoa so matching success more likely
     )
 
 
@@ -241,6 +241,7 @@ data_processed <- data_extract %>%
     # earliest covid event after study start
     anycovid_date = pmin(postest_date, covidemergency_date, covidadmitted_date, coviddeath_date, na.rm=TRUE),
 
+    covidadmitted_ccdays = as.integer(as.character(covidadmitted_ccdays)),
     #FIXME ignores any covid-icu episodes subsequent to the first known covid admission, so we need to extract multiple covid admissions to capture them
     #covidicu_date = if_else(covidadmitted_ccdays>0, covidadmitted_date, Date(NA)),
 
