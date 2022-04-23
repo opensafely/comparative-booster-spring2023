@@ -981,7 +981,6 @@ study = StudyDefinition(
     on_or_after="covid_vax_disease_3_date",
     return_expectations={
       "category": {"ratios": {"0": 0.75, "1": 0.20,  "2": 0.05}},
-      "incidence": 0.5,
     },
   ),
   
