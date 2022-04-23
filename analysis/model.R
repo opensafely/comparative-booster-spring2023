@@ -376,7 +376,7 @@ foreach::foreach(sub = subgroup) %dopar% {
       summary3$glance,
     ) %>%
     mutate(
-      model_descr = fct_recode(as.character(model), !!!model_descr)
+      model_descr = fct_recoderelevel(as.character(model), model_descr)
     )
   write_csv(model_glance, fs::path(output_dir, "glance.csv"))
 
@@ -388,7 +388,7 @@ foreach::foreach(sub = subgroup) %dopar% {
       summary3$tidy,
     ) %>%
     mutate(
-      model_descr = fct_recode(as.character(model), !!!model_descr)
+      model_descr = fct_recoderelevel(as.character(model), model_descr)
     )
   write_csv(model_tidy, fs::path(output_dir, "tidy.csv"))
 
