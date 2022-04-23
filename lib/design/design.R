@@ -168,8 +168,7 @@ if(exists("matchset")){
       "vax12_type",
       #"vax2_week",
       "region",
-      #"sex",
-      #"cev_cv",
+      "sex",
 
       #"multimorb",
       "prior_covid_infection",
