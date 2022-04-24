@@ -221,6 +221,7 @@ data_surv_rounded <-
     n.risk = ceiling_any(max(n.risk, na.rm=TRUE), threshold) - lag(cml.event + cml.censor,1,0),
     sumerand = n.event / ((n.risk - n.event) * n.risk),
     surv.se = surv * sqrt(cumsum(replace_na(sumerand, 0))),
+    cmlhaz.se = surv.se/surv,
   ) %>%
   select(!!subgroup_sym, treatment, treatment_descr, time, lagtime, leadtime, interval, surv, surv.se, surv.ll, surv.ul, n.risk, n.event, n.censor, sumerand)
 
@@ -281,8 +282,6 @@ km_incidence <-
     surv, surv.se, surv.ll, surv.ul, risk, risk.ll, risk.ul, n.atrisk, n.event, n.censor, sumerand, rate, cml.atrisk, cml.event, cml.censor, cml.sumerand, cml.rate
   )
 
-
-
 kmcontrast <- function(data, cuts=NULL){
 
   if(is.null(cuts)){cuts <- unique(c(0,data$time))}
@@ -315,8 +314,8 @@ kmcontrast <- function(data, cuts=NULL){
       risk.ll = last(risk.ul),
       risk.ul = last(risk.ll),
       rate = n.event/persontime,
+      .groups="drop"
     ) %>%
-    ungroup() %>%
     pivot_wider(
       id_cols= c(subgroup, "period_start", "period_end", "period",  "interval"),
       names_from=treatment,
@@ -327,12 +326,16 @@ kmcontrast <- function(data, cuts=NULL){
       n.nonevent_0 = n.atrisk_0 - n.event_0,
       n.nonevent_1 = n.atrisk_1 - n.event_1,
 
-      # relative risk, standard error, and confidence limits
+      # survival ratio, standard error, and confidence limits
+      kmsr = surv_1 / surv_0,
+      kmsr.ln = log(kmrs),
+      kmsr.ln.se = (surv.se_0/surv_0) + (surv.se_1/surv_1), #because cmlhaz = -log(surv) and cmlhaz.se = surv.se/surv
+      kmsr.ll = exp(kmsr.ln + qnorm(0.025)*kmsr.ln.se),
+      kmsr.ul = exp(kmsr.ln + qnorm(0.975)*kmsr.ln.se),
+
+      # risk ratio, standard error, and confidence limits
       kmrr = risk_1 / risk_0,
-        # ignoring censoring
-      # kmlnrr.se = sqrt( (1/n.event_1) +  (1/n.event_0) - (1/(n.atrisk_1)) - (1/(n.atrisk_0))),
-      # kmrr.ll = exp(log(kmrr) + qnorm(0.025)*kmlnrr.se),
-      # kmrr.ul = exp(log(kmrr) + qnorm(0.975)*kmlnrr.se),
+
 
       # risk difference, standard error and confidence limits
       kmrd = risk_1 - risk_0,
