@@ -1,8 +1,7 @@
 ---
 title: "Comparative effectiveness of BNT162b2 versus Moderna booster doses in England: protocol"
 output:
-  html_document:
-    self_contained: yes
+  word_document: default
   pdf_document:
     toc: no
   bookdown::html_document2:
@@ -10,11 +9,12 @@ output:
     toc: no
   rtf_document:
     toc: no
-  word_document: default
-bibliography: references.bib
-csl: vancouver.csl
-link-citations: yes
-zotero: yes
+  html_document:
+    self_contained: yes
+#bibliography: references.bib
+#csl: vancouver.csl
+#link-citations: yes
+#zotero: yes
 header-includes:
 - \usepackage{float} 
 - \floatplacement{figure}{H}
@@ -96,7 +96,7 @@ The exposure of interest is the brand of COVID-19 vaccine administered for the t
 
 The following primary outcomes were considered: 
 * Positive SARS-CoV-2 test, identified using SGSS testing records and based on swab date. Both polymerase chain reaction (PCR) and lateral flow test results are included, without differentiation between symptomatic and asymptomatic infection. 
-* COVID-19 A&E attendances were identified using HES emergency care records with U07.1 ("COVID-19, virus identified") or U07.2 ("COVID-19, virus not identified") ICD-10 diagnosis codes @emergenc. This outcome also includes COVID-19 admissions (see below) to pick up more severe disease episodes that may have bypassed A&E. 
+* COVID-19 A&E attendances were identified using HES emergency care records with U07.1 ("COVID-19, virus identified") or U07.2 ("COVID-19, virus not identified") ICD-10 diagnosis codes. This outcome also includes COVID-19 admissions (see below) to pick up more severe disease episodes that may have bypassed A&E. 
 * COVID-19 hospital admission, identified using HES in-patient hospital records with U07.1 or U07.2 ICD-10 reason for admission codes. 
 * COVID-19 death. Deaths were classified as from COVID-19 if deaths with the U07.1 or U07.2 ICD-10 codes were mentioned anywhere on the death certificate (i.e., as an underlying or contributing cause of death).
 * Non-COVID-19 death.
@@ -125,6 +125,7 @@ Outcome events occurring on the day of boosting will be considered to have occur
 BNT162b2 booster recipients will be matched with Moderna booster recipients on one or more of the following characteristics, calculated as at the day of boosting:
 
 Essential matching criteria:
+
 * date of booster dose
 * primary course vaccine brand
 * date of second vaccine dose, within 7 days
@@ -132,12 +133,14 @@ Essential matching criteria:
 * clinical risk groups used for prioritisation (clinically extremely vulnerable, clinically at-risk, neither)
 * age, within 3 years, and age groups used by JCVI for prioritisation
 * Geographical region, one of the below in decreasing order of precision:
+
   * Lower Layer Super Output Area (LSOA)
   * Middle Layer Super Output Area (MSOA)
   * NHS Strategic Health Partnership (STP)
   * NHS region (East of England, Midlands, London, North East and Yorkshire, North West, South East, South West)
 
 Additional matching criteria if possible:
+
 * English Index of Multiple Deprivation (IMD), within X days (tbd)
 * ethnicity (Black, Mixed, South Asian, White, Other, as per the UK census);
 * existing morbidity count: diabetes, BMI \> 40kg/m^2^, chronic heart disease, chronic kidney disease, chronic liver disease, chronic respiratory disease or severe asthma, chronic neurological disease
@@ -158,9 +161,9 @@ We estimated Kaplan-Meier (KM) cumulative incidence curves separately by vaccine
 
 Confidence limits for the KM estimate will be derived from complimentary log-log transformation.
 Confidence limits for the risk difference will be derived from the square root of the sum of squares the treatment-specific KM standard errors. The KM standard errors will use Greenwood's formula.
-Confidence limits for the relative risk??
+Confidence limits for the survival ratio are straight-forward, and can be based on the standard error of the cumulative hazard. But confidence limits for the risk ratio (or relative risk) are more complicated. TBD.
 
-Alternatively, we could boostrap.
+Alternatively, we could bootstrap.
 
 <!-- [The primary estimand is the average treatment effect in the recruited population. To estimate this, expected cumulative incidence rates are estimated for each participant assuming treatment was received by everyone in both treatment groups at time zero. These curves are then averaged over all participants to give the marginal cumulative incidence. This is repeated assuming nobody is treated in either group, and their difference taken. Calculating standard errors for these quantities is challenging, whether approached analytically (due to complex variance components) or computationally (via bootstrapping, due to the large sample sizes involved) and are therefore not reported. ] -->
 
@@ -181,278 +184,6 @@ Any reported figures based on counts below 6 must be redacted or rounded for dis
 
 Kaplan-Meier survival estimates are rounded upwards by deferring event-times until there are at least 7 events, so that each KM "step" is based on at least 7 events. The same principle is applied to KM confidence limits.
 
-
-# Results
-
-## Study population and matching
-
-`r label_number(1, big.mark=",")(filter(match_flowchart, crit=="c0") %>% pull(n) %>% sum)` adults registered at a TPP practice received a booster vaccination of either BNT162b2 (`r label_number(1, big.mark=",")(filter(match_flowchart, crit=="c0", vax3_type=="pfizer") %>% pull(n))`) or Moderna (`r label_number(1, big.mark=",")(filter(match_flowchart, crit=="c0", vax3_type=="moderna") %>% pull(n))`) during the study period, with `r label_number(1, big.mark=",")(filter(match_flowchart, crit=="c6", vax3_type="pfizer") %>% pull(n))` (`r label_percent(0.1)(filter(match_flowchart, crit=="c6", vax3_type="pfizer") %>% pull(pct_all))`) and `r label_number(1, big.mark=",")(filter(match_flowchart, crit=="c6", vax3_type="pfizer") %>% pull(n))` (`r label_percent(0.1)(filter(match_flowchart, crit=="c6", vax3_type="moderna") %>% pull(pct_all))`) eligible for matching. `r label_number(1, big.mark=",")(filter(match_flowchart, crit=="c7", vax3_type="pfizer") %>% pull(n))` were successfully matched in each group, `r label_percent(0.1)(filter(match_flowchart, crit=="c7", vax3_type="pfizer") %>% pull(pct_step))` and `r label_percent(0.1)(filter(match_flowchart, crit=="c7", vax3_type="moderna") %>% pull(pct_step))` respectively (Table 1, Figure 1).
-
-
-#### Table 1: inclusion criteria
-
-```{r table-flowchart, echo=FALSE, warning=FALSE, message=FALSE}
-
-match_flowchart %>%
-  select(-crit) %>%
-   pivot_wider(
-    id_cols = c(criteria, vax3_type),
-    names_from = vax3_type,
-    values_from = c(n, n_exclude, pct_all)
-  ) %>%
-  gt() %>%
-  cols_label(
-    criteria = "",
-    
-    n_pfizer = "N",
-    n_moderna = "N",
-
-    n_exclude_pfizer = "N excluded",
-    n_exclude_moderna = "N excluded",
-    
-    pct_all_pfizer = "% remaining",
-    pct_all_moderna = "% remaining",
-  ) %>%
-  tab_spanner(
-    label = "BNT162b2",
-    columns = ends_with("pfizer")
-  ) %>%
-   tab_spanner(
-    label = "Moderna mRNA-1273",
-    columns = ends_with("moderna")
-  ) %>%
-  # tab_spanner(
-  #   label = "mRNA-1273",
-  #   columns = ends_with("moderna")
-  # ) %>%
-  fmt_percent(
-    columns = starts_with(c("pct_")),
-    decimals = 1
-  ) %>%
-  fmt_number(
-    columns = starts_with(c("n_")),
-    decimals= 0
-  ) %>%
-  fmt_missing(
-    everything(),
-    missing_text="-"
-  ) %>%
-  tab_style(
-    style=cell_text(whitespace ="pre-wrap"),
-    #style=cell_text(style ="italic"),
-    locations = cells_body(columns = "criteria")
-  )
-```
-
-
-\newpage 
-#### Figure 1: Cumulative matching success
-
-```{r, figure-matchingsuccess, echo=FALSE, message=FALSE, warning=FALSE, out.width='90%', out.height='50%', results='asis', out.extra=''}
-#read_rds(fs::path(output_dir_os, "descriptive", "vaxdate", "plot_vaxdate_stack.rds"))
-
-xmin <- min(match_coverage$vax3_date )
-xmax <- max(match_coverage$vax3_date )+1
-
-plot_coverage_cumuln <-
-  match_coverage %>%
-  mutate(
-    treatment_descr = fct_recoderelevel(as.character(treatment), recoder$treatment),
-    status_descr = fct_recoderelevel(as.character(status), recoder$status),
-    cumuln = cumuln*((treatment*2) - 1)
-  ) %>%
-  ggplot()+
-  geom_col(
-    aes(
-      x=vax3_date+0.5,
-      y=cumuln,
-      group=paste0(treatment,status_descr),
-      fill=treatment_descr,
-      alpha=status_descr,
-      colour=NULL
-    ),
-    position=position_stack(reverse=TRUE),
-    width=1
-  )+
-  geom_rect(xmin=xmin, xmax= xmax+1, ymin=-6, ymax=6, fill="grey", colour="transparent")+
-  scale_x_date(
-    breaks = unique(lubridate::ceiling_date(match_coverage$vax3_date, "1 month")),
-    limits = c(xmin-1, NA),
-    labels = scales::label_date("%d/%m"),
-    expand = expansion(add=1),
-  )+
-  scale_y_continuous(
-    labels = ~scales::label_number(accuracy = 1, big.mark=",")(abs(.)),
-    expand = expansion(c(0, NA))
-  )+
-  scale_fill_brewer(type="qual", palette="Set2")+
-  scale_colour_brewer(type="qual", palette="Set2")+
-  scale_alpha_discrete(range= c(0.8,0.4))+
-  labs(
-    x="Date",
-    y="Cumulative booster vaccines",
-    colour=NULL,
-    fill=NULL,
-    alpha=NULL
-  ) +
-  theme_minimal()+
-  theme(
-    axis.line.x.bottom = element_line(),
-    axis.text.x.top=element_text(hjust=0),
-    strip.text.y.right = element_text(angle = 0),
-    axis.ticks.x=element_line(),
-    legend.position = "bottom"
-  )+
-  NULL
-
-plot_coverage_cumuln
-cat("  \n\n")
-```
-
-\newpage
-
-#### Table 2: baseline characteristics
-
-```{r table-table1, echo=FALSE, warning=FALSE, message=FALSE}
-table1 <- 
-  match_table1 %>%
-  #filter(outcome %in% outcomes) %>%
-  group_by(variable) %>%
-  mutate(
-    label = if_else(row_number()==1, label, str_c("&nbsp;&nbsp;&nbsp;", label)),
-  ) %>%
-  mutate(
-    across(
-      starts_with("stat_"),
-      ~if_else(is.na(.x) & row_number()==1, "", .x)
-    )
-  ) %>%
-  ungroup() %>%
-  mutate(
-    order = cumsum(lag(variable, 1, first(variable))!=variable)
-  ) %>%
-  select(
-    variable, var_label, label, starts_with("stat_"), order
-  ) %>%
-  rename(!!!set_names(match_table1by$by_col, match_table1by$by_chr))
-
-
-table1 %>%
-  gt(groupname_col="treatment_descr") %>%
-  fmt_markdown(columns = "label") %>%
-  tab_style(
-    style = list(
-      cell_fill(color = "gray96")
-    ),
-    locations = cells_body(
-      rows = order%%2 == 0
-    )
-  ) %>%
-  tab_style(
-    style = list(
-      cell_text(weight = "bold")
-    ),
-    locations = cells_column_labels(everything())
-  ) %>%
-  cols_label(
-     label=md("Characteristic")
-  ) %>%
-  cols_hide(c("variable", "var_label", "order"))
-```
-
-
-## Estimated comparative effectiveness
-
-### Main analysis
-
-#### Table 3: Kaplan-Meier cumulative incidence estimates
-
-```{r table-km, echo=FALSE, warning=FALSE, message=FALSE}
-
-km_contrasts_overall %>%
-  transmute(
-    outcome_descr,
-    subgroup_descr,
-    subgroup_level_descr,
-    n.atrisk=n.atrisk_0,
-    cml.atrisk_0=label_number(1)(cml.atrisk_0/7), 
-    cml.atrisk_1=label_number(1)(cml.atrisk_1/7),
-    n.event_0, 
-    n.event_1,
-    riskCI_0 = paste0(label_number(0.01)(risk_0), " (", label_number(0.01)(risk.ll_0), "-", label_number(0.01)(risk.ul_0), ")"),
-    riskCI_1 = paste0(label_number(0.01)(risk_1), " (", label_number(0.01)(risk.ll_1), "-", label_number(0.01)(risk.ul_1), ")"),
-    kmrdCI = paste0(label_number(0.01)(kmrd), " (", label_number(0.01)(kmrd.ll), "-", label_number(0.01)(kmrd.ul), ")"),
-    kmrr = paste0(label_number(0.01)(kmrr)),
-  ) %>%
-  gt(groupname_col="outcome_descr") %>%
-  cols_label(
-    
-    outcome_descr = "Outcome",
-    subgroup_descr = "Subgroup",
-    subgroup_level_descr = "Subgroup",
-    
-    n.atrisk = "N per group",
-    
-    cml.atrisk_0 = "Person-weeks", 
-    cml.atrisk_1 = "Person-weeks", 
-    
-    n.event_0 = "Events",
-    n.event_1 = "Events",
-    
-    riskCI_0 = "KM risk (95% CI)",
-    riskCI_1 = "KM risk (95% CI)",
-    
-    kmrdCI = "Risk-difference (95% CI)",
-    kmrr = "Relative-risk"
-  ) %>%
-  tab_spanner(
-    label = "BNT162b2",
-    columns = ends_with("_0")
-  ) %>%
-   tab_spanner(
-    label = "Moderna",
-    columns = ends_with("_1")
-  )  %>%
-   tab_spanner(
-    label = "Comparison",
-    columns = starts_with("km")
-  ) 
-  
-```
-
-#### Figure 3: Kaplan-Meier cumulative incidence estimates
-
-```{r, figure-km, echo=FALSE, message=FALSE, warning=FALSE, out.width='90%', out.height='50%', results='asis', out.extra=''}
-plot_km <- km_estimates %>%
-  filter(
-    subgroup=="all",
-    outcome %in% outcomes
-  ) %>%
-  ggplot(aes(group=treatment_descr, colour=treatment_descr, fill=treatment_descr)) +
-  geom_step(aes(x=time, y=1-surv))+
-  geom_rect(aes(xmin=time, xmax=leadtime, ymin=1-surv.ll, ymax=1-surv.ul), alpha=0.1, colour="transparent")+
-  facet_grid(rows=vars(outcome_descr))+
-  scale_color_brewer(type="qual", palette="Set1", na.value="grey") +
-  scale_fill_brewer(type="qual", palette="Set1", guide="none", na.value="grey") +
-  scale_x_continuous(breaks = seq(0,600,14))+
-  scale_y_continuous(expand = expansion(mult=c(0,0.01)))+
-  coord_cartesian(xlim=c(0, NA))+
-  labs(
-    x="Days",
-    y="Cumulative incidence",
-    colour=NULL,
-    title=NULL
-  )+
-  theme_minimal()+
-  theme(
-    axis.line.x = element_line(colour = "black"),
-    panel.grid.minor.x = element_blank(),
-    legend.position=c(.05,.95),
-    legend.justification = c(0,1),
-  )
-
-plot_km
-```
 
 # Supplement
 
@@ -492,6 +223,3 @@ See revised priority groups here: https://www.england.nhs.uk/coronavirus/wp-cont
 Note that we excluded care home residents and health care workers in our analysis, so members of JCVI group 1 are not included and JCVI group 2 includes only those aged 80 and over. The original priority group list has 9 groups, with a 10th group implicitly defined as "everybody else". Here we explicitly define this group, and split into two (10a and 10b) because of the earlier booster eligibility in the 40-49 group from 15 November 2021 onwards. (https://www.gov.uk/government/news/jcvi-issues-advice-on-covid-19-booster-vaccines-for-those-aged-40-to-49-and-second-doses-for-16-to-17-year-olds)
 
 
-\newpage
-
-## References
