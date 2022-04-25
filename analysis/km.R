@@ -328,7 +328,7 @@ kmcontrast <- function(data, cuts=NULL){
 
       # survival ratio, standard error, and confidence limits
       kmsr = surv_1 / surv_0,
-      kmsr.ln = log(kmrs),
+      kmsr.ln = log(kmsr),
       kmsr.ln.se = (surv.se_0/surv_0) + (surv.se_1/surv_1), #because cmlhaz = -log(surv) and cmlhaz.se = surv.se/surv
       kmsr.ll = exp(kmsr.ln + qnorm(0.025)*kmsr.ln.se),
       kmsr.ul = exp(kmsr.ln + qnorm(0.975)*kmsr.ln.se),
