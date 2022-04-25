@@ -91,9 +91,9 @@ study = StudyDefinition(
       AND
       NOT has_died
       AND 
-      covid_vax_disease_3_date >= {studystart_date}
+      covid_vax_disease_3_date >= '{studystart_date}'
       AND
-      covid_vax_disease_3_date <= {studyend_date}
+      covid_vax_disease_3_date <= '{studyend_date}'
     """,
     # we define baseline variables on the day _before_ the study date (start date = day of first possible booster vaccination)
     registered=patients.registered_as_of(
