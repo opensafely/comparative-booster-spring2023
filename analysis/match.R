@@ -96,7 +96,7 @@ data_matchingcandidates <-
 library("doParallel")
 
 parallel::detectCores() # how many cores available?
-n_threads <- 2
+n_threads <- 8
 
 cluster <- parallel::makeCluster(
   n_threads,
@@ -106,14 +106,6 @@ print(cluster)
 #register it to be used by %dopar%
 doParallel::registerDoParallel(cl = cluster)
 
-
-
-foreach(
-  i = 1:10,
-  .combine = 'c'
-) %dopar% {
-  sqrt(i)
-}
 
 # create function that catches errors in case no matches are found within a thread
 safely_matchit <- purrr::safely(matchit)

@@ -167,10 +167,12 @@ if(exists("matchset")){
       "cev_cv",
       "vax12_type",
       #"vax2_week",
-      "region",
+      "stp",
       "sex",
+      "ethnicity",
 
-      #"multimorb",
+
+      "multimorb",
       "prior_covid_infection",
       #"immunosuppressed",
       #"status_hospplanned"
@@ -180,6 +182,7 @@ if(exists("matchset")){
     caliper <- c(
       age = 3,
       vax2_day = 7,
+      imd = 1000,
       NULL
     )
 
