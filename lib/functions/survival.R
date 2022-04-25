@@ -65,24 +65,27 @@ tidy_surv <-
           sumerand = n.event / ((n.risk - n.event) * n.risk),
 
           surv=cumprod(1 - n.event / n.risk),
-          surv.se = std.error,
           surv.ll = conf.low,
           surv.ul = conf.high,
-          se.surv_greenwood = surv * sqrt(cumsum(sumerand)),
+          surv.se = surv * sqrt(cumsum(sumerand)), #greenwood's formula
+          cmlhaz.se = std.error, # = surv.se/surv,
+          lsurv = log(surv),
+          lsurv.se = sqrt(cumsum(sumerand)),
 
           # kaplan meier hazard estimates
           haz_km = n.event / (n.risk * interval), # =-(surv-lag(surv))/lag(surv)
-          se.haz_km = haz_km * sqrt((n.risk - n.event) / (n.risk * n.event)),
+          haz_km.se = haz_km * sqrt((n.risk - n.event) / (n.risk * n.event)),
+
 
           # actuarial hazard estimates
           haz_ac = n.event / ((n.risk - (n.censor / 2) - (n.event / 2)) * interval), # =(cml.haz-lag(cml.haz))/interval
           cml.haz_ac = -log(surv), #=cumsum(haz_ac)
-          se.haz_ac = (haz_ac * sqrt(1 - (haz_ac * interval / 2)^2)) / sqrt(n.event),
+          haz_ac.se = (haz_ac * sqrt(1 - (haz_ac * interval / 2)^2)) / sqrt(n.event),
 
           # log(-log()) scale
 
           llsurv = log(-log(surv)),
-          se.llsurv = sqrt((1 / log(surv)^2) * cumsum(sumerand)),
+          llsurv.se = sqrt((1 / log(surv)^2) * cumsum(sumerand)),
 
       )
     }
@@ -110,27 +113,27 @@ tidy_surv <-
 
           surv=cumprod(1 - n.event / n.risk),
 
-          surv.se = std.error,
-
           surv.ll = conf.low,
           surv.ul = conf.high,
-
-          se.surv_greenwood = surv * sqrt(cumsum(sumerand)),
+          surv.se = surv * sqrt(cumsum(sumerand)), #greenwood's formula
+          cmlhaz.se = std.error, #  = surv.se/surv
+          lsurv = log(surv),
+          lsurv.se = sqrt(cumsum(sumerand)),
 
           # kaplan meier hazard estimates
           haz_km = n.event / (n.risk * interval), # =-(surv-lag(surv))/lag(surv)
           cml.haz_km = cumsum(haz_km), # =cumsum(haz_km)
-          se.haz_km = haz_km * sqrt((n.risk - n.event) / (n.risk * n.event)),
+          haz_km.se = haz_km * sqrt((n.risk - n.event) / (n.risk * n.event)),
 
           # actuarial hazard estimates
           haz_ac = n.event / ((n.risk - (n.censor / 2) - (n.event / 2)) * interval), # =(cml.haz-lag(cml.haz))/interval
           cml.haz_ac = -log(surv), #=cumsum(haz_ac)
-          se.haz_ac = (haz_ac * sqrt(1 - (haz_ac * interval / 2)^2)) / sqrt(n.event),
+          haz_ac.se = (haz_ac * sqrt(1 - (haz_ac * interval / 2)^2)) / sqrt(n.event),
 
           # log(-log()) scale
 
           llsurv = log(-log(surv)),
-          se.llsurv = sqrt((1 / log(surv)^2) * cumsum(sumerand)),
+          llsurv.se = sqrt((1 / log(surv)^2) * cumsum(sumerand)),
         )
     }
 
@@ -148,10 +151,10 @@ tidy_surv <-
           surv.se = 0,
           surv.ll=1,
           surv.ul=1,
-          se.surv_greenwood=0,
+          surv.se=0,
 
-          haz_km=0, se.haz_km=0, cml.haz_km=0,
-          haz_ac=0, se.haz_ac=0, cml.haz_ac=0,
+          haz_km=0, haz_km.se=0, cml.haz_km=0,
+          haz_ac=0, haz_ac.se=0, cml.haz_ac=0,
           .before=1
         )
     }

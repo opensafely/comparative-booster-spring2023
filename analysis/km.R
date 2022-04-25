@@ -221,6 +221,7 @@ data_surv_rounded <-
     n.risk = ceiling_any(max(n.risk, na.rm=TRUE), threshold) - lag(cml.event + cml.censor,1,0),
     sumerand = n.event / ((n.risk - n.event) * n.risk),
     surv.se = surv * sqrt(cumsum(replace_na(sumerand, 0))),
+    cmlhaz.se = surv.se/surv,
   ) %>%
   select(!!subgroup_sym, treatment, treatment_descr, time, lagtime, leadtime, interval, surv, surv.se, surv.ll, surv.ul, n.risk, n.event, n.censor, sumerand)
 
@@ -278,10 +279,12 @@ km_incidence <-
     !!subgroup_sym,
     treatment,
     time, interval,
-    surv, surv.se, surv.ll, surv.ul, risk, risk.ll, risk.ul, n.atrisk, n.event, n.censor, sumerand, rate, cml.atrisk, cml.event, cml.censor, cml.sumerand, cml.rate
+    surv, surv.se, surv.ll, surv.ul,
+    risk, risk.ll, risk.ul,
+    haz=haz_km, haz.se=haz_km.se,
+    n.atrisk, n.event, n.censor, sumerand, rate,
+    cml.atrisk, cml.event, cml.censor, cml.sumerand, cml.haz = cml.haz_km
   )
-
-
 
 kmcontrast <- function(data, cuts=NULL){
 
@@ -315,8 +318,8 @@ kmcontrast <- function(data, cuts=NULL){
       risk.ll = last(risk.ul),
       risk.ul = last(risk.ll),
       rate = n.event/persontime,
+      .groups="drop"
     ) %>%
-    ungroup() %>%
     pivot_wider(
       id_cols= c(subgroup, "period_start", "period_end", "period",  "interval"),
       names_from=treatment,
@@ -327,12 +330,16 @@ kmcontrast <- function(data, cuts=NULL){
       n.nonevent_0 = n.atrisk_0 - n.event_0,
       n.nonevent_1 = n.atrisk_1 - n.event_1,
 
-      # relative risk, standard error, and confidence limits
+      # survival ratio, standard error, and confidence limits
+      kmsr = surv_1 / surv_0,
+      kmsr.ln = log(kmsr),
+      kmsr.ln.se = (surv.se_0/surv_0) + (surv.se_1/surv_1), #because cmlhaz = -log(surv) and cmlhaz.se = surv.se/surv
+      kmsr.ll = exp(kmsr.ln + qnorm(0.025)*kmsr.ln.se),
+      kmsr.ul = exp(kmsr.ln + qnorm(0.975)*kmsr.ln.se),
+
+      # risk ratio, standard error, and confidence limits
       kmrr = risk_1 / risk_0,
-        # ignoring censoring
-      # kmlnrr.se = sqrt( (1/n.event_1) +  (1/n.event_0) - (1/(n.atrisk_1)) - (1/(n.atrisk_0))),
-      # kmrr.ll = exp(log(kmrr) + qnorm(0.025)*kmlnrr.se),
-      # kmrr.ul = exp(log(kmrr) + qnorm(0.975)*kmlnrr.se),
+
 
       # risk difference, standard error and confidence limits
       kmrd = risk_1 - risk_0,
@@ -340,6 +347,13 @@ kmcontrast <- function(data, cuts=NULL){
       kmrd.se = sqrt( (surv.se_0^2) + (surv.se_1^2) ), # combining SEs from greenwood's formula
       kmrd.ll = kmrd + qnorm(0.025)*kmrd.se,
       kmrd.ul = kmrd + qnorm(0.975)*kmrd.se,
+
+      # hazard ratio, standard error and confidence limits
+      # kmhr = haz_1 / haz_0,
+      # kmhr.se = sqrt( (haz.se_0^2) + (haz.se_1^2) ),
+      # kmhr.ll = kmrd + qnorm(0.025)*kmhr.se,
+      # kmhr.ul = kmrd + qnorm(0.975)*kmhr.se,
+
 
       # incidence rate ratio
       irr = rate_1 / rate_0,

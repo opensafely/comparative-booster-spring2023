@@ -97,6 +97,7 @@ km_contrasts_overall <- read_csv(here("output", "release-objects", matchset, "km
     ) %>% 
     set_names(., .)
 
+
 ```
 
 
@@ -406,9 +407,9 @@ plot_km <- km_estimates %>%
     outcome %in% outcomes
   ) %>%
   ggplot(aes(group=treatment_descr, colour=treatment_descr, fill=treatment_descr)) +
-  geom_step(aes(x=time, y=1-surv))+
+  geom_step(aes(x=period_end, y=1-surv))+
   geom_rect(aes(xmin=time, xmax=leadtime, ymin=1-surv.ll, ymax=1-surv.ul), alpha=0.1, colour="transparent")+
-  facet_grid(rows=vars(outcome_descr))+
+  facet_grid(rows=vars(outcome_descr), scales="free_y")+
   scale_color_brewer(type="qual", palette="Set1", na.value="grey") +
   scale_fill_brewer(type="qual", palette="Set1", guide="none", na.value="grey") +
   scale_x_continuous(breaks = seq(0,600,14))+
@@ -420,15 +421,81 @@ plot_km <- km_estimates %>%
     colour=NULL,
     title=NULL
   )+
-  theme_minimal()+
-  theme(
-    axis.line.x = element_line(colour = "black"),
-    panel.grid.minor.x = element_blank(),
-    legend.position=c(.05,.95),
-    legend.justification = c(0,1),
-  )
+  theme_minimal(base_size = 9)+
+    theme(
+      legend.position=c(0.05,0.1),
+      legend.justification = c(0,0),
+      legend.direction = "vertical",
+      axis.text.x.top=element_text(hjust=0),
+
+      panel.border = element_blank(),
+      axis.line.y = element_line(colour = "black"),
+      axis.line.x.top = element_line(colour = "black"),
+
+      panel.grid.minor.x = element_blank(),
+      panel.grid.minor.y = element_blank(),
+      strip.background = element_blank(),
+
+
+      panel.spacing = unit(0.8, "lines"),
+
+    )+
+    NULL
 
 plot_km
+
+plot_kmrd <- km_contrasts_daily %>%
+  filter(
+    subgroup=="all",
+    outcome %in% outcomes
+  ) %>%
+  ggplot(aes(group=subgroup_level_descr, colour=subgroup_level_descr, fill=subgroup_level_descr)) +
+  geom_step(aes(x=period_start, y=kmrd))+
+  geom_rect(aes(xmin=period_start, xmax=period_end, ymin=kmrd.ll, ymax=kmrd.ul), alpha=0.1, colour="transparent")+
+  facet_grid(rows=vars(outcome_descr), scales="free_y")+
+  scale_color_brewer(type="qual", palette="Set1", na.value="grey") +
+  scale_fill_brewer(type="qual", palette="Set1", guide="none", na.value="grey") +
+  scale_x_continuous(breaks = seq(0,600,14))+
+  scale_y_continuous(expand = expansion(mult=c(0,0.01)))+
+  coord_cartesian(xlim=c(0, NA))+
+  labs(
+    x="Days",
+    y="Cumulative risk difference",
+    colour=NULL,
+    title=NULL
+  )+
+  theme_minimal(base_size = 9)+
+    theme(
+      legend.position="none",
+      legend.direction = "vertical",
+      axis.text.x.top=element_text(hjust=0),
+
+      panel.border = element_blank(),
+      axis.line.y = element_line(colour = "black"),
+      axis.line.x.top = element_line(colour = "black"),
+
+      panel.grid.minor.x = element_blank(),
+      panel.grid.minor.y = element_blank(),
+      strip.background = element_blank(),
+
+
+      panel.spacing = unit(0.8, "lines"),
+
+    )+
+    NULL
+
+plot_kmrd
+
+
+  plot_combined <- patchwork::wrap_plots(plot_km, plot_kmrd, plotkmrr, ncol=1)
+  ggsave(
+    filename="km.png",
+    path=output_dir_rmd,
+    plot=plot_combined,
+  )
+  
+plot_combined
+
 ```
 
 # Supplement

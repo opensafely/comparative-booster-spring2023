@@ -61,9 +61,7 @@ logoutput_datasize <- function(x){
 data_matchstatus <- read_rds(fs::path(here("output", "match", matchset), "data_matchstatus.rds"))
 
 
-# matching coverage per trial / day of follow up
-
-
+# matching coverage on each day of recruitment period ----
 
 
 # matching coverage for boosted people
@@ -106,11 +104,24 @@ data_coverage <-
 
 write_csv(data_coverage, fs::path(output_dir, "data_coverage.csv"))
 
-# report matching info ----
 
-day1_date <- study_dates$index_date
 
-## matching coverage ----
+## round to nearest 7 for disclosure control
+threshold <- 7
+
+data_coverage_rounded <-
+  data_coverage %>%
+  group_by(treatment, status) %>%
+  mutate(
+    cumuln = ceiling_any(cumuln, to = threshold),
+    n = diff(c(0,cumuln)),
+  )
+
+write_csv(data_coverage_rounded, fs::path(output_dir, "data_coverage.csv"))
+
+
+
+## plot matching coverage ----
 
 xmin <- min(data_coverage$vax3_date )
 xmax <- max(data_coverage$vax3_date )+1
@@ -224,9 +235,6 @@ plot_coverage_cumuln <-
 plot_coverage_cumuln
 
 ggsave(plot_coverage_cumuln, filename="coverage_stack.png", path=output_dir)
-
-
-
 
 
 
