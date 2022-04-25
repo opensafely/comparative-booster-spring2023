@@ -46,6 +46,8 @@ if(Sys.getenv("OPENSAFELY_BACKEND") %in% c("", "expectations")){
   data_custom_dummy <- read_feather(here("lib", "dummydata", "dummyinput.feather")) %>%
     mutate(
       msoa = sample(factor(c("1", "2")), size=n(), replace=TRUE), # override msoa so matching success more likely
+      stp = sample(factor(c("1", "2")), size=n(), replace=TRUE), # override stp so matching success more likely
+      imd = sample(factor((1:10)*3284), size=n(), replace=TRUE), # override imd so matching success more likely
     )
 
 
