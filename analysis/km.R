@@ -279,7 +279,11 @@ km_incidence <-
     !!subgroup_sym,
     treatment,
     time, interval,
-    surv, surv.se, surv.ll, surv.ul, risk, risk.ll, risk.ul, n.atrisk, n.event, n.censor, sumerand, rate, cml.atrisk, cml.event, cml.censor, cml.sumerand, cml.rate
+    surv, surv.se, surv.ll, surv.ul,
+    risk, risk.ll, risk.ul,
+    haz=haz_km, haz.se=haz_km.se,
+    n.atrisk, n.event, n.censor, sumerand, rate,
+    cml.atrisk, cml.event, cml.censor, cml.sumerand, cml.haz = cml.haz_km
   )
 
 kmcontrast <- function(data, cuts=NULL){
@@ -343,6 +347,13 @@ kmcontrast <- function(data, cuts=NULL){
       kmrd.se = sqrt( (surv.se_0^2) + (surv.se_1^2) ), # combining SEs from greenwood's formula
       kmrd.ll = kmrd + qnorm(0.025)*kmrd.se,
       kmrd.ul = kmrd + qnorm(0.975)*kmrd.se,
+
+      # hazard ratio, standard error and confidence limits
+      # kmhr = haz_1 / haz_0,
+      # kmhr.se = sqrt( (haz.se_0^2) + (haz.se_1^2) ),
+      # kmhr.ll = kmrd + qnorm(0.025)*kmhr.se,
+      # kmhr.ul = kmrd + qnorm(0.975)*kmhr.se,
+
 
       # incidence rate ratio
       irr = rate_1 / rate_0,
