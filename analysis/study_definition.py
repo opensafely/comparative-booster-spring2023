@@ -14,7 +14,7 @@ import codelists
 # import json module
 import json
 
-# import study dates defined in "design.R" script
+# import study dates defined in "./lib/design/study-dates.R" script
 with open("./lib/design/study-dates.json") as f:
   study_dates = json.load(f)
 
@@ -91,9 +91,9 @@ study = StudyDefinition(
       AND
       NOT has_died
       AND 
-      covid_vax_disease_3_date >= {studystart_date}
+      covid_vax_disease_3_date >= startdate
       AND
-      covid_vax_disease_3_date <= {studyend_date}
+      covid_vax_disease_3_date <= enddate
     """,
     # we define baseline variables on the day _before_ the study date (start date = day of first possible booster vaccination)
     registered=patients.registered_as_of(
@@ -102,10 +102,13 @@ study = StudyDefinition(
     has_died=patients.died_from_any_cause(
       on_or_before="covid_vax_disease_3_date - 1 day",
       returning="binary_flag",
-    ),
+    ), 
+   
+    startdate = patients.fixed_value(studystart_date),
+    enddate = patients.fixed_value(studyend_date),
+  
     
   ),
-  
   
   
   #################################################################
