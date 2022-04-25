@@ -182,5 +182,5 @@ data_matchstatus %>%
   group_by(vax3_date, treatment, matched) %>%
   summarise(
     n=n()
-  )
+  ) %>% print(n=1000)
 
