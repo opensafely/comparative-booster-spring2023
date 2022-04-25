@@ -283,7 +283,7 @@ km_incidence <-
     risk, risk.ll, risk.ul,
     haz=haz_km, haz.se=haz_km.se,
     n.atrisk, n.event, n.censor, sumerand, rate,
-    cml.atrisk, cml.event, cml.censor, cml.sumerand, cml.haz = cml.haz_km
+    cml.atrisk, cml.event, cml.censor, cml.sumerand, cml.haz = cml.haz_km, cml.rate
   )
 
 kmcontrast <- function(data, cuts=NULL){
