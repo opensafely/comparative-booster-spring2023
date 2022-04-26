@@ -130,6 +130,6 @@ data_flowchart <-
       crit == "c6" ~ "  and not in hospital at time of booster",
       TRUE ~ NA_character_
     )
-  )
+  ) #
 write_csv(data_flowchart, here("output", "data", "flowchart.csv"))
 
