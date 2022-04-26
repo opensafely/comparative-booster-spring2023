@@ -120,8 +120,6 @@ study = StudyDefinition(
     name = "covid_vax_pfizer",
     # use 1900 to capture all possible recorded covid vaccinations, including date errors
     # any vaccines occurring before national rollout are later excluded
-    # Elsie: for vaccines occuring before rollout - is this dose removed, then 1st dose after rollout is the 1st dose,
-    # or is the patient excluded if they have any vaccines recorded pre-rollout?
     index_date = "1900-01-01", 
     n = 4,
     product_name_matches="COVID-19 mRNA Vaccine Comirnaty 30micrograms/0.3ml dose conc for susp for inj MDV (Pfizer)"
