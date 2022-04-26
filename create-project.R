@@ -296,6 +296,16 @@ actions_list <- splice(
   ),
 
 
+  action(
+    name = "geography",
+    run = "r:latest analysis/geography.R",
+    needs = list("data_process"),
+    moderately_sensitive = lst(
+      png = "output/geography/*.png",
+      csv = "output/geography/*.csv",
+    )
+  ),
+
   # action(
   #   name = "cohort_report",
   #   run = "cohort-report:v3.0.0 output/data/data_cohort.feather",
