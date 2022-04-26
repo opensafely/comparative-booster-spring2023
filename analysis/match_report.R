@@ -41,9 +41,9 @@ output_dir <- here("output", "match", matchset, "report")
 fs::dir_create(output_dir)
 
 ## create special log file ----
-cat(glue("## script info for natch report ##"), "  \n", file = fs::path(output_dir, glue("log.txt")), append = FALSE)
+cat(glue("## script info for match report ##"), "  \n", file = fs::path(output_dir, glue("log.txt")), append = FALSE)
 
-## functions to pass additional log info to seperate file
+## functions to pass additional log info to separate file
 logoutput <- function(...){
   cat(..., file = fs::path(output_dir, glue("log.txt")), sep = "\n  ", append = TRUE)
   cat("\n", file = fs::path(output_dir, glue("log.txt")), sep = "\n  ", append = TRUE)
@@ -413,7 +413,7 @@ data_flowchart_match <-
       crit == "c7" ~ "  and successfully matched",
       TRUE ~ NA_character_
     )
-  )
+  ) #
 
 write_csv(data_flowchart_match, fs::path(output_dir, "flowchart.csv"))
 
