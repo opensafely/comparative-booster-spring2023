@@ -7,7 +7,7 @@
 # Import libraries ----
 library('tidyverse')
 library('lubridate')
-library('arrow')
+library('glue')
 library('here')
 
 # Import custom user functions from lib
@@ -108,7 +108,7 @@ regional <- function(data, region, period, region_name = "geography", period_nam
         xend=pct,
         y={{period}}-3,
         yend={{period}}+3,
-        colour=factor({{period}}),
+        colour=factor({{period}})
       ),
       alpha=0.2,
       size=1
@@ -119,7 +119,7 @@ regional <- function(data, region, period, region_name = "geography", period_nam
         xend=pct,
         y={{period}}-4,
         yend={{period}}+4,
-        colour=factor({{period}}),
+        colour=factor({{period}})
       ),
       #shape="|",
       size=1
@@ -150,7 +150,7 @@ regional <- function(data, region, period, region_name = "geography", period_nam
       aes(
         x=pct,
         y={{region}},
-        fill=factor({{period}}),
+        fill=factor({{period}})
       ),
       width=0.95,
       colour="transparent"
@@ -189,7 +189,7 @@ regional <- function(data, region, period, region_name = "geography", period_nam
       data=summary_noregion,
       aes(
         x={{period}},
-        y=pct,
+        y=pct
         #colour={{region}}
       ),
       colour='black'
@@ -198,7 +198,7 @@ regional <- function(data, region, period, region_name = "geography", period_nam
     geom_hline(yintercept=1, colour="darkgrey")+
     labs(
       x=period_name,
-      y="Moderna, proportion",
+      y="Moderna, proportion"
     )+
     theme_minimal()
 
@@ -216,7 +216,7 @@ regional <- function(data, region, period, region_name = "geography", period_nam
       aes(
         x=N,
         y=pct,
-        colour=factor({{period}}),
+        colour=factor({{period}})
       ),
     ) +
 
