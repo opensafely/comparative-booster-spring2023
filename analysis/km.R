@@ -210,6 +210,7 @@ data_surv_rounded <-
   mutate(
     # Use ceiling not round. This is slightly biased upwards,
     # but means there's no disclosure risk at the boundaries (0 and 1) where masking would otherwise be threshold/2
+    # annotate?
     lagtime = lag(time,1L,0),
     surv = ceiling_any(surv, 1/floor(max(n.risk, na.rm=TRUE)/(threshold))),
     surv.ll = ceiling_any(surv.ll, 1/floor(max(n.risk, na.rm=TRUE)/(threshold))),
@@ -286,6 +287,7 @@ km_incidence <-
     cml.atrisk, cml.event, cml.censor, cml.sumerand, cml.haz = cml.haz_km, cml.rate
   )
 
+# issue?
 kmcontrast <- function(data, cuts=NULL){
 
   if(is.null(cuts)){cuts <- unique(c(0,data$time))}
