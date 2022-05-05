@@ -60,7 +60,10 @@ source(here("lib", "design", "design.R"))
 matchset <- "A"
 
 match_flowchart <-  read_csv(here("output", "release-objects", matchset, "match_flowchart.csv"))
-match_coverage <- read_csv(here("output", "release-objects", matchset, "match_coverage.csv"))
+match_coverage <- read_csv(here("output", "release-objects", matchset, "match_coverage.csv")) %>%
+   mutate(
+    treatment_descr = fct_recoderelevel(as.character(treatment),  recoder$treatment),
+  )
 
 match_table1 <- read_csv(here("output", "release-objects", matchset, "match_table1.csv"))
 match_table1by <- read_csv(here("output", "release-objects", matchset, "match_table1by.csv"))
@@ -235,8 +238,8 @@ xmax <- max(match_coverage$vax3_date )+1
 plot_coverage_cumuln <-
   match_coverage %>%
   mutate(
-    treatment_descr = fct_recoderelevel(as.character(treatment), recoder$treatment),
-    status_descr = fct_recoderelevel(as.character(status), recoder$status),
+   # treatment_descr = fct_recoderelevel(as.character(treatment), recoder$treatment),
+    status_descr = fct_rev(fct_recoderelevel(as.character(status), recoder$status)),
     cumuln = cumuln*((treatment*2) - 1)
   ) %>%
   ggplot()+
@@ -254,10 +257,16 @@ plot_coverage_cumuln <-
   )+
   geom_rect(xmin=xmin, xmax= xmax+1, ymin=-6, ymax=6, fill="grey", colour="transparent")+
   scale_x_date(
-    breaks = unique(lubridate::ceiling_date(match_coverage$vax3_date, "1 month")),
+    breaks = seq(xmin, xmax+1, by=14),
+    #breaks = unique(lubridate::ceiling_date(match_coverage$vax3_date, "1 month")),
     limits = c(xmin-1, NA),
     labels = scales::label_date("%d/%m"),
     expand = expansion(add=1),
+    sec.axis = sec_axis(
+      trans = ~as.Date(.),
+      breaks=as.Date(seq(floor_date(xmin, "month"), ceiling_date(xmax, "month"),by="month")),
+      labels = scales::label_date("%B %y")
+    )
   )+
   scale_y_continuous(
     labels = ~scales::label_number(accuracy = 1, big.mark=",")(abs(.)),
@@ -409,7 +418,7 @@ plot_km <- km_estimates %>%
   ggplot(aes(group=treatment_descr, colour=treatment_descr, fill=treatment_descr)) +
   geom_step(aes(x=time, y=1-surv))+
   geom_rect(aes(xmin=lagtime, xmax=time, ymin=1-surv.ll, ymax=1-surv.ul), alpha=0.1, colour="transparent")+
-  facet_grid(rows=vars(outcome_descr), scales="free_y")+
+  facet_grid(rows=vars(outcome_descr), scales="free_y", switch="y")+
   scale_color_brewer(type="qual", palette="Set1", na.value="grey") +
   scale_fill_brewer(type="qual", palette="Set1", guide="none", na.value="grey") +
   scale_x_continuous(breaks = seq(0,600,14))+
@@ -435,6 +444,8 @@ plot_km <- km_estimates %>%
       panel.grid.minor.x = element_blank(),
       panel.grid.minor.y = element_blank(),
       strip.background = element_blank(),
+      strip.placement="outside",
+      strip.text.y = element_text(angle=0),
 
 
       panel.spacing = unit(0.8, "lines"),
@@ -442,7 +453,7 @@ plot_km <- km_estimates %>%
     )+
     NULL
 
-plot_km
+
 
 plot_kmrd <- contrasts_daily %>%
   filter(
@@ -452,6 +463,7 @@ plot_kmrd <- contrasts_daily %>%
   ggplot(aes(group=subgroup_level_descr, colour=subgroup_level_descr, fill=subgroup_level_descr)) +
   geom_step(aes(x=period_start, y=kmrd))+
   geom_rect(aes(xmin=period_start, xmax=period_end, ymin=kmrd.ll, ymax=kmrd.ul), alpha=0.1, colour="transparent")+
+  geom_hline(aes(yintercept=0), colour="black")+
   facet_grid(rows=vars(outcome_descr), scales="free_y")+
   scale_color_brewer(type="qual", palette="Set1", na.value="grey") +
   scale_fill_brewer(type="qual", palette="Set1", guide="none", na.value="grey") +
@@ -477,6 +489,7 @@ plot_kmrd <- contrasts_daily %>%
       panel.grid.minor.x = element_blank(),
       panel.grid.minor.y = element_blank(),
       strip.background = element_blank(),
+      strip.text = element_blank(),
 
 
       panel.spacing = unit(0.8, "lines"),
@@ -484,7 +497,7 @@ plot_kmrd <- contrasts_daily %>%
     )+
     NULL
 
-plot_kmrd
+
 
 plot_kmrr <- contrasts_daily %>%
   filter(
@@ -494,6 +507,7 @@ plot_kmrr <- contrasts_daily %>%
   ggplot(aes(group=subgroup_level_descr, colour=subgroup_level_descr, fill=subgroup_level_descr)) +
   geom_step(aes(x=period_start, y=kmrr))+
   #geom_rect(aes(xmin=period_start, xmax=period_end, ymin=kmrr.ll, ymax=kmrr.ul), alpha=0.1, colour="transparent")+
+  geom_hline(aes(yintercept=0), colour="black")+
   facet_grid(rows=vars(outcome_descr), scales="free_y")+
   scale_color_brewer(type="qual", palette="Set1", na.value="grey") +
   scale_fill_brewer(type="qual", palette="Set1", guide="none", na.value="grey") +
@@ -519,14 +533,13 @@ plot_kmrr <- contrasts_daily %>%
       panel.grid.minor.x = element_blank(),
       panel.grid.minor.y = element_blank(),
       strip.background = element_blank(),
+      strip.text = element_blank(),
 
 
       panel.spacing = unit(0.8, "lines"),
 
     )+
     NULL
-
-plot_kmrr
 
 
   plot_combined <- patchwork::wrap_plots(plot_km, plot_kmrd, plot_kmrr, ncol=3)
