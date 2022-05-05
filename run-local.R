@@ -106,6 +106,71 @@ action_km("A", "variantera", "noncoviddeath")
 
 action_km_combine("A")
 
+
+
+
+action_match("B")
+action_km("B", "all", "postest")
+action_km("B", "all", "covidemergency")
+action_km("B", "all", "covidadmittedproxy1")
+action_km("B", "all", "covidadmitted")
+#action_km("B", "all", "noncovidadmitted")
+#action_km("B", "all", "covidcc")
+action_km("B", "all", "coviddeath")
+action_km("B", "all", "noncoviddeath")
+
+
+action_km("B", "vax12_type", "postest")
+action_km("B", "vax12_type", "covidemergency")
+action_km("B", "vax12_type", "covidadmittedproxy1")
+action_km("B", "vax12_type", "covidadmitted")
+#action_km("B", "vax12_type", "noncovidadmitted")
+#action_km("B", "vax12_type", "covidcc")
+action_km("B", "vax12_type", "coviddeath")
+action_km("B", "vax12_type", "noncoviddeath")
+
+
+
+action_km("B", "cev_cv", "postest")
+action_km("B", "cev_cv", "covidemergency")
+action_km("B", "cev_cv", "covidadmittedproxy1")
+action_km("B", "cev_cv", "covidadmitted")
+#action_km("B", "cev_cv", "noncovidadmitted")
+#action_km("B", "cev_cv", "covidcc")
+action_km("B", "cev_cv", "coviddeath")
+action_km("B", "cev_cv", "noncoviddeath")
+
+
+action_km("B", "prior_covid_infection", "postest")
+action_km("B", "prior_covid_infection", "covidemergency")
+action_km("B", "prior_covid_infection", "covidadmittedproxy1")
+action_km("B", "prior_covid_infection", "covidadmitted")
+#action_km("B", "prior_covid_infection", "noncovidadmitted")
+#action_km("B", "prior_covid_infection", "covidcc")
+action_km("B", "prior_covid_infection", "coviddeath")
+action_km("B", "prior_covid_infection", "noncoviddeath")
+
+
+action_km("B", "age65plus", "postest")
+action_km("B", "age65plus", "covidemergency")
+action_km("B", "age65plus", "covidadmittedproxy1")
+action_km("B", "age65plus", "covidadmitted")
+#action_km("B", "age65plus", "noncovidadmitted")
+#action_km("B", "age65plus", "covidcc")
+action_km("B", "age65plus", "coviddeath")
+action_km("B", "age65plus", "noncoviddeath")
+
+action_km("B", "variantera", "postest")
+action_km("B", "variantera", "covidemergency")
+action_km("B", "variantera", "covidadmittedproxy1")
+action_km("B", "variantera", "covidadmitted")
+#action_km("B", "variantera", "noncovidadmitted")
+#action_km("B", "variantera", "covidcc")
+action_km("B", "variantera", "coviddeath")
+action_km("B", "variantera", "noncoviddeath")
+
+action_km_combine("B")
+
 action_ls(
   here("analysis", "release_objects.R")
 )
