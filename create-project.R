@@ -318,12 +318,10 @@ actions_list <- splice(
   # ),
 
 
-  comment("# # # # # # # # # # # # # # # # # # #", "Matching", "# # # # # # # # # # # # # # # # # # #"),
-
-  action_match("A"),
 
   comment("# # # # # # # # # # # # # # # # # # #", "matching set A", "# # # # # # # # # # # # # # # # # # #"),
 
+  action_match("A"),
 
   comment("### Overall models ('all')"),
 
@@ -396,6 +394,81 @@ actions_list <- splice(
   action_km("A", "variantera", "noncoviddeath"),
 
 
+  comment("# # # # # # # # # # # # # # # # # # #", "matching set B", "# # # # # # # # # # # # # # # # # # #"),
+
+  action_match("B"),
+
+  comment("### Overall models ('all')"),
+
+  action_km("B", "all", "postest"),
+  action_km("B", "all", "covidemergency"),
+  action_km("B", "all", "covidadmittedproxy1"),
+  action_km("B", "all", "covidadmitted"),
+  #action_km("B", "all", "noncovidadmitted"),
+  #action_km("B", "all", "covidcc"),
+  action_km("B", "all", "coviddeath"),
+  action_km("B", "all", "noncoviddeath"),
+
+
+  comment("### Models by primary course ('vax12_type')"),
+
+  action_km("B", "vax12_type", "postest"),
+  action_km("B", "vax12_type", "covidemergency"),
+  action_km("B", "vax12_type", "covidadmittedproxy1"),
+  action_km("B", "vax12_type", "covidadmitted"),
+  #action_km("B", "vax12_type", "noncovidadmitted"),
+  #action_km("B", "vax12_type", "covidcc"),
+  action_km("B", "vax12_type", "coviddeath"),
+  action_km("B", "vax12_type", "noncoviddeath"),
+
+
+  comment("### Models by clinically vulnerable group ('cev_cv')"),
+
+  action_km("B", "cev_cv", "postest"),
+  action_km("B", "cev_cv", "covidemergency"),
+  action_km("B", "cev_cv", "covidadmittedproxy1"),
+  action_km("B", "cev_cv", "covidadmitted"),
+  #action_km("B", "cev_cv", "noncovidadmitted"),
+  #action_km("B", "cev_cv", "covidcc"),
+  action_km("B", "cev_cv", "coviddeath"),
+  action_km("B", "cev_cv", "noncoviddeath"),
+
+
+  comment("### Models by prior infection ('prior_covid_infection')"),
+
+  action_km("B", "prior_covid_infection", "postest"),
+  action_km("B", "prior_covid_infection", "covidemergency"),
+  action_km("B", "prior_covid_infection", "covidadmittedproxy1"),
+  action_km("B", "prior_covid_infection", "covidadmitted"),
+  #action_km("B", "prior_covid_infection", "noncovidadmitted"),
+  #action_km("B", "prior_covid_infection", "covidcc"),
+  action_km("B", "prior_covid_infection", "coviddeath"),
+  action_km("B", "prior_covid_infection", "noncoviddeath"),
+
+
+  comment("### Models by age ('age65plus')"),
+
+  action_km("B", "age65plus", "postest"),
+  action_km("B", "age65plus", "covidemergency"),
+  action_km("B", "age65plus", "covidadmittedproxy1"),
+  action_km("B", "age65plus", "covidadmitted"),
+  #action_km("B", "age65plus", "noncovidadmitted"),
+  #action_km("B", "age65plus", "covidcc"),
+  action_km("B", "age65plus", "coviddeath"),
+  action_km("B", "age65plus", "noncoviddeath"),
+
+  comment("### Models by variant era ('variantera')"),
+
+  action_km("B", "variantera", "postest"),
+  action_km("B", "variantera", "covidemergency"),
+  action_km("B", "variantera", "covidadmittedproxy1"),
+  action_km("B", "variantera", "covidadmitted"),
+  #action_km("B", "variantera", "noncovidadmitted"),
+  #action_km("B", "variantera", "covidcc"),
+  action_km("B", "variantera", "coviddeath"),
+  action_km("B", "variantera", "noncoviddeath"),
+
+
   comment("# # # # # # # # # # # # # # # # # # #", "Combine KM estimates across outcomes and subgroups", "# # # # # # # # # # # # # # # # # # #"),
 
   action_km_combine(
@@ -403,6 +476,13 @@ actions_list <- splice(
     subgroups = c("all", "vax12_type", "prior_covid_infection", "age65plus", "cev_cv", "variantera"),
     outcomes=c("postest", "covidemergency", "covidadmittedproxy1", "covidadmitted", "coviddeath", "noncoviddeath")
   ),
+
+  action_km_combine(
+    "B",
+    subgroups = c("all", "vax12_type", "prior_covid_infection", "age65plus", "cev_cv", "variantera"),
+    outcomes=c("postest", "covidemergency", "covidadmittedproxy1", "covidadmitted", "coviddeath", "noncoviddeath")
+  ),
+
 
   comment("# # # # # # # # # # # # # # # # # # #", "Files for release", "# # # # # # # # # # # # # # # # # # #"),
 
@@ -412,6 +492,7 @@ actions_list <- splice(
     needs = list(
       "data_selection",
       "match_report_A",
+      "match_report_B",
       "km_combine_A"
     ),
     moderately_sensitive = lst(

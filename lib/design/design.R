@@ -170,15 +170,8 @@ if(exists("matchset")){
       "jcvi_ageband",
       "cev_cv",
       "vax12_type",
-      "stp",
-      "sex",
-      #"ethnicity",
+      "region",
       "imd_Q5",
-
-      "multimorb",
-      "prior_covid_infection",
-      #"immunosuppressed",
-      #"status_hospplanned"
       NULL
     )
 
@@ -200,12 +193,14 @@ if(exists("matchset")){
       "vax3_date",
       "jcvi_ageband",
       "cev_cv",
+      "sex",
       "vax12_type",
       #"vax2_week",
-      "msoa",
-      "sex",
+      "stp",
+      "imd_Q5",
 
-      #"multimorb",
+
+      "multimorb",
       "prior_covid_infection",
       #"immunosuppressed",
       #"status_hospplanned"
@@ -219,7 +214,6 @@ if(exists("matchset")){
     )
 
     all <- c(exact, names(caliper))
-
 
     matching_variables$B = lst(exact, caliper, all)
 

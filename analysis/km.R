@@ -475,10 +475,10 @@ coxcontrast <- function(data, cuts=NULL){
       !!subgroup_sym,
       period_start,
       period_end,
-      coxhaz = exp(estimate),
-      coxhaz.se = robust.se,
-      coxhaz.ll = exp(estimate + qnorm(0.025)*robust.se),
-      coxhaz.ul = exp(estimate + qnorm(0.975)*robust.se),
+      coxhazr = exp(estimate),
+      coxhr.se = robust.se,
+      coxhr.ll = exp(estimate + qnorm(0.025)*robust.se),
+      coxhr.ul = exp(estimate + qnorm(0.975)*robust.se),
     )
   data_cox
 
