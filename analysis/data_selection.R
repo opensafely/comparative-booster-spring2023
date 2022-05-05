@@ -101,6 +101,9 @@ data_inclusioncriteria <- data_criteria %>%
 
 write_rds(data_inclusioncriteria, here("output", "data", "data_inclusioncriteria.rds"), compress="gz")
 
+
+## flowchart -- rounded so disclosure-safe ----
+
 data_flowchart <-
   data_inclusioncriteria %>%
   select(-patient_id) %>%
@@ -135,7 +138,7 @@ data_flowchart <-
 
 
 
-## flowchart -- rounded -- disclosure-safe
+## flowchart -- rounded so disclosure-safe ----
 data_flowchart_rounded <-
   data_inclusioncriteria %>%
   select(-patient_id) %>%
