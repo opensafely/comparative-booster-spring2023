@@ -129,6 +129,7 @@ These matching criteria ensure that treatment groups are also matched within JCV
 ## Outcomes
 
 The following outcomes were considered: 
+
 * Positive SARS-CoV-2 test, identified using SGSS testing records and based on swab date. Both polymerase chain reaction (PCR) and lateral flow test results are included, without differentiation between symptomatic and asymptomatic infection. 
 * COVID-19 A&E attendances were identified using HES emergency care records with U07.1 ("COVID-19, virus identified") or U07.2 ("COVID-19, virus not identified") ICD-10 diagnosis codes @emergenc.
 * COVID-19 hospital admission, identified using HES in-patient hospital records with U07.1 or U07.2 ICD-10 reason for admission codes. 
@@ -154,7 +155,7 @@ We estimated Kaplan-Meier cumulative incidence curves separately by vaccine bran
 
 ## Subgroup analyses
 
-We also estimated comparative effectiveness separately in the following subgroups: primary vaccine course; age (18-64 or $\ge$ 65 years); clinically extremely vulnerable or not; evidence of prior SARS-CoV-2 infection or not.
+We also estimated comparative effectiveness separately in the following subgroups: primary vaccine course; age (18-64 or $\ge$ 65 years); clinically extremely .vulnerable or not; evidence of prior SARS-CoV-2 infection or not; dominant SARS-CoV-2 variant era (Delta or Omicron).
 
 
 ## Software, code, and reproducibility
@@ -223,6 +224,8 @@ match_flowchart %>%
     #style=cell_text(style ="italic"),
     locations = cells_body(columns = "criteria")
   )
+
+cat("  \n\n")
 ```
 
 
@@ -293,6 +296,7 @@ plot_coverage_cumuln <-
   NULL
 
 plot_coverage_cumuln
+
 cat("  \n\n")
 ```
 
@@ -345,6 +349,8 @@ table1 %>%
      label=md("Characteristic")
   ) %>%
   cols_hide(c("variable", "var_label", "order"))
+
+cat("  \n\n")
 ```
 
 
@@ -369,7 +375,8 @@ contrasts_overall %>%
     riskCI_0 = paste0(label_number(0.01)(risk_0), " (", label_number(0.01)(risk.ll_0), "-", label_number(0.01)(risk.ul_0), ")"),
     riskCI_1 = paste0(label_number(0.01)(risk_1), " (", label_number(0.01)(risk.ll_1), "-", label_number(0.01)(risk.ul_1), ")"),
     kmrdCI = paste0(label_number(0.01)(kmrd), " (", label_number(0.01)(kmrd.ll), "-", label_number(0.01)(kmrd.ul), ")"),
-    kmrr = paste0(label_number(0.01)(kmrr)),
+    irrCI =  paste0(label_number(0.01)(irr), " (", label_number(0.01)(irr.ll), "-", label_number(0.01)(irr.ul), ")"),
+    coxhrCI =  paste0(label_number(0.01)(kmrr), " (", label_number(0.01)(coxhr.ll), "-", label_number(0.01)(coxhr.ul), ")"),
   ) %>%
   gt(groupname_col="outcome_descr") %>%
   cols_label(
@@ -389,8 +396,9 @@ contrasts_overall %>%
     riskCI_0 = "KM risk (95% CI)",
     riskCI_1 = "KM risk (95% CI)",
     
-    kmrdCI = "Risk-difference (95% CI)",
-    kmrr = "Relative-risk"
+    kmrdCI = "Risk difference (95% CI)",
+    irrCI = "Incidence rate ratio (95% CI)",
+    coxhrCI = "Hazard ratio (95% CI)"
   ) %>%
   tab_spanner(
     label = "BNT162b2",
@@ -405,6 +413,7 @@ contrasts_overall %>%
     columns = starts_with("km")
   ) 
   
+cat("  \n\n")
 ```
 
 #### Figure 3: Kaplan-Meier cumulative incidence estimates
@@ -507,12 +516,12 @@ plot_kmrr <- contrasts_daily %>%
   ggplot(aes(group=subgroup_level_descr, colour=subgroup_level_descr, fill=subgroup_level_descr)) +
   geom_step(aes(x=period_start, y=kmrr))+
   #geom_rect(aes(xmin=period_start, xmax=period_end, ymin=kmrr.ll, ymax=kmrr.ul), alpha=0.1, colour="transparent")+
-  geom_hline(aes(yintercept=0), colour="black")+
+  geom_hline(aes(yintercept=1), colour="black")+
   facet_grid(rows=vars(outcome_descr), scales="free_y")+
   scale_color_brewer(type="qual", palette="Set1", na.value="grey") +
   scale_fill_brewer(type="qual", palette="Set1", guide="none", na.value="grey") +
   scale_x_continuous(breaks = seq(0,600,14))+
-  scale_y_continuous(expand = expansion(mult=c(0,0.01)))+
+  scale_y_log10(expand = expansion(mult=c(0,0.01)))+
   coord_cartesian(xlim=c(0, NA))+
   labs(
     x="Days",
@@ -550,6 +559,7 @@ plot_kmrr <- contrasts_daily %>%
   )
   
 plot_combined
+cat("  \n\n")
 
 ```
 
@@ -582,7 +592,7 @@ mutate(Description = str_replace_all(Description, "\n", "<br>")) %>%
 gt() %>% 
 fmt_markdown(columns = TRUE)
 
-
+cat("  \n\n")
 ```
 
 See original priority groups here: https://assets.publishing.service.gov.uk/government/uploads/system/uploads/attachment_data/file/1007737/Greenbook_chapter_14a_30July2021.pdf#page=15
