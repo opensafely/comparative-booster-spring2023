@@ -210,7 +210,15 @@ data_surv_rounded <-
   mutate(
     # Use ceiling not round. This is slightly biased upwards,
     # but means there's no disclosure risk at the boundaries (0 and 1) where masking would otherwise be threshold/2
-    # annotate?
+    #
+    # Explanation:
+    # ensure every "step" in the KM survival curve is based on no fewer than `threshold` outcome+censoring events
+    # max(n.risk, na.rm=TRUE) is the number at risk at time zero.
+    # max(n.risk, na.rm=TRUE)/threshold is the inverse of the minimum `step` size on the survival scale (0-1)
+    # floor(max(n.risk, na.rm=TRUE)/threshold) rounds down to nearest integer.
+    # 1/floor(max(n.risk, na.rm=TRUE)) is the minimum step size on the survival scale (0-1), ensuring increments no fewer than `threshold` on the events scale
+    # ceiling_any(x, min_increment) rounds up values of x on the survival scale, so that they lie on the grid of width `min_increment`.
+
     lagtime = lag(time,1L,0),
     surv = ceiling_any(surv, 1/floor(max(n.risk, na.rm=TRUE)/(threshold))),
     surv.ll = ceiling_any(surv.ll, 1/floor(max(n.risk, na.rm=TRUE)/(threshold))),

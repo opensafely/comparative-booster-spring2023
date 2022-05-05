@@ -40,8 +40,6 @@ if(Sys.getenv("OPENSAFELY_BACKEND") %in% c("", "expectations")){
   data_studydef_dummy <- read_feather(here("output", "input.feather")) %>%
     # because date types are not returned consistently by cohort extractor
     mutate(across(ends_with("_date"), ~ as.Date(.))) %>%
-    # because of a bug in cohort extractor -- remove once pulled new version
-    # remove line above?
     mutate(patient_id = as.integer(patient_id))
 
   data_custom_dummy <- read_feather(here("lib", "dummydata", "dummyinput.feather")) %>%
