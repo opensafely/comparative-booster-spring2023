@@ -55,26 +55,29 @@ tidy_surv <-
         broom::tidy() %>%
         transmute(
           time,
+          lagtime = lag(time, 1L, default=timezero),
           leadtime = lead(time),
-          interval = leadtime - time,
+          interval = time - lagtime,
 
           n.risk,
           n.event,
           n.censor,
 
-          sumerand = n.event / ((n.risk - n.event) * n.risk),
+          summand = n.event / ((n.risk - n.event) * n.risk),
 
           surv=cumprod(1 - n.event / n.risk),
           surv.ll = conf.low,
           surv.ul = conf.high,
-          surv.se = surv * sqrt(cumsum(sumerand)), #greenwood's formula
-          cmlhaz.se = std.error, # = surv.se/surv,
+          surv.se = surv * sqrt(cumsum(summand)), #greenwood's formula
+
           lsurv = log(surv),
-          lsurv.se = sqrt(cumsum(sumerand)),
+          lsurv.se = sqrt(cumsum(summand)),
 
           # kaplan meier hazard estimates
-          haz_km = n.event / (n.risk * interval), # =-(surv-lag(surv))/lag(surv)
-          haz_km.se = haz_km * sqrt((n.risk - n.event) / (n.risk * n.event)),
+          haz = n.event / (n.risk * interval), # =-(surv-lag(surv))/lag(surv)
+          cml.haz = cumsum(haz),
+          cml.haz.se = std.error, # = surv.se/surv,
+          haz.se = haz * sqrt((n.risk - n.event) / (n.risk * n.event)),
 
 
           # actuarial hazard estimates
@@ -85,7 +88,7 @@ tidy_surv <-
           # log(-log()) scale
 
           llsurv = log(-log(surv)),
-          llsurv.se = sqrt((1 / log(surv)^2) * cumsum(sumerand)),
+          llsurv.se = sqrt((1 / log(surv)^2) * cumsum(summand)),
 
       )
     }
@@ -102,28 +105,30 @@ tidy_surv <-
         fill(n.risk, .direction = c("up")) %>%
         transmute(
           time,
+          lagtime = lag(time, 1L, default = timezero),
           leadtime = lead(time),
-          interval = leadtime - time,
+          interval = time - lagtime,
 
           n.risk,
           n.event,
           n.censor,
 
-          sumerand = n.event / ((n.risk - n.event) * n.risk),
+          summand = n.event / ((n.risk - n.event) * n.risk),
 
           surv=cumprod(1 - n.event / n.risk),
 
           surv.ll = conf.low,
           surv.ul = conf.high,
-          surv.se = surv * sqrt(cumsum(sumerand)), #greenwood's formula
-          cmlhaz.se = std.error, #  = surv.se/surv
+          surv.se = surv * sqrt(cumsum(summand)), #greenwood's formula
+
           lsurv = log(surv),
-          lsurv.se = sqrt(cumsum(sumerand)),
+          lsurv.se = sqrt(cumsum(summand)),
 
           # kaplan meier hazard estimates
-          haz_km = n.event / (n.risk * interval), # =-(surv-lag(surv))/lag(surv)
-          cml.haz_km = cumsum(haz_km), # =cumsum(haz_km)
-          haz_km.se = haz_km * sqrt((n.risk - n.event) / (n.risk * n.event)),
+          haz = n.event / (n.risk * interval), # =-(surv-lag(surv))/lag(surv)
+          cml.haz.se = std.error, #  = surv.se/surv
+          cml.haz = cumsum(haz), # =cumsum(haz_km)
+          haz.se = haz * sqrt((n.risk - n.event) / (n.risk * n.event)),
 
           # actuarial hazard estimates
           haz_ac = n.event / ((n.risk - (n.censor / 2) - (n.event / 2)) * interval), # =(cml.haz-lag(cml.haz))/interval
@@ -133,7 +138,7 @@ tidy_surv <-
           # log(-log()) scale
 
           llsurv = log(-log(surv)),
-          llsurv.se = sqrt((1 / log(surv)^2) * cumsum(sumerand)),
+          llsurv.se = sqrt((1 / log(surv)^2) * cumsum(summand)),
         )
     }
 
@@ -141,9 +146,10 @@ tidy_surv <-
       output <- output %>%
         add_row(
           time = timezero,
+          lagtime = NA_real_,
           leadtime = mintime,
           interval = leadtime-time,
-          sumerand=0,
+          summand=0,
 
           #estimate=1, std.error=0, conf.high=1, conf.low=1,
 

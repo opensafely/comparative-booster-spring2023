@@ -196,11 +196,10 @@ data_surv <-
     surv_obj = map(data, ~{
       survfit(Surv(tte_outcome, ind_outcome) ~ 1, data = .x, conf.type="log-log")
     }),
-    surv_obj_tidy = map(surv_obj, ~tidy_surv(.x, times=seq_len(maxfup))),
+    surv_obj_tidy = map(surv_obj, ~tidy_surv(.x, times=seq_len(maxfup))), # return survival table for each day of follow up
   ) %>%
   select(!!subgroup_sym, treatment, n_events, surv_obj_tidy) %>%
   unnest(surv_obj_tidy) %>%
-  #ungroup() %>%
   mutate(
     treatment_descr = fct_recoderelevel(as.character(treatment), recoder$treatment)
   )
@@ -219,7 +218,6 @@ data_surv_rounded <-
     # 1/floor(max(n.risk, na.rm=TRUE)) is the minimum step size on the survival scale (0-1), ensuring increments no fewer than `threshold` on the events scale
     # ceiling_any(x, min_increment) rounds up values of x on the survival scale, so that they lie on the grid of width `min_increment`.
 
-    lagtime = lag(time,1L,0),
     surv = ceiling_any(surv, 1/floor(max(n.risk, na.rm=TRUE)/(threshold))),
     surv.ll = ceiling_any(surv.ll, 1/floor(max(n.risk, na.rm=TRUE)/(threshold))),
     surv.ul = ceiling_any(surv.ul, 1/floor(max(n.risk, na.rm=TRUE)/(threshold))),
@@ -228,11 +226,11 @@ data_surv_rounded <-
     n.event = diff(c(0,cml.event)),
     n.censor = diff(c(0,cml.censor)),
     n.risk = ceiling_any(max(n.risk, na.rm=TRUE), threshold) - lag(cml.event + cml.censor,1,0),
-    sumerand = n.event / ((n.risk - n.event) * n.risk),
-    surv.se = surv * sqrt(cumsum(replace_na(sumerand, 0))),
+    summand = n.event / ((n.risk - n.event) * n.risk),
+    surv.se = surv * sqrt(cumsum(replace_na(summand, 0))),
     cmlhaz.se = surv.se/surv,
   ) %>%
-  select(!!subgroup_sym, treatment, treatment_descr, time, lagtime, leadtime, interval, surv, surv.se, surv.ll, surv.ul, n.risk, n.event, n.censor, sumerand)
+  select(!!subgroup_sym, treatment, treatment_descr, time, lagtime, leadtime, interval, surv, surv.se, surv.ll, surv.ul, n.risk, n.event, n.censor, summand)
 
 
 write_csv(data_surv_rounded, fs::path(output_dir, "km_estimates.csv"))
@@ -266,34 +264,7 @@ plot_km
 ggsave(filename=fs::path(output_dir, "km_plot.png"), plot_km, width=20, height=15, units="cm")
 
 
-
-## incidence via km risk table ----
-
-km_incidence <-
-  data_surv %>%
-  mutate(
-    n.atrisk = n.risk,
-    cml.atrisk = cumsum(replace_na(n.atrisk, 0)),
-    cml.event = cumsum(replace_na(n.event, 0)),
-    cml.censor = cumsum(replace_na(n.censor, 0)),
-    cml.sumerand = cumsum(sumerand),
-    rate = n.event / n.atrisk,
-    cml.rate = cml.event / cml.atrisk,
-
-    risk = 1 - surv,
-    risk.ll = 1 - surv.ul,
-    risk.ul = 1 - surv.ll
-  ) %>%
-  select(
-    !!subgroup_sym,
-    treatment,
-    time, interval,
-    surv, surv.se, surv.ll, surv.ul,
-    risk, risk.ll, risk.ul,
-    haz=haz_km, haz.se=haz_km.se,
-    n.atrisk, n.event, n.censor, sumerand, rate,
-    cml.atrisk, cml.event, cml.censor, cml.sumerand, cml.haz = cml.haz_km, cml.rate
-  )
+## calculate quantities relating to kaplan-meier curve and their ratio / difference / etc
 
 # issue?
 kmcontrast <- function(data, cuts=NULL){
@@ -302,43 +273,119 @@ kmcontrast <- function(data, cuts=NULL){
 
   data %>%
     filter(time!=0) %>%
-    mutate(
+    transmute(
+      !!subgroup_sym,
+      treatment,
+
+      time, lagtime, interval,
       period_start = cut(time, cuts, right=TRUE, label=cuts[-length(cuts)]),
       period_end = cut(time, cuts, right=TRUE, label=cuts[-1]),
-      period = cut(time, cuts, right=TRUE, label=paste0(cuts[-length(cuts)]+1, " - ", cuts[-1]))
+      period = cut(time, cuts, right=TRUE, label=paste0(cuts[-length(cuts)]+1, " - ", cuts[-1])),
+
+      n.atrisk = n.risk,
+      n.event, n.censor, summand,
+
+      cml.persontime = cumsum(n.atrisk*interval),
+      cml.event = cumsum(replace_na(n.event, 0)),
+      cml.censor = cumsum(replace_na(n.censor, 0)),
+      cml.summand = cumsum(summand),
+
+      rate = n.event / n.atrisk,
+      cml.rate = cml.event / cml.persontime,
+
+      surv, surv.se, surv.ll, surv.ul,
+
+      risk = 1 - surv,
+      risk.se = surv.se,
+      risk.ll = 1 - surv.ul,
+      risk.ul = 1 - surv.ll,
+
+      haz, haz.se,
+      cml.haz, cml.haz.se
+
     ) %>%
     group_by(!!subgroup_sym, treatment, period_start, period_end, period) %>%
     summarise(
-      interval = last(time) - first(time) + 1,
-      cml.atrisk = last(cml.atrisk),
-      cml.event = last(cml.event),
-      cml.censor = last(cml.censor),
-      cml.rate = last(cml.rate),
-      cml.sumerand = last(cml.sumerand),
-      persontime = sum(n.atrisk),
-      n.atrisk = first(n.atrisk),
-      n.event = sum(n.event, na.rm=TRUE),
-      n.censor = sum(n.censor, na.rm=TRUE),
-      sumerand = sum(sumerand),
+
+      ## time-period-specific quantities
+
+      persontime = sum(n.atrisk*interval), # total person-time at risk within time period
+
+      n.atrisk = first(n.atrisk), # number at risk at start of time period
+      n.event = sum(n.event, na.rm=TRUE), # number of events within time period
+      n.censor = sum(n.censor, na.rm=TRUE), # number censored within time period
+
+      rate = n.event/persontime, # = weighted.mean(haz, n.atrisk*interval), incidence rate. this is equivalent to a weighted average of the hazard ratio, with time-exposed as the weights
+
+      interval = sum(interval), # width of time period
+
+      ## quantities calculated from time zero until end of time period
+      # these should be the same as the daily values as at the end of the time period
+
       surv = last(surv),
-      surv.se = surv * sqrt(cml.sumerand), #greenwood standard error
+      surv.se = last(surv.se),
       surv.ll = last(surv.ll),
       surv.ul = last(surv.ul),
+
       risk = last(risk),
+      risk.se = last(risk.se),
       risk.ll = last(risk.ul),
       risk.ul = last(risk.ll),
-      rate = n.event/persontime,
+
+      cml.haz = last(cml.haz),  # cumulative hazard from time zero to end of time period
+
+      cml.rate = last(cml.rate), # event rate from time zero to end of time period
+
+      # cml.persontime = last(cml.persontime), # total person-time at risk from time zero to end of time period
+       cml.event = last(cml.event), # number of events from time zero to end of time period
+      # cml.censor = last(cml.censor), # number censored from time zero to end of time period
+
+      # cml.summand = last(cml.summand), # summand used for estimation of SE of survival
+
       .groups="drop"
     ) %>%
+    ungroup() %>%
     pivot_wider(
       id_cols= c(subgroup, "period_start", "period_end", "period",  "interval"),
       names_from=treatment,
       names_glue="{.value}_{treatment}",
-      values_from=c(surv, surv.se, surv.ll, surv.ul, risk, risk.ll, risk.ul, n.atrisk, n.event, n.censor, rate, cml.atrisk, cml.event, cml.censor, cml.rate)
+      values_from=c(
+
+        persontime, n.atrisk, n.event, n.censor,
+        rate,
+
+        cml.haz,
+        surv, surv.se, surv.ll, surv.ul,
+        risk, risk.se, risk.ll, risk.ul,
+
+        cml.event, cml.rate
+        )
     ) %>%
     mutate(
       n.nonevent_0 = n.atrisk_0 - n.event_0,
       n.nonevent_1 = n.atrisk_1 - n.event_1,
+
+
+      ## time-period-specific quantities
+
+      # hazard ratio, standard error and confidence limits
+
+      #hr_cml = cml.haz_1 / cml.haz_0, # CHECK
+      #hr_cmlac = cml.haz_ac_1 / cml.haz_ac_0, # CHECK
+
+      # incidence rate ratio
+      irr = rate_1 / rate_0,
+      irr.ln.se = sqrt((1/n.event_0) + (1/n.event_1)),
+      irr.ll = exp(log(irr) + qnorm(0.025)*irr.ln.se),
+      irr.ul = exp(log(irr) + qnorm(0.975)*irr.ln.se),
+
+      # incidence rate difference
+      ird = rate_1 - rate_0,
+
+
+
+      ## quantities calculated from time zero until end of time period
+      # these should be the same as values calculated on each day of follow up
 
       # survival ratio, standard error, and confidence limits
       kmsr = surv_1 / surv_0,
@@ -350,7 +397,6 @@ kmcontrast <- function(data, cuts=NULL){
       # risk ratio, standard error, and confidence limits
       kmrr = risk_1 / risk_0,
 
-
       # risk difference, standard error and confidence limits
       kmrd = risk_1 - risk_0,
       #kmrd.se = sqrt( ((n.event_1*n.nonevent_1)/(n.atrisk_1^3)) + ((n.event_0*n.nonevent_0)/(n.atrisk_0^3)) ), # ignores censoring
@@ -358,30 +404,87 @@ kmcontrast <- function(data, cuts=NULL){
       kmrd.ll = kmrd + qnorm(0.025)*kmrd.se,
       kmrd.ul = kmrd + qnorm(0.975)*kmrd.se,
 
-      # hazard ratio, standard error and confidence limits
-      # kmhr = haz_1 / haz_0,
-      # kmhr.se = sqrt( (haz.se_0^2) + (haz.se_1^2) ),
-      # kmhr.ll = kmrd + qnorm(0.025)*kmhr.se,
-      # kmhr.ul = kmrd + qnorm(0.975)*kmhr.se,
-
-
-      # incidence rate ratio
-      irr = rate_1 / rate_0,
-
-      # incidence rate difference
-      ird = rate_1 - rate_0,
 
       # cumulative incidence rate ratio
       cmlirr = cml.rate_1 / cml.rate_0,
+      cmlirr.ln.se = sqrt((1/cml.event_0) + (1/cml.event_1)),
+      cmlirr.ll = exp(log(cmlirr) + qnorm(0.025)*cmlirr.ln.se),
+      cmlirr.ul = exp(log(cmlirr) + qnorm(0.975)*cmlirr.ln.se),
 
       # cumulative incidence rate difference
       cmlird = cml.rate_1 - cml.rate_0
     )
 }
 
-km_contrasts_daily <- kmcontrast(km_incidence)
-km_contrasts_cuts <- kmcontrast(km_incidence, postbaselinecuts)
-km_contrasts_overall <- kmcontrast(km_incidence, c(0,maxfup))
+km_contrasts_daily <- kmcontrast(data_surv)
+km_contrasts_cuts <- kmcontrast(data_surv, postbaselinecuts)
+km_contrasts_overall <- kmcontrast(data_surv, c(0,maxfup))
 
 write_csv(km_contrasts_daily, fs::path(output_dir, "km_contrasts_daily.csv"))
 write_csv(km_contrasts_overall, fs::path(output_dir, "km_contrasts_overall.csv"))
+
+
+## Cox models ----
+
+coxcontrast <- function(data, cuts=NULL){
+
+  if(is.null(cuts)){cuts <- unique(c(0,data$time))}
+
+  fup_split <-
+    data %>%
+    select(patient_id, treatment) %>%
+    uncount(weights = length(cuts)-1, .id="period_id") %>%
+    mutate(
+      fup_time = cuts[period_id],
+      fup_period = paste0(cuts[period_id], "-", cuts[period_id+1]-1)
+    ) %>%
+    droplevels() %>%
+    select(
+      patient_id, period_id, fup_time, fup_period
+    )
+
+  data_split <-
+    tmerge(
+      data1 = data,
+      data2 = data,
+      id = patient_id,
+      tstart = 0,
+      tstop = tte_outcome,
+      ind_outcome = event(if_else(ind_outcome, tte_outcome, NA_real_))
+    ) %>%
+    # add post-treatment periods
+    tmerge(
+      data1 = .,
+      data2 = fup_split,
+      id = patient_id,
+      period_id = tdc(fup_time, period_id)
+    ) %>%
+    mutate(
+      period_start = postbaselinecuts[period_id],
+      period_end = postbaselinecuts[period_id+1],
+    )
+
+  data_cox <-
+    data_split %>%
+    group_by(!!subgroup_sym, period_start, period_end) %>%
+    nest() %>%
+    mutate(
+      cox_obj = map(data, ~{
+        coxph(Surv(tstart, tstop, ind_outcome) ~ treatment, data = .x, y=FALSE, robust=TRUE, id=patient_id, na.action="na.fail")
+      }),
+      cox_obj_tidy = map(cox_obj, ~broom::tidy(.x)),
+    ) %>%
+    select(!!subgroup_sym, period_start, period_end, cox_obj_tidy) %>%
+    unnest(cox_obj_tidy) %>%
+    mutate(
+      coxhaz = exp(estimate),
+      coxhaz.ll = exp(estimate + qnorm(0.025)*robust.se),
+      coxhaz.ul = exp(estimate + qnorm(0.975)*robust.se),
+    )
+  data_cox
+
+}
+
+cox_contrasts_cuts <- coxcontrast(data_matched, postbaselinecuts)
+cox_contrasts_overall <- coxcontrast(data_matched, c(0,maxfup))
+

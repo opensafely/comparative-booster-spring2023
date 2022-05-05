@@ -63,6 +63,15 @@ actions:
       moderately_sensitive:
         cohort: output/data_properties/data_cohort*.txt
 
+  geography:
+    run: r:latest analysis/geography.R
+    needs:
+    - data_process
+    outputs:
+      moderately_sensitive:
+        png: output/geography/*.png
+        csv: output/geography/*.csv
+
   ## # # # # # # # # # # # # # # # # # # # 
   ## Matching 
   ## # # # # # # # # # # # # # # # # # # # 
