@@ -109,6 +109,10 @@ recoder <-
     prior_covid_infection = c(
       `No prior SARS-CoV-2 infection` = "FALSE",
       `Prior SARS-CoV-2 infection` = "TRUE"
+    ),
+    variantera = c(
+      `Delta (29 Nov - 31 Dec)` = "Delta (29 Nov - 31 Dec)",
+      `Omicron (1 Jan onwards)` = "Omicron (1 Jan onwards)"
     )
   )
 

@@ -384,11 +384,23 @@ actions_list <- splice(
   action_km("A", "age65plus", "coviddeath"),
   action_km("A", "age65plus", "noncoviddeath"),
 
+  comment("### Models by variant era ('variantera')"),
+
+  action_km("A", "variantera", "postest"),
+  action_km("A", "variantera", "covidemergency"),
+  action_km("A", "variantera", "covidadmittedproxy1"),
+  action_km("A", "variantera", "covidadmitted"),
+  #action_km("A", "variantera", "noncovidadmitted"),
+  #action_km("A", "variantera", "covidcc"),
+  action_km("A", "variantera", "coviddeath"),
+  action_km("A", "variantera", "noncoviddeath"),
+
+
   comment("# # # # # # # # # # # # # # # # # # #", "Combine KM estimates across outcomes and subgroups", "# # # # # # # # # # # # # # # # # # #"),
 
   action_km_combine(
     "A",
-    subgroups = c("all", "vax12_type", "prior_covid_infection", "age65plus", "cev_cv"),
+    subgroups = c("all", "vax12_type", "prior_covid_infection", "age65plus", "cev_cv", "variantera"),
     outcomes=c("postest", "covidemergency", "covidadmittedproxy1", "covidadmitted", "coviddeath", "noncoviddeath")
   ),
 

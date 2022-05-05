@@ -224,7 +224,12 @@ data_processed <- data_extract %>%
 
     # subgroups
     all=factor("all"),
-    age65plus=age>=65,
+    age65plus = age>=65,
+    variantera = fct_case_when(
+      covid_vax_disease_3_date <= as.Date("2021-12-31") ~ "Delta (29 Nov - 31 Dec)",
+      covid_vax_disease_3_date >= as.Date("2022-01-01") ~ "Omicron (1 Jan onwards)",
+      TRUE ~ NA_character_
+    ),
 
     prior_tests_cat = cut(prior_covid_test_frequency, breaks=c(0, 1, 2, 3, Inf), labels=c("0", "1", "2", "3+"), right=FALSE),
 
