@@ -130,6 +130,42 @@ data_flowchart <-
       crit == "c6" ~ "  and not in hospital at time of booster",
       TRUE ~ NA_character_
     )
-  )
-write_csv(data_flowchart, here("output", "data", "flowchart.csv"))
+  ) #
+#write_csv(data_flowchart, here("output", "data", "flowchart.csv"))
+
+
+
+## flowchart -- rounded -- disclosure-safe
+data_flowchart_rounded <-
+  data_inclusioncriteria %>%
+  select(-patient_id) %>%
+  group_by(vax3_type) %>%
+  summarise(
+    across(.fns=~ceiling_any(sum(.), 7))
+  ) %>%
+  pivot_longer(
+    cols=-vax3_type,
+    names_to="criteria",
+    values_to="n"
+  ) %>%
+  group_by(vax3_type) %>%
+  mutate(
+    n_exclude = lag(n) - n,
+    pct_exclude = n_exclude/lag(n),
+    pct_all = n / first(n),
+    pct_step = n / lag(n),
+    crit = str_extract(criteria, "^c\\d+"),
+    criteria = fct_case_when(
+      crit == "c0" ~ "Aged 18+ and recieved booster dose of BNT162b2 or Moderna between 29 October 2021 and 31 January 2022", # paste0("Aged 18+\n with 2 doses on or before ", format(study_dates$lastvax2_date, "%d %b %Y")),
+      crit == "c1" ~ "  with no missing demographic information",
+      crit == "c2" ~ "  with homologous primary vaccination course of pfizer or AZ",
+      crit == "c3" ~ "  and not a HSC worker",
+      crit == "c4" ~ "  and not a care/nursing home resident, end-of-life or housebound",
+      crit == "c5" ~ "  and no COVID-19-related events within 90 days",
+      crit == "c6" ~ "  and not in hospital at time of booster",
+      TRUE ~ NA_character_
+    )
+  ) #
+write_csv(data_flowchart_rounded, here("output", "data", "flowchart.csv"))
+
 

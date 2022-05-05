@@ -807,14 +807,14 @@ study = StudyDefinition(
     restrict_to_earliest_specimen_date=False,
   ),
   
-  # planned hospital admission at time of 3rd / booster dose
+  # unplanned hospital admission at time of 3rd / booster dose
   inhospital_unplanned = patients.satisfying(
   
     "discharged_unplanned_0_date >= covid_vax_disease_3_date",
     
     discharged_unplanned_0_date=patients.admitted_to_hospital(
       returning="date_discharged",
-      on_or_before="covid_vax_disease_3_date - 1 day", #FIXME -- need to decide whether to include admissions occurring on the same day as booster dose or not
+      on_or_before="covid_vax_disease_3_date - 1 day", #FIXME -- need to decide whether to include admissions discharged on the same day as booster dose or not
       # see https://github.com/opensafely-core/cohort-extractor/pull/497 for codes
       # see https://docs.opensafely.org/study-def-variables/#sus for more info
       with_admission_method=["21", "22", "23", "24", "25", "2A", "2B", "2C", "2D", "28"],
@@ -824,14 +824,14 @@ study = StudyDefinition(
     ), 
   ),
   
-  # unplanned hospital admission at time of 3rd / booster dose
+  # planned hospital admission at time of 3rd / booster dose
   inhospital_planned = patients.satisfying(
   
     "discharged_planned_0_date >= covid_vax_disease_3_date",
     
     discharged_planned_0_date=patients.admitted_to_hospital(
       returning="date_discharged",
-      on_or_before="covid_vax_disease_3_date - 1 day", #FIXME -- need to decide whether to include admissions occurring on the same day as booster dose or not
+      on_or_before="covid_vax_disease_3_date - 1 day", #FIXME -- need to decide whether to include admissions discharged on the same day as booster dose or not
       # see https://github.com/opensafely-core/cohort-extractor/pull/497 for codes
       # see https://docs.opensafely.org/study-def-variables/#sus for more info
       with_admission_method=["11", "12", "13", "81"],
@@ -848,7 +848,7 @@ study = StudyDefinition(
   ############################################################
 
 
-  # Positive case identification prior to study start date
+  # Positive case identification after study start date
   primary_care_covid_case_date=patients.with_these_clinical_events(
     combine_codelists(
       codelists.covid_primary_care_code,

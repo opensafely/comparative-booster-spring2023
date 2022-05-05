@@ -41,9 +41,9 @@ output_dir <- here("output", "match", matchset, "report")
 fs::dir_create(output_dir)
 
 ## create special log file ----
-cat(glue("## script info for natch report ##"), "  \n", file = fs::path(output_dir, glue("log.txt")), append = FALSE)
+cat(glue("## script info for match report ##"), "  \n", file = fs::path(output_dir, glue("log.txt")), append = FALSE)
 
-## functions to pass additional log info to seperate file
+## functions to pass additional log info to separate file
 logoutput <- function(...){
   cat(..., file = fs::path(output_dir, glue("log.txt")), sep = "\n  ", append = TRUE)
   cat("\n", file = fs::path(output_dir, glue("log.txt")), sep = "\n  ", append = TRUE)
@@ -415,7 +415,47 @@ data_flowchart_match <-
     )
   )
 
-write_csv(data_flowchart_match, fs::path(output_dir, "flowchart.csv"))
+
+data_flowchart_match_rounded <-
+  read_rds(here("output", "data", "data_inclusioncriteria.rds")) %>%
+  left_join(
+    data_matchstatus %>% select(patient_id, matched),
+    by="patient_id"
+  ) %>%
+  mutate(
+    c7 = c6 & matched,
+  ) %>%
+  select(-patient_id, -matched) %>%
+  group_by(vax3_type) %>%
+  summarise(
+    across(.fns=~ceiling_any(sum(.), 7))
+  ) %>%
+  pivot_longer(
+    cols=-vax3_type,
+    names_to="criteria",
+    values_to="n"
+  ) %>%
+  group_by(vax3_type) %>%
+  mutate(
+    n_exclude = lag(n) - n,
+    pct_exclude = n_exclude/lag(n),
+    pct_all = n / first(n),
+    pct_step = n / lag(n),
+    crit = str_extract(criteria, "^c\\d+"),
+    criteria = fct_case_when(
+      crit == "c0" ~ "Aged 18+ and recieved booster dose of BNT162b2 or Moderna between 29 October 2021 and 31 January 2022", # paste0("Aged 18+\n with 2 doses on or before ", format(study_dates$lastvax2_date, "%d %b %Y")),
+      crit == "c1" ~ "  with no missing demographic information",
+      crit == "c2" ~ "  with homologous primary vaccination course of pfizer or AZ",
+      crit == "c3" ~ "  and not a HSC worker",
+      crit == "c4" ~ "  and not a care/nursing home resident, end-of-life or housebound",
+      crit == "c5" ~ "  and no COVID-19-related events within 90 days",
+      crit == "c6" ~ "  and not in hospital at time of booster",
+      crit == "c7" ~ "  and successfully matched",
+      TRUE ~ NA_character_
+    )
+  ) #
+
+write_csv(data_flowchart_match_rounded, fs::path(output_dir, "flowchart.csv"))
 
 
 

@@ -18,11 +18,9 @@ args <- commandArgs(trailingOnly=TRUE)
 
 if(length(args)==0){
   # use for interactive testing
-  removeobjects <- FALSE
   matchset <- "A"
 
 } else {
-  removeobjects <- TRUE
   matchset <- args[[1]]
 
 }
