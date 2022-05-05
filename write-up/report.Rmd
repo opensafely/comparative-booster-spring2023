@@ -23,7 +23,7 @@ header-includes:
 - \captionsetup[table]{labelformat=empty}
 ---
 
-```{r setup, include=FALSE}
+```{r setup, include=FALSE, message=FALSE}
 
 library('tidyverse')
 library('here')
@@ -72,13 +72,13 @@ km_estimates <- read_csv(here("output", "release-objects", matchset, "km_estimat
     subgroup_descr = fct_recoderelevel(subgroup,  recoder$subgroup),
     subgroup_level_descr = replace_na(subgroup_level_descr, "")
   )
-km_contrasts_daily <- read_csv(here("output", "release-objects", matchset, "km_contrasts_daily.csv")) %>% 
+contrasts_daily <- read_csv(here("output", "release-objects", matchset, "contrasts_daily.csv")) %>% 
   mutate(
     outcome_descr = fct_recoderelevel(as.character(outcome),  recoder$outcome),
     subgroup_descr = fct_recoderelevel(subgroup,  recoder$subgroup),
     subgroup_level_descr = replace_na(subgroup_level_descr, "")
   )
-km_contrasts_overall <- read_csv(here("output", "release-objects", matchset, "km_contrasts_overall.csv")) %>% 
+contrasts_overall <- read_csv(here("output", "release-objects", matchset, "contrasts_overall.csv")) %>% 
   mutate(
     outcome_descr = fct_recoderelevel(as.character(outcome),  recoder$outcome),
     subgroup_descr = fct_recoderelevel(subgroup,  recoder$subgroup),
@@ -347,14 +347,14 @@ table1 %>%
 
 ```{r table-km, echo=FALSE, warning=FALSE, message=FALSE}
 
-km_contrasts_overall %>%
+contrasts_overall %>%
   transmute(
     outcome_descr,
     subgroup_descr,
     subgroup_level_descr,
     n.atrisk=n.atrisk_0,
-    cml.atrisk_0=label_number(1)(cml.atrisk_0/7), 
-    cml.atrisk_1=label_number(1)(cml.atrisk_1/7),
+    persontime_0=label_number(1)(persontime_0/7), 
+    persontime_1=label_number(1)(persontime_1/7),
     n.event_0, 
     n.event_1,
     riskCI_0 = paste0(label_number(0.01)(risk_0), " (", label_number(0.01)(risk.ll_0), "-", label_number(0.01)(risk.ul_0), ")"),
@@ -371,8 +371,8 @@ km_contrasts_overall %>%
     
     n.atrisk = "N per group",
     
-    cml.atrisk_0 = "Person-weeks", 
-    cml.atrisk_1 = "Person-weeks", 
+    persontime_0 = "Person-weeks", 
+    persontime_1 = "Person-weeks", 
     
     n.event_0 = "Events",
     n.event_1 = "Events",
@@ -407,8 +407,8 @@ plot_km <- km_estimates %>%
     outcome %in% outcomes
   ) %>%
   ggplot(aes(group=treatment_descr, colour=treatment_descr, fill=treatment_descr)) +
-  geom_step(aes(x=period_end, y=1-surv))+
-  geom_rect(aes(xmin=time, xmax=leadtime, ymin=1-surv.ll, ymax=1-surv.ul), alpha=0.1, colour="transparent")+
+  geom_step(aes(x=time, y=1-surv))+
+  geom_rect(aes(xmin=lagtime, xmax=time, ymin=1-surv.ll, ymax=1-surv.ul), alpha=0.1, colour="transparent")+
   facet_grid(rows=vars(outcome_descr), scales="free_y")+
   scale_color_brewer(type="qual", palette="Set1", na.value="grey") +
   scale_fill_brewer(type="qual", palette="Set1", guide="none", na.value="grey") +
@@ -417,9 +417,9 @@ plot_km <- km_estimates %>%
   coord_cartesian(xlim=c(0, NA))+
   labs(
     x="Days",
-    y="Cumulative incidence",
-    colour=NULL,
-    title=NULL
+    y=NULL,
+    title="Cumulative incidence",
+    colour=NULL
   )+
   theme_minimal(base_size = 9)+
     theme(
@@ -444,11 +444,11 @@ plot_km <- km_estimates %>%
 
 plot_km
 
-plot_kmrd <- km_contrasts_daily %>%
+plot_kmrd <- contrasts_daily %>%
   filter(
     subgroup=="all",
     outcome %in% outcomes
-  ) %>%
+  ) %>% 
   ggplot(aes(group=subgroup_level_descr, colour=subgroup_level_descr, fill=subgroup_level_descr)) +
   geom_step(aes(x=period_start, y=kmrd))+
   geom_rect(aes(xmin=period_start, xmax=period_end, ymin=kmrd.ll, ymax=kmrd.ul), alpha=0.1, colour="transparent")+
@@ -460,9 +460,9 @@ plot_kmrd <- km_contrasts_daily %>%
   coord_cartesian(xlim=c(0, NA))+
   labs(
     x="Days",
-    y="Cumulative risk difference",
-    colour=NULL,
-    title=NULL
+    y=NULL,
+    title="Cumulative risk difference",
+    colour=NULL
   )+
   theme_minimal(base_size = 9)+
     theme(
@@ -486,8 +486,50 @@ plot_kmrd <- km_contrasts_daily %>%
 
 plot_kmrd
 
+plot_kmrr <- contrasts_daily %>%
+  filter(
+    subgroup=="all",
+    outcome %in% outcomes
+  ) %>%
+  ggplot(aes(group=subgroup_level_descr, colour=subgroup_level_descr, fill=subgroup_level_descr)) +
+  geom_step(aes(x=period_start, y=kmrr))+
+  #geom_rect(aes(xmin=period_start, xmax=period_end, ymin=kmrr.ll, ymax=kmrr.ul), alpha=0.1, colour="transparent")+
+  facet_grid(rows=vars(outcome_descr), scales="free_y")+
+  scale_color_brewer(type="qual", palette="Set1", na.value="grey") +
+  scale_fill_brewer(type="qual", palette="Set1", guide="none", na.value="grey") +
+  scale_x_continuous(breaks = seq(0,600,14))+
+  scale_y_continuous(expand = expansion(mult=c(0,0.01)))+
+  coord_cartesian(xlim=c(0, NA))+
+  labs(
+    x="Days",
+    y=NULL,
+    title="Cumulative risk ratio",
+    colour=NULL
+  )+
+  theme_minimal(base_size = 9)+
+    theme(
+      legend.position="none",
+      legend.direction = "vertical",
+      axis.text.x.top=element_text(hjust=0),
 
-  plot_combined <- patchwork::wrap_plots(plot_km, plot_kmrd, plotkmrr, ncol=1)
+      panel.border = element_blank(),
+      axis.line.y = element_line(colour = "black"),
+      axis.line.x.top = element_line(colour = "black"),
+
+      panel.grid.minor.x = element_blank(),
+      panel.grid.minor.y = element_blank(),
+      strip.background = element_blank(),
+
+
+      panel.spacing = unit(0.8, "lines"),
+
+    )+
+    NULL
+
+plot_kmrr
+
+
+  plot_combined <- patchwork::wrap_plots(plot_km, plot_kmrd, plot_kmrr, ncol=3)
   ggsave(
     filename="km.png",
     path=output_dir_rmd,
