@@ -66,8 +66,8 @@ tidy_surv <-
           summand = n.event / ((n.risk - n.event) * n.risk),
 
           surv=cumprod(1 - n.event / n.risk),
-          surv.ll = conf.low,
-          surv.ul = conf.high,
+          #surv.ll = conf.low,
+          #surv.ul = conf.high,
           surv.se = surv * sqrt(cumsum(summand)), #greenwood's formula
 
           lsurv = log(surv),
@@ -89,6 +89,9 @@ tidy_surv <-
 
           llsurv = log(-log(surv)),
           llsurv.se = sqrt((1 / log(surv)^2) * cumsum(summand)),
+
+          surv.ll = exp(-exp(llsurv + qnorm(0.025)*llsurv.se)),
+          surv.ul = exp(-exp(llsurv + qnorm(0.975)*llsurv.se)),
 
       )
     }
@@ -117,8 +120,8 @@ tidy_surv <-
 
           surv=cumprod(1 - n.event / n.risk),
 
-          surv.ll = conf.low,
-          surv.ul = conf.high,
+          #surv.ll = conf.low,
+          #surv.ul = conf.high,
           surv.se = surv * sqrt(cumsum(summand)), #greenwood's formula
 
           lsurv = log(surv),
@@ -139,6 +142,10 @@ tidy_surv <-
 
           llsurv = log(-log(surv)),
           llsurv.se = sqrt((1 / log(surv)^2) * cumsum(summand)),
+
+
+          surv.ll = exp(-exp(llsurv + qnorm(0.025)*llsurv.se)),
+          surv.ul = exp(-exp(llsurv + qnorm(0.975)*llsurv.se)),
         )
     }
 
