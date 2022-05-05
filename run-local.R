@@ -95,6 +95,15 @@ action_km("A", "age65plus", "covidadmitted")
 action_km("A", "age65plus", "coviddeath")
 action_km("A", "age65plus", "noncoviddeath")
 
+action_km("A", "variantera", "postest")
+action_km("A", "variantera", "covidemergency")
+action_km("A", "variantera", "covidadmittedproxy1")
+action_km("A", "variantera", "covidadmitted")
+#action_km("A", "variantera", "noncovidadmitted")
+#action_km("A", "variantera", "covidcc")
+action_km("A", "variantera", "coviddeath")
+action_km("A", "variantera", "noncoviddeath")
+
 action_km_combine("A")
 
 action_ls(

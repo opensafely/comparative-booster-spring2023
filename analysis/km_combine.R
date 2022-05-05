@@ -57,7 +57,7 @@ metaparams <-
 km_estimates <- metaparams %>%
   mutate(
     data = pmap(list(matchset, subgroup, outcome), function(matchset, subgroup, outcome) {
-      dat <- read_csv(here("output", "match", matchset, "km", subgroup, outcome, glue("km_estimates.csv")), na="NA")
+      dat <- read_csv(here("output", "match", matchset, "km", subgroup, outcome, glue("km_estimates.csv")), na="NA", col_types = cols())
       dat %>%
       add_column(
         subgroup_level = as.character(.[[subgroup]]),
@@ -72,10 +72,10 @@ km_estimates <- metaparams %>%
 write_csv(km_estimates, fs::path(output_dir, "km_estimates.csv"))
 
 
-km_contrasts_daily <- metaparams %>%
+contrasts_daily <- metaparams %>%
   mutate(
     data = pmap(list(matchset, outcome, subgroup), function(matchset, outcome, subgroup){
-        dat <- read_csv(here("output", "match", matchset, "km", subgroup, outcome, glue("km_contrasts_daily.csv")), na="NA")
+        dat <- read_csv(here("output", "match", matchset, "km", subgroup, outcome, glue("contrasts_daily.csv")), na="NA", col_types = cols())
         dat %>%
           add_column(
             subgroup_level = as.character(.[[subgroup]]),
@@ -88,14 +88,14 @@ km_contrasts_daily <- metaparams %>%
   ) %>%
   unnest(data)
 
-write_csv(km_contrasts_daily, fs::path(output_dir, "km_contrasts_daily.csv"))
+write_csv(contrasts_daily, fs::path(output_dir, "contrasts_daily.csv"))
 
 
 
-km_contrasts_overall <- metaparams %>%
+contrasts_overall <- metaparams %>%
   mutate(
     data = pmap(list(matchset, outcome, subgroup), function(matchset, outcome, subgroup) {
-        dat <- read_csv(here("output", "match", matchset, "km", subgroup, outcome, glue("km_contrasts_overall.csv")), na="NA")
+        dat <- read_csv(here("output", "match", matchset, "km", subgroup, outcome, glue("contrasts_overall.csv")), na="NA", col_types = cols())
         dat %>%
           add_column(
             subgroup_level = as.character(.[[subgroup]]),
@@ -108,4 +108,4 @@ km_contrasts_overall <- metaparams %>%
   ) %>%
   unnest(data)
 
-write_csv(km_contrasts_overall, fs::path(output_dir, "km_contrasts_overall.csv"))
+write_csv(contrasts_overall, fs::path(output_dir, "contrasts_overall.csv"))

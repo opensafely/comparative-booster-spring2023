@@ -27,8 +27,8 @@ for(matchset in c("A")){
     ## KM ----
 
   fs::file_copy(here("output", "match", "A", "km", "combined", "km_estimates.csv"), here("output", "release-objects", matchset, "km_estimates.csv"), overwrite = TRUE)
-  fs::file_copy(here("output", "match", "A", "km", "combined", "km_contrasts_daily.csv"), here("output", "release-objects", matchset, "km_contrasts_daily.csv"), overwrite = TRUE)
-  fs::file_copy(here("output", "match", "A", "km", "combined", "km_contrasts_overall.csv"), here("output", "release-objects", matchset, "km_contrasts_overall.csv"), overwrite = TRUE)
+  fs::file_copy(here("output", "match", "A", "km", "combined", "contrasts_daily.csv"), here("output", "release-objects", matchset, "contrasts_daily.csv"), overwrite = TRUE)
+  fs::file_copy(here("output", "match", "A", "km", "combined", "contrasts_overall.csv"), here("output", "release-objects", matchset, "contrasts_overall.csv"), overwrite = TRUE)
 
 }
 

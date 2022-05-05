@@ -278,8 +278,8 @@ kmcontrast <- function(data, cuts=NULL){
       treatment,
 
       time, lagtime, interval,
-      period_start = cut(time, cuts, right=TRUE, label=cuts[-length(cuts)]),
-      period_end = cut(time, cuts, right=TRUE, label=cuts[-1]),
+      period_start = as.integer(as.character(cut(time, cuts, right=TRUE, label=cuts[-length(cuts)]))),
+      period_end = as.integer(as.character(cut(time, cuts, right=TRUE, label=cuts[-1]))),
       period = cut(time, cuts, right=TRUE, label=paste0(cuts[-length(cuts)]+1, " - ", cuts[-1])),
 
       n.atrisk = n.risk,
@@ -370,9 +370,6 @@ kmcontrast <- function(data, cuts=NULL){
 
       # hazard ratio, standard error and confidence limits
 
-      #hr_cml = cml.haz_1 / cml.haz_0, # CHECK
-      #hr_cmlac = cml.haz_ac_1 / cml.haz_ac_0, # CHECK
-
       # incidence rate ratio
       irr = rate_1 / rate_0,
       irr.ln.se = sqrt((1/n.event_0) + (1/n.event_1)),
@@ -420,8 +417,6 @@ km_contrasts_daily <- kmcontrast(data_surv)
 km_contrasts_cuts <- kmcontrast(data_surv, postbaselinecuts)
 km_contrasts_overall <- kmcontrast(data_surv, c(0,maxfup))
 
-write_csv(km_contrasts_daily, fs::path(output_dir, "km_contrasts_daily.csv"))
-write_csv(km_contrasts_overall, fs::path(output_dir, "km_contrasts_overall.csv"))
 
 
 ## Cox models ----
@@ -476,8 +471,12 @@ coxcontrast <- function(data, cuts=NULL){
     ) %>%
     select(!!subgroup_sym, period_start, period_end, cox_obj_tidy) %>%
     unnest(cox_obj_tidy) %>%
-    mutate(
+    transmute(
+      !!subgroup_sym,
+      period_start,
+      period_end,
       coxhaz = exp(estimate),
+      coxhaz.se = robust.se,
       coxhaz.ll = exp(estimate + qnorm(0.025)*robust.se),
       coxhaz.ul = exp(estimate + qnorm(0.975)*robust.se),
     )
@@ -488,3 +487,11 @@ coxcontrast <- function(data, cuts=NULL){
 cox_contrasts_cuts <- coxcontrast(data_matched, postbaselinecuts)
 cox_contrasts_overall <- coxcontrast(data_matched, c(0,maxfup))
 
+contrasts_daily <-  km_contrasts_daily # don't bother with cox as HR within daily intervals will be imprecisely estimated or zero.
+contrasts_cuts <-  left_join(km_contrasts_cuts, cox_contrasts_cuts, by=c(subgroup, "period_start", "period_end"))
+contrasts_overall <-  left_join(km_contrasts_overall, cox_contrasts_overall, by=c(subgroup, "period_start", "period_end"))
+
+
+write_csv(contrasts_daily, fs::path(output_dir, "contrasts_daily.csv"))
+write_csv(contrasts_cuts, fs::path(output_dir, "contrasts_cuts.csv"))
+write_csv(contrasts_overall, fs::path(output_dir, "contrasts_overall.csv"))
