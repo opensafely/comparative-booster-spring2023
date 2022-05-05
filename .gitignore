@@ -4,8 +4,9 @@ model.log
 __pycache__
 .python-version
 /output/*
-metadata/*
+/metadata/*
 venv/
 .DS_Store
 .Rhistory
 .Rproj.user/
+/write-up/figures/*
