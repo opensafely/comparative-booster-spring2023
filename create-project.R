@@ -97,18 +97,35 @@ action_km <- function(
   matchset, subgroup, outcome
 ){
 
-  action(
-    name = glue("km_{matchset}_{subgroup}_{outcome}"),
-    run = glue("r:latest analysis/km.R"),
-    arguments = c(matchset, subgroup, outcome),
-    needs = list(
-      glue("match_{matchset}"),
-      "data_selection"
-    ),
-    moderately_sensitive = lst(
-      txt = glue("output/match/{matchset}/km/{subgroup}/{outcome}/*.txt"),
-      csv = glue("output/match/{matchset}/km/{subgroup}/{outcome}/*.csv"),
-      png = glue("output/match/{matchset}/km/{subgroup}/{outcome}/*.png"),
+  splice(
+    # action(
+    #   name = glue("km_{matchset}_{subgroup}_{outcome}"),
+    #   run = glue("r:latest analysis/km.R"),
+    #   arguments = c(matchset, subgroup, outcome),
+    #   needs = list(
+    #     glue("match_{matchset}"),
+    #     "data_selection"
+    #   ),
+    #   moderately_sensitive = lst(
+    #     txt = glue("output/match/{matchset}/km/{subgroup}/{outcome}/*.txt"),
+    #     csv = glue("output/match/{matchset}/km/{subgroup}/{outcome}/*.csv"),
+    #     png = glue("output/match/{matchset}/km/{subgroup}/{outcome}/*.png"),
+    #   )
+    # ),
+
+    action(
+      name = glue("km_{matchset}_{subgroup}_{outcome}"),
+      run = glue("r:latest analysis/km_bootstrap.R"),
+      arguments = c(matchset, subgroup, outcome),
+      needs = list(
+        glue("match_{matchset}"),
+        "data_selection"
+      ),
+      moderately_sensitive = lst(
+        txt = glue("output/match/{matchset}/km/{subgroup}/{outcome}/*.txt"),
+        csv = glue("output/match/{matchset}/km/{subgroup}/{outcome}/*.csv"),
+        png = glue("output/match/{matchset}/km/{subgroup}/{outcome}/*.png"),
+      )
     )
   )
 }

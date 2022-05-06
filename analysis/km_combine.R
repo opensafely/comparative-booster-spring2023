@@ -49,14 +49,23 @@ metaparams <-
     subgroup = factor(recoder$subgroup),
   ) %>%
   mutate(
-    outcome_descr = fct_recoderelevel(as.character(outcome),  recoder$outcome),
+    outcome_descr = fct_recoderelevel(outcome,  recoder$outcome),
     subgroup_descr = fct_recoderelevel(subgroup,  recoder$subgroup),
+  )
+
+
+test <- read_csv(here("output", "match", "A", "km", "vax12_type", "postest", glue("km_estimates.csv")), na="NA", col_types = cols()) %>%
+  add_column(
+    subgroup_level = as.character(.[[factor("vax12_type")]]),
+    subgroup_level_descr = fct_recoderelevel((.[["vax12_type"]]), recoder[["vax12_type"]]),
+    .before=1
   )
 
 
 km_estimates <- metaparams %>%
   mutate(
     data = pmap(list(matchset, subgroup, outcome), function(matchset, subgroup, outcome) {
+      subgroup <- as.character(subgroup)
       dat <- read_csv(here("output", "match", matchset, "km", subgroup, outcome, glue("km_estimates.csv")), na="NA", col_types = cols())
       dat %>%
       add_column(
@@ -75,14 +84,15 @@ write_csv(km_estimates, fs::path(output_dir, "km_estimates.csv"))
 contrasts_daily <- metaparams %>%
   mutate(
     data = pmap(list(matchset, outcome, subgroup), function(matchset, outcome, subgroup){
-        dat <- read_csv(here("output", "match", matchset, "km", subgroup, outcome, glue("contrasts_daily.csv")), na="NA", col_types = cols())
-        dat %>%
-          add_column(
-            subgroup_level = as.character(.[[subgroup]]),
-            subgroup_level_descr = fct_recoderelevel(.[[subgroup]], recoder[[subgroup]]),
-            .before=1
-          ) %>%
-          select(-all_of(subgroup))
+      subgroup <- as.character(subgroup)
+      dat <- read_csv(here("output", "match", matchset, "km", subgroup, outcome, glue("contrasts_daily.csv")), na="NA", col_types = cols())
+      dat %>%
+        add_column(
+          subgroup_level = as.character(.[[subgroup]]),
+          subgroup_level_descr = fct_recoderelevel(.[[subgroup]], recoder[[subgroup]]),
+          .before=1
+        ) %>%
+        select(-all_of(subgroup))
       }
     )
   ) %>%
@@ -95,14 +105,15 @@ write_csv(contrasts_daily, fs::path(output_dir, "contrasts_daily.csv"))
 contrasts_overall <- metaparams %>%
   mutate(
     data = pmap(list(matchset, outcome, subgroup), function(matchset, outcome, subgroup) {
-        dat <- read_csv(here("output", "match", matchset, "km", subgroup, outcome, glue("contrasts_overall.csv")), na="NA", col_types = cols())
-        dat %>%
-          add_column(
-            subgroup_level = as.character(.[[subgroup]]),
-            subgroup_level_descr = fct_recoderelevel(.[[subgroup]], recoder[[subgroup]]),
-            .before=1
-          ) %>%
-          select(-all_of(subgroup))
+      subgroup <- as.character(subgroup)
+      dat <- read_csv(here("output", "match", matchset, "km", subgroup, outcome, glue("contrasts_overall.csv")), na="NA", col_types = cols())
+      dat %>%
+        add_column(
+          subgroup_level = as.character(.[[subgroup]]),
+          subgroup_level_descr = fct_recoderelevel(.[[subgroup]], recoder[[subgroup]]),
+          .before=1
+        ) %>%
+        select(-all_of(subgroup))
       }
     )
   ) %>%

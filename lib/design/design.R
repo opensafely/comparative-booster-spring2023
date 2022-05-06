@@ -98,8 +98,8 @@ recoder <-
       `ChAdOx1-S` = "az-az"
     ),
     age65plus = c(
-      `Aged 18-64` = "FALSE",
-      `Aged 65 and over` = "TRUE"
+      `18-64` = "FALSE",
+      `65 and over` = "TRUE"
     ),
     cev_cv = c(
       "Clinically extremely vulnerable" = "Clinically extremely vulnerable",

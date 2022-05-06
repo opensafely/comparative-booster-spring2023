@@ -31,11 +31,7 @@ library('MatchIt')
 
 ## Import custom user functions from lib
 source(here("lib", "functions", "utility.R"))
-source(here("lib", "functions", "survival.R"))
 source(here("lib", "functions", "redaction.R"))
-
-## Import custom user functions from lib
-source(here("lib", "functions", "utility.R"))
 
 ## Import design elements
 source(here("lib", "design", "design.R"))
@@ -90,8 +86,10 @@ data_matchingcandidates <-
   arrange(patient_id)
 
 
+# create function that catches errors in case no matches are found within a thread
+safely_matchit <- purrr::safely(matchit)
 
-## manage parallelisation
+## parallelisation preliminaries ----
 
 library("doParallel")
 
@@ -107,15 +105,12 @@ print(cluster)
 doParallel::registerDoParallel(cl = cluster)
 
 
-# create function that catches errors in case no matches are found within a thread
-safely_matchit <- purrr::safely(matchit)
-
-
-
 # create parallel matching streams
 matchthreads <- unique(as.character(data_matchingcandidates$thread_variable))
+
 table(data_matchingcandidates$thread_variable, useNA="ifany")
 
+## match in parallel ----
 data_matchstatus <-
   foreach(
     matchthread = matchthreads,
@@ -151,7 +146,7 @@ data_matchstatus <-
           patient_id = data_thread$patient_id,
           matched = FALSE,
           thread_id = data_thread$thread_id,
-          match_id = factor(NA),
+          threadmatch_id = NA_integer_,
           treatment = data_thread$treatment,
           weight = 0,
           vax3_date = data_thread$vax3_date
@@ -163,7 +158,7 @@ data_matchstatus <-
           patient_id = data_thread$patient_id,
           matched = !is.na(obj_matchit$subclass),
           thread_id = data_thread$thread_id,
-          match_id = obj_matchit$subclass,
+          threadmatch_id = as.integer(as.character(obj_matchit$subclass)),
           treatment = obj_matchit$treat,
           weight = obj_matchit$weights,
           .before = 1
@@ -175,6 +170,11 @@ data_matchstatus <-
 
 parallel::stopCluster(cl = cluster)
 
+data_matchstatus <- data_matchstatus %>%
+  arrange(threadmatch_id, thread_id) %>%
+  mutate(
+    match_id = dense_rank(threadmatch_id * max(thread_id) + thread_id) # create unique match id across all threads
+  )
 
 write_rds(data_matchstatus, fs::path(output_dir, "data_matchstatus.rds"), compress="gz")
 
@@ -183,4 +183,31 @@ data_matchstatus %>%
   summarise(
     n=n()
   ) %>% print(n=1000)
+
+
+
+## bootstrap sampling ----
+
+## bootstrap sample matched pairs and use this sampling throughout the analysis
+## doing it here avoids repeating the sampling process in each individual outcome script
+## and provides consistency across different analyses
+## but the leg work is still done by the analysis scripts
+
+boot_n <- 10000 # more than necessary, can select fewer in the analysis scripts
+
+boot_id <- seq_len(boot_n)
+
+match_ids <- unique(data_matchstatus$match_id[!is.na(data_matchstatus$match_id)])
+
+set.seed <- 20220506
+
+boot_samples <-
+  tibble(boot_id) %>%
+  mutate(
+    match_id = map(boot_id, ~sample(match_ids, size=length(match_ids), replace=TRUE))
+  ) %>%
+  unnest(match_id)
+
+write_rds(boot_samples, fs::path(output_dir, "boot_samples.rds"), compress="gz")
+
 
