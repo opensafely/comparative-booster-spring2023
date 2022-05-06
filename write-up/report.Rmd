@@ -223,13 +223,21 @@ match_flowchart %>%
     style=cell_text(whitespace ="pre-wrap"),
     #style=cell_text(style ="italic"),
     locations = cells_body(columns = "criteria")
+  ) %>%
+  tab_options(
+    table.font.size = 8
   )
 
 cat("  \n\n")
 ```
 
 
-\newpage 
+&nbsp; &nbsp; &nbsp;
+
+&nbsp; &nbsp; &nbsp;
+
+&nbsp; &nbsp; &nbsp;
+
 #### Figure 1: Cumulative matching success
 
 ```{r, figure-matchingsuccess, echo=FALSE, message=FALSE, warning=FALSE, out.width='90%', out.height='50%', results='asis', out.extra=''}
@@ -300,7 +308,12 @@ plot_coverage_cumuln
 cat("  \n\n")
 ```
 
-\newpage
+&nbsp; &nbsp; &nbsp;
+
+&nbsp; &nbsp; &nbsp;
+
+&nbsp; &nbsp; &nbsp;
+
 
 #### Table 2: baseline characteristics
 
@@ -348,17 +361,26 @@ table1 %>%
   cols_label(
      label=md("Characteristic")
   ) %>%
-  cols_hide(c("variable", "var_label", "order"))
+  cols_hide(c("variable", "var_label", "order")) %>%
+  tab_options(
+    table.font.size = 8
+  )
 
 cat("  \n\n")
 ```
+
+&nbsp; &nbsp; &nbsp;
+
+&nbsp; &nbsp; &nbsp;
+
+&nbsp; &nbsp; &nbsp;
 
 
 ## Estimated comparative effectiveness
 
 ### Main analysis
 
-#### Table 3: Kaplan-Meier cumulative incidence estimates
+#### Table 3: Kaplan-Meier 10-week risk estimates
 
 ```{r table-km, echo=FALSE, warning=FALSE, message=FALSE}
 
@@ -372,18 +394,27 @@ contrasts_overall %>%
     persontime_1=label_number(1)(persontime_1/7),
     n.event_0, 
     n.event_1,
-    riskCI_0 = paste0(label_number(0.01)(risk_0), " (", label_number(0.01)(risk.ll_0), "-", label_number(0.01)(risk.ul_0), ")"),
-    riskCI_1 = paste0(label_number(0.01)(risk_1), " (", label_number(0.01)(risk.ll_1), "-", label_number(0.01)(risk.ul_1), ")"),
+    riskCI_0 = paste0(label_number(0.01)(1-surv_0), " (", label_number(0.01)(1-surv.ul_0), "-", label_number(0.01)(1-surv.ll_0), ")"),
+    riskCI_1 = paste0(label_number(0.01)(1-surv_1), " (", label_number(0.01)(1-surv.ul_1), "-", label_number(0.01)(1-surv.ll_1), ")"),
     kmrdCI = paste0(label_number(0.01)(kmrd), " (", label_number(0.01)(kmrd.ll), "-", label_number(0.01)(kmrd.ul), ")"),
+    kmrrCI = paste0(label_number(0.01)(kmrr), " (", label_number(0.01)(kmrr.ll), "-", label_number(0.01)(kmrr.ul), ")"),
     irrCI =  paste0(label_number(0.01)(irr), " (", label_number(0.01)(irr.ll), "-", label_number(0.01)(irr.ul), ")"),
-    coxhrCI =  paste0(label_number(0.01)(kmrr), " (", label_number(0.01)(coxhr.ll), "-", label_number(0.01)(coxhr.ul), ")"),
+    #coxhrCI =  paste0(label_number(0.01)(kmrr), " (", label_number(0.01)(coxhr.ll), "-", label_number(0.01)(coxhr.ul), ")"),
   ) %>%
+  group_by(outcome_descr) %>%
+  mutate(
+    # add indicator for row shading
+    shade = cumsum((lag(subgroup_descr, 1, "")!=subgroup_descr)*1L),
+    # remove repeat values of subgroup_level
+    subgroup_descr = if_else(lag(subgroup_descr)==subgroup_descr & row_number()!=1, "", as.character(subgroup_descr)),
+  ) %>%
+  ungroup() %>%
   gt(groupname_col="outcome_descr") %>%
   cols_label(
     
     outcome_descr = "Outcome",
-    subgroup_descr = "Subgroup",
-    subgroup_level_descr = "Subgroup",
+    subgroup_descr = "Sub-group",
+    subgroup_level_descr = "",
     
     n.atrisk = "N per group",
     
@@ -393,12 +424,13 @@ contrasts_overall %>%
     n.event_0 = "Events",
     n.event_1 = "Events",
     
-    riskCI_0 = "KM risk (95% CI)",
-    riskCI_1 = "KM risk (95% CI)",
+    riskCI_0 = "Risk (95% CI)",
+    riskCI_1 = "Risk (95% CI)",
     
     kmrdCI = "Risk difference (95% CI)",
+    kmrrCI = "Risk ratio (95% CI)",
     irrCI = "Incidence rate ratio (95% CI)",
-    coxhrCI = "Hazard ratio (95% CI)"
+    #coxhrCI = "Hazard ratio (95% CI)"
   ) %>%
   tab_spanner(
     label = "BNT162b2",
@@ -410,11 +442,33 @@ contrasts_overall %>%
   )  %>%
    tab_spanner(
     label = "Comparison",
-    columns = starts_with("km")
-  ) 
+    columns = c("kmrrCI", "irrCI")
+  ) %>%
+  cols_align(
+    align = c("right"),
+    columns = ends_with(c("_1", "_0", "CI"))
+  ) %>%
+  tab_options(
+    table.font.size = 8
+  ) %>%
+  tab_style(
+    style = list(
+      cell_fill(color = "gray96")
+    ),
+    locations = cells_body(
+      rows = shade%%2 != 0
+    )
+  ) %>%
+  cols_hide(c("shade"))
   
 cat("  \n\n")
 ```
+
+&nbsp; &nbsp; &nbsp;
+
+&nbsp; &nbsp; &nbsp;
+
+&nbsp; &nbsp; &nbsp;
 
 #### Figure 3: Kaplan-Meier cumulative incidence estimates
 
@@ -427,11 +481,12 @@ plot_km <- km_estimates %>%
   ggplot(aes(group=treatment_descr, colour=treatment_descr, fill=treatment_descr)) +
   geom_step(aes(x=time, y=1-surv))+
   geom_rect(aes(xmin=lagtime, xmax=time, ymin=1-surv.ll, ymax=1-surv.ul), alpha=0.1, colour="transparent")+
+  geom_hline(aes(yintercept=0), colour="black")+
   facet_grid(rows=vars(outcome_descr), scales="free_y", switch="y")+
   scale_color_brewer(type="qual", palette="Set1", na.value="grey") +
   scale_fill_brewer(type="qual", palette="Set1", guide="none", na.value="grey") +
-  scale_x_continuous(breaks = seq(0,600,14))+
-  scale_y_continuous(expand = expansion(mult=c(0,0.01)))+
+  scale_x_continuous(breaks = seq(0,600,14), expand = expansion(mult=c(0,0.01)))+
+  scale_y_continuous(expand = expansion(mult=c(0,0.01)), )+
   coord_cartesian(xlim=c(0, NA))+
   labs(
     x="Days",
@@ -463,50 +518,50 @@ plot_km <- km_estimates %>%
     NULL
 
 
-
-plot_kmrd <- contrasts_daily %>%
-  filter(
-    subgroup=="all",
-    outcome %in% outcomes
-  ) %>% 
-  ggplot(aes(group=subgroup_level_descr, colour=subgroup_level_descr, fill=subgroup_level_descr)) +
-  geom_step(aes(x=period_start, y=kmrd))+
-  geom_rect(aes(xmin=period_start, xmax=period_end, ymin=kmrd.ll, ymax=kmrd.ul), alpha=0.1, colour="transparent")+
-  geom_hline(aes(yintercept=0), colour="black")+
-  facet_grid(rows=vars(outcome_descr), scales="free_y")+
-  scale_color_brewer(type="qual", palette="Set1", na.value="grey") +
-  scale_fill_brewer(type="qual", palette="Set1", guide="none", na.value="grey") +
-  scale_x_continuous(breaks = seq(0,600,14))+
-  scale_y_continuous(expand = expansion(mult=c(0,0.01)))+
-  coord_cartesian(xlim=c(0, NA))+
-  labs(
-    x="Days",
-    y=NULL,
-    title="Cumulative risk difference",
-    colour=NULL
-  )+
-  theme_minimal(base_size = 9)+
-    theme(
-      legend.position="none",
-      legend.direction = "vertical",
-      axis.text.x.top=element_text(hjust=0),
-
-      panel.border = element_blank(),
-      axis.line.y = element_line(colour = "black"),
-      axis.line.x.top = element_line(colour = "black"),
-
-      panel.grid.minor.x = element_blank(),
-      panel.grid.minor.y = element_blank(),
-      strip.background = element_blank(),
-      strip.text = element_blank(),
-
-
-      panel.spacing = unit(0.8, "lines"),
-
-    )+
-    NULL
-
-
+# 
+# plot_kmrd <- contrasts_daily %>%
+#   filter(
+#     subgroup=="all",
+#     outcome %in% outcomes
+#   ) %>% 
+#   ggplot(aes(group=subgroup_level_descr, colour=subgroup_level_descr, fill=subgroup_level_descr)) +
+#   geom_step(aes(x=period_start, y=kmrd))+
+#   geom_rect(aes(xmin=period_start, xmax=period_end, ymin=kmrd.ll, ymax=kmrd.ul), alpha=0.1, colour="transparent")+
+#   geom_hline(aes(yintercept=0), colour="black")+
+#   facet_grid(rows=vars(outcome_descr), scales="free_y")+
+#   scale_color_brewer(type="qual", palette="Set1", na.value="grey") +
+#   scale_fill_brewer(type="qual", palette="Set1", guide="none", na.value="grey") +
+#   scale_x_continuous(breaks = seq(0,600,14), expand = expansion(mult=c(0,0.01)))+
+#   scale_y_continuous(expand = expansion(mult=c(0,0.01)))+
+#   coord_cartesian(xlim=c(0, NA))+
+#   labs(
+#     x="Days",
+#     y=NULL,
+#     title="Cumulative risk difference",
+#     colour=NULL
+#   )+
+#   theme_minimal(base_size = 9)+
+#     theme(
+#       legend.position="none",
+#       legend.direction = "vertical",
+#       axis.text.x.top=element_text(hjust=0),
+# 
+#       panel.border = element_blank(),
+#       axis.line.y = element_line(colour = "black"),
+#       axis.line.x.top = element_line(colour = "black"),
+# 
+#       panel.grid.minor.x = element_blank(),
+#       panel.grid.minor.y = element_blank(),
+#       strip.background = element_blank(),
+#       strip.text = element_blank(),
+# 
+# 
+#       panel.spacing = unit(0.8, "lines"),
+# 
+#     )+
+#     NULL
+# 
+# 
 
 plot_kmrr <- contrasts_daily %>%
   filter(
@@ -515,12 +570,12 @@ plot_kmrr <- contrasts_daily %>%
   ) %>%
   ggplot(aes(group=subgroup_level_descr, colour=subgroup_level_descr, fill=subgroup_level_descr)) +
   geom_step(aes(x=period_start, y=kmrr))+
-  #geom_rect(aes(xmin=period_start, xmax=period_end, ymin=kmrr.ll, ymax=kmrr.ul), alpha=0.1, colour="transparent")+
+  geom_rect(aes(xmin=period_start, xmax=period_end, ymin=kmrr.ll, ymax=kmrr.ul), alpha=0.1, colour="transparent")+
   geom_hline(aes(yintercept=1), colour="black")+
   facet_grid(rows=vars(outcome_descr), scales="free_y")+
   scale_color_brewer(type="qual", palette="Set1", na.value="grey") +
   scale_fill_brewer(type="qual", palette="Set1", guide="none", na.value="grey") +
-  scale_x_continuous(breaks = seq(0,600,14))+
+  scale_x_continuous(breaks = seq(0,600,14), expand = expansion(mult=c(0,0.01)))+
   scale_y_log10(expand = expansion(mult=c(0,0.01)))+
   coord_cartesian(xlim=c(0, NA))+
   labs(
@@ -551,7 +606,12 @@ plot_kmrr <- contrasts_daily %>%
     NULL
 
 
-  plot_combined <- patchwork::wrap_plots(plot_km, plot_kmrd, plot_kmrr, ncol=3)
+  plot_combined <- patchwork::wrap_plots(
+    plot_km, 
+    #plot_kmrd, 
+    plot_kmrr, 
+    ncol=3
+  )
   ggsave(
     filename="km.png",
     path=output_dir_rmd,
@@ -563,7 +623,16 @@ cat("  \n\n")
 
 ```
 
+&nbsp; &nbsp; &nbsp;
+
+&nbsp; &nbsp; &nbsp;
+
+&nbsp; &nbsp; &nbsp;
+
+
+\newpage 
 # Supplement
+
 
 ## JCVI vaccine priority groups
 
