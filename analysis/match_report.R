@@ -462,12 +462,6 @@ write_csv(data_flowchart_match_rounded, fs::path(output_dir, "flowchart.csv"))
 
 
 
-
-
-
-
-
-
 ## matching summary ----
 # FIXME -- need to import baseline variabels here
 
