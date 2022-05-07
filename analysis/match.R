@@ -194,7 +194,7 @@ data_matchstatus %>%
 ## and provides consistency across different analyses
 ## but the leg work is still done by the analysis scripts
 
-boot_n <- 10000 # more than necessary, can select fewer in the analysis scripts
+boot_n <- 1000 # more than necessary, can select fewer in the analysis scripts
 
 boot_id <- seq_len(boot_n)
 
