@@ -149,7 +149,12 @@ threshold <- 7
 
 quantile_bs <- partial(quantile, na.rm = TRUE, names=FALSE)
 
-boot_n <- 100
+boot_n <-
+  if(Sys.getenv("OPENSAFELY_BACKEND") %in% c("", "expectations")){
+    100L
+  } else {
+    500L
+  }
 
 boot_samples <- read_rds(here("output", "match", matchset, "boot_samples.rds")) %>%
   filter(boot_id <= boot_n)
