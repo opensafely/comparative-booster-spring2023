@@ -182,7 +182,8 @@ data_matchstatus %>%
   group_by(vax3_date, treatment, matched) %>%
   summarise(
     n=n()
-  ) %>% print(n=1000)
+  ) %>%
+  print(n=1000)
 
 
 
@@ -199,7 +200,7 @@ boot_id <- seq_len(boot_n)
 
 match_ids <- unique(data_matchstatus$match_id[!is.na(data_matchstatus$match_id)])
 
-set.seed <- 20220506
+set.seed(20220506)
 
 boot_samples <-
   tibble(boot_id) %>%
