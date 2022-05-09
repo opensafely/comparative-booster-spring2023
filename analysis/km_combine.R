@@ -33,8 +33,6 @@ library('survival')
 
 ## Import custom user functions from lib
 source(here("lib", "functions", "utility.R"))
-source(here("lib", "functions", "survival.R"))
-source(here("lib", "functions", "redaction.R"))
 
 ## Import design elements
 source(here("lib", "design", "design.R"))
@@ -51,14 +49,6 @@ metaparams <-
   mutate(
     outcome_descr = fct_recoderelevel(outcome,  recoder$outcome),
     subgroup_descr = fct_recoderelevel(subgroup,  recoder$subgroup),
-  )
-
-
-test <- read_csv(here("output", "match", "A", "km", "vax12_type", "postest", glue("km_estimates.csv")), na="NA", col_types = cols()) %>%
-  add_column(
-    subgroup_level = as.character(.[[factor("vax12_type")]]),
-    subgroup_level_descr = fct_recoderelevel((.[["vax12_type"]]), recoder[["vax12_type"]]),
-    .before=1
   )
 
 
