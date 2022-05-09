@@ -1,6 +1,6 @@
 
 # # # # # # # # # # # # # # # # # # # # #
-# Purpose: Combine km estimates for different outcomes
+# Purpose: Combine km estimates from different outcomes
 #  - import matched data
 #  - adds outcome variable and restricts follow-up
 #  - gets KM estimates
