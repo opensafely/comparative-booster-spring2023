@@ -146,7 +146,6 @@ threshold <- 7
 
 ## get bootstrap samples ----
 
-
 quantile_bs <- partial(quantile, na.rm = TRUE, names=FALSE)
 
 boot_n <-
@@ -156,45 +155,37 @@ boot_n <-
     500L
   }
 
-boot_samples <- read_rds(here("output", "match", matchset, "boot_samples.rds")) %>%
-  filter(boot_id <= boot_n)
+# look-up for bootstrap samples ----
+# boot_id = 0 is the unsampled (ie, sample everyone once) id list
 
-## kaplan meier cumulative risk differences ----
-data_surv0 <-
-  data_matched %>%
-  group_by(!!subgroup_sym, treatment) %>%
-  nest() %>%
-  mutate(
-    n_events = map_int(data, ~sum(.x$ind_outcome, na.rm=TRUE)),
-    surv_obj = map(data, ~{
-      survfit(Surv(tte_outcome, ind_outcome) ~ 1, data = .x, conf.type="log-log")
-    }),
-    surv_obj_tidy = map(surv_obj, ~tidy_surv(.x, times=seq_len(maxfup))), # return survival table for each day of follow up
-  ) %>%
-  select(!!subgroup_sym, treatment, n_events, surv_obj_tidy) %>%
-  unnest(surv_obj_tidy) %>%
-  mutate(
-    treatment_descr = fct_recoderelevel(as.character(treatment), recoder$treatment)
+boot_samples <- read_rds(here("output", "match", matchset, "boot_samples.rds")) %>%
+  filter(boot_id <= boot_n) %>%
+  bind_rows(
+    data_matched %>% transmute(boot_id=0L, match_id),
+    .
   )
 
+boot_ids <- unique(boot_samples$boot_id)
 
-## parallelisation preliminaries ----
+## calculate confidence limits with boot strapping ----
+
+### parallelisation preliminaries ----
 
 library("doParallel")
 
-parallel::detectCores() # how many cores available?
+# how many cores available?
+#parallel::detectCores()
+
 n_threads <- 8
 
 cluster <- parallel::makeCluster(
   n_threads,
   type = "PSOCK" # this should work across multi-core windows or linux machines
 )
-print(cluster)
+#print(cluster)
+
 #register it to be used by %dopar%
 doParallel::registerDoParallel(cl = cluster)
-
-
-boot_ids <- unique(as.character(boot_samples$boot_id))
 
 #### survival table in parallel ----
 data_surv_boot <-
@@ -229,35 +220,42 @@ data_surv_boot <-
 
 parallel::stopCluster(cl = cluster)
 
-data_surv_boot_summary <- data_surv_boot %>%
+data_surv_boot_CL <-
+  data_surv_boot %>%
+  filter(boot_id != 0) %>%
   group_by(!!subgroup_sym, treatment, time) %>%
   summarise(
     surv.median = quantile_bs(surv, 0.5),
     surv.ll = quantile_bs(surv, 0.025),
     surv.ul = quantile_bs(surv, 0.975),
     surv.se = sd(surv),
-    cml.haz.median = quantile_bs(cml.haz, 0.5),
-    cml.haz.ll = quantile_bs(cml.haz, 0.025),
-    cml.haz.ul = quantile_bs(cml.haz, 0.975),
-    cml.haz.se = sd(cml.haz, 0.975),
     haz.median = quantile_bs(haz, 0.5),
     haz.ll = quantile_bs(haz, 0.025),
     haz.ul = quantile_bs(haz, 0.975),
     haz.se = sd(haz),
+    cml.haz.median = quantile_bs(cml.haz, 0.5),
+    cml.haz.ll = quantile_bs(cml.haz, 0.025),
+    cml.haz.ul = quantile_bs(cml.haz, 0.975),
+    cml.haz.se = sd(cml.haz, 0.975),
+    .groups= "drop"
   )
 
+## join complete survival estimates with bootstrap CIs ----
 
 data_surv <-
   left_join(
-    data_surv0 %>% select(
-      !!subgroup_sym, treatment,
-      treatment_descr,
+    # point estimates
+    data_surv_boot %>%
+      ungroup() %>%
+    filter(boot_id==0L) %>%
+    select(
+      !!subgroup_sym, treatment, treatment_descr,
       time, lagtime, interval,
       n.risk, n.event, n.censor, surv, haz, cml.haz
     ),
-    data_surv_boot_summary %>% select(
-      !!subgroup_sym, treatment,
-      time,
+    # booststrap CLs
+    data_surv_boot_CL %>% select(
+      !!subgroup_sym, treatment, time,
       surv.ll, surv.ul, surv.se,
       haz.ll, haz.ul, haz.se,
       cml.haz.ll, cml.haz.ul, cml.haz.se
@@ -265,6 +263,8 @@ data_surv <-
     by=c(subgroup, "treatment", "time")
   )
 
+
+## round estimates for disclosure control ----
 data_surv_rounded <-
   data_surv %>%
   group_by(!!subgroup_sym, treatment) %>%
@@ -288,8 +288,10 @@ data_surv_rounded <-
     n.event = diff(c(0,cml.event)),
     n.censor = diff(c(0,cml.censor)),
     n.risk = ceiling_any(max(n.risk, na.rm=TRUE), threshold) - lag(cml.event + cml.censor,1,0),
+    haz = n.event / (n.risk * interval),
+    cml.haz = cumsum(haz),
   ) %>%
-  select(!!subgroup_sym, treatment, treatment_descr, time, lagtime, interval, n.risk, n.event, n.censor, surv, surv.se, surv.ll, surv.ul)
+  select(!!subgroup_sym, treatment, treatment_descr, time, lagtime, interval, n.risk, n.event, n.censor, surv, surv.se, surv.ll, surv.ul, haz, cml.haz)
 
 
 write_csv(data_surv_rounded, fs::path(output_dir, "km_estimates.csv"))
@@ -325,15 +327,25 @@ ggsave(filename=fs::path(output_dir, "km_plot.png"), plot_km, width=20, height=1
 
 ## calculate quantities relating to kaplan-meier curve and their ratio / difference / etc
 
-kmcontrast <- function(data_surv, data_surv_boot, cuts=NULL){
+kmcontrast <- function(data_surv_boot, cuts=NULL, round_values=FALSE){
 
-  if(is.null(cuts)){cuts <- unique(c(0,data_surv$time))}
+  if(is.null(cuts)){cuts <- unique(c(0,data_surv_boot$time))}
 
-  data_boot <-
-    bind_rows(
-      data_surv %>% mutate(boot_id=0),
-      data_surv_boot
-    ) %>%
+  data_contrast_boot <-
+    data_surv_boot %>%
+    group_by(boot_id, !!subgroup_sym, treatment) %>%
+    {if(round_values==FALSE) . else {
+        mutate(
+          # round KM survival estimates (as described above) and base all contrasts on these values
+          .,
+          cml.event = ceiling_any(cumsum(replace_na(n.event, 0)), round_values),
+          cml.censor = ceiling_any(cumsum(replace_na(n.censor, 0)), round_values),
+          n.event = diff(c(0,cml.event)),
+          n.censor = diff(c(0,cml.censor)),
+          n.risk = ceiling_any(max(n.risk, na.rm=TRUE), round_values) - lag(cml.event + cml.censor,1,0),
+        )
+    }
+    } %>%
     transmute(
       boot_id,
       !!subgroup_sym,
@@ -352,21 +364,22 @@ kmcontrast <- function(data_surv, data_surv_boot, cuts=NULL){
       cml.event = cumsum(replace_na(n.event, 0)),
       cml.censor = cumsum(replace_na(n.censor, 0)),
 
+      surv = cumprod(1 - n.event / n.atrisk),
+      risk = 1-surv,
+
+      haz = n.event / (n.atrisk * interval),
+      cml.haz = cumsum(haz),
+
+      cml.persontime = cumsum(n.atrisk*interval),
       rate = n.event / (n.atrisk*interval),
       cml.rate = cml.event / cml.persontime,
-
-      surv,
-
-      risk = 1 - surv,
-
-      haz,
-      cml.haz,
 
     ) %>%
     group_by(boot_id, !!subgroup_sym, treatment, period_start, period_end, period) %>%
     summarise(
 
       ## time-period-specific quantities
+      ## as defined by period_start and period_end
 
       persontime = sum(n.atrisk*interval), # total person-time at risk within time period
 
@@ -379,7 +392,7 @@ kmcontrast <- function(data_surv, data_surv_boot, cuts=NULL){
       interval = sum(interval), # width of time period
 
       ## quantities calculated from time zero until end of time period
-      # these should be the same as the daily values as at the end of the time period
+      ## these should be the same as the daily values as at the end of the time period
 
       surv = last(surv),
       risk = last(risk),
@@ -396,7 +409,6 @@ kmcontrast <- function(data_surv, data_surv_boot, cuts=NULL){
 
       .groups="drop"
     ) %>%
-    ungroup() %>%
     pivot_wider(
       id_cols= all_of(c("boot_id", subgroup, "period_start", "period_end", "period",  "interval")),
       names_from=treatment,
@@ -441,16 +453,11 @@ kmcontrast <- function(data_surv, data_surv_boot, cuts=NULL){
       cmlird = cml.rate_1 - cml.rate_0
     )
 
-  data_contrast <-
-    data_boot %>%
-    filter(boot_id==0)
-
-  data_contrast_boot <-
-    data_boot %>%
+  data_contrast_CL <-
+    data_contrast_boot %>%
     filter(boot_id!=0) %>%
-    group_by(!!subgroup_sym, period_start, period_end, period,  interval) %>%
+    group_by(!!subgroup_sym, period_start, period_end, period, interval) %>%
     summarise(
-
 
       surv.median_0 = quantile_bs(surv_0, 0.5),
       surv.ll_0 = quantile_bs(surv_0, 0.025),
@@ -501,26 +508,29 @@ kmcontrast <- function(data_surv, data_surv_boot, cuts=NULL){
     )
 
     left_join(
-      data_contrast,
-      data_contrast_boot,
+      data_contrast_boot %>% filter(boot_id==0),
+      data_contrast_CL,
       by=c(subgroup, "period_start", "period_end", "period", "interval")
     )
 
 }
 
-km_contrasts_daily <- kmcontrast(data_surv0, data_surv_boot)
-km_contrasts_cuts <- kmcontrast(data_surv0, data_surv_boot, postbaselinecuts)
-km_contrasts_overall <- kmcontrast(data_surv0, data_surv_boot, c(0,maxfup))
+km_contrasts_daily <- kmcontrast(data_surv_boot, cuts=NULL, round_values=FALSE)
+km_contrasts_cuts <- kmcontrast(data_surv_boot, cuts=postbaselinecuts, round_values=FALSE)
+km_contrasts_overall <- kmcontrast(data_surv_boot, cuts=c(0,maxfup), round_values=FALSE)
 
+km_contrasts_rounded_daily <- kmcontrast(data_surv_boot, cuts=NULL, round_values=threshold)
+km_contrasts_rounded_cuts <- kmcontrast(data_surv_boot, cuts=postbaselinecuts, round_values=threshold)
+km_contrasts_rounded_overall <- kmcontrast(data_surv_boot, cuts=c(0,maxfup), round_values=threshold)
 
-write_csv(km_contrasts_daily, fs::path(output_dir, "contrasts_daily.csv"))
-write_csv(km_contrasts_cuts, fs::path(output_dir, "contrasts_cuts.csv"))
-write_csv(km_contrasts_overall, fs::path(output_dir, "contrasts_overall.csv"))
+write_csv(km_contrasts_rounded_daily, fs::path(output_dir, "contrasts_daily.csv"))
+write_csv(km_contrasts_rounded_cuts, fs::path(output_dir, "contrasts_cuts.csv"))
+write_csv(km_contrasts_rounded_overall, fs::path(output_dir, "contrasts_overall.csv"))
 
 
 ## Cox models ----
 
 # Not done, because it will be slow
 # use incidence rate ratio (IRR) instead, which is similar
-# The Cox model assumes proportional hazards within each follow-up period, so the "shape" of the hazard across treatment groups is the same
-# The IRR makes so such assumption, instead it just calculates the person-time-weighted hazard within each follow up period and takes the ratio
+# The Cox model assumes proportional hazards within each follow-up period, so the "shape" (in some sense) of the hazard across treatment groups is the same
+# The IRR makes no such assumption, instead it just calculates the person-time-weighted hazard within each follow up period and takes the ratio
