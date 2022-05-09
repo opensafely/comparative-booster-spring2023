@@ -510,7 +510,8 @@ actions_list <- splice(
       "data_selection",
       "match_report_A",
       "match_report_B",
-      "km_combine_A"
+      "km_combine_A",
+      "km_combine_B"
     ),
     moderately_sensitive = lst(
       txt = "output/files-for-release.txt",
