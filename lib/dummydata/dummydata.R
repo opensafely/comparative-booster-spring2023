@@ -10,7 +10,7 @@ remotes::install_github("https://github.com/wjchulme/dd4d")
 library('dd4d')
 
 
-population_size <- 50000
+population_size <- 100000
 
 # get nth largest value from list
 nthmax <- function(x, n=1){
@@ -275,22 +275,22 @@ sim_list = lst(
 
   emergency_day = bn_node(
     ~as.integer(runif(n=..n, covid_vax_disease_3_day, covid_vax_disease_3_day+100)),
-    missing_rate = ~0.9
+    missing_rate = ~0.8
   ),
   emergencyhosp_day = bn_node(
     ~as.integer(runif(n=..n, covid_vax_disease_3_day, covid_vax_disease_3_day+100)),
-    missing_rate = ~0.95
+    missing_rate = ~0.85
   ),
 
 
   covidemergency_day = bn_node(
     ~as.integer(runif(n=..n, covid_vax_disease_3_day, covid_vax_disease_3_day+100)),
-    missing_rate = ~0.95
+    missing_rate = ~0.8
   ),
 
   covidemergencyhosp_day = bn_node(
     ~as.integer(runif(n=..n, covid_vax_disease_3_day, covid_vax_disease_3_day+100)),
-    missing_rate = ~0.975
+    missing_rate = ~0.85
   ),
 
   # respemergency_day = bn_node(
@@ -330,7 +330,7 @@ sim_list = lst(
 
   death_day = bn_node(
     ~as.integer(runif(n=..n, covid_vax_disease_3_day, covid_vax_disease_3_day+100)),
-    missing_rate = ~0.99
+    missing_rate = ~0.90
   ),
 
 
