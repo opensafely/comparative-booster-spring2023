@@ -102,8 +102,6 @@ data_coverage <-
   ) %>%
   arrange(treatment, status_descr, vax3_date)
 
-write_csv(data_coverage, fs::path(output_dir, "data_coverage.csv"))
-
 
 
 ## round to nearest 7 for disclosure control
