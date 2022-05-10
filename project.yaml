@@ -986,6 +986,7 @@ actions:
     outputs:
       moderately_sensitive:
         csv: output/match/A/km/combined/*.csv
+        png: output/match/A/km/combined/plots/*.png
 
   km_combine_B:
     run: r:latest analysis/km_combine.R B
@@ -1029,6 +1030,7 @@ actions:
     outputs:
       moderately_sensitive:
         csv: output/match/B/km/combined/*.csv
+        png: output/match/B/km/combined/plots/*.png
 
   ## # # # # # # # # # # # # # # # # # # # 
   ## Files for release 

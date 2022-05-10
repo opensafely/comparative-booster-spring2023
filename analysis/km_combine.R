@@ -44,11 +44,11 @@ fs::dir_create(output_dir)
 metaparams <-
   expand_grid(
     outcome = factor(c("postest", "covidemergency", "covidadmittedproxy1", "covidadmitted", "coviddeath", "noncoviddeath")),
-    subgroup = factor(recoder$subgroup),
+    subgroup = factor(recoder$subgroups),
   ) %>%
   mutate(
     outcome_descr = fct_recoderelevel(outcome,  recoder$outcome),
-    subgroup_descr = fct_recoderelevel(subgroup,  recoder$subgroup),
+    subgroup_descr = fct_recoderelevel(subgroup,  recoder$subgroups),
   )
 
 
@@ -110,3 +110,14 @@ contrasts_overall <- metaparams %>%
   unnest(data)
 
 write_csv(contrasts_overall, fs::path(output_dir, "contrasts_overall.csv"))
+
+
+## move KM plots to single folder ----
+fs::dir_create(here("output", "match", matchset, "km", "combined", "plots"))
+
+metaparams %>%
+  mutate(
+    kmplotdir = here("output", "match", matchset, "km", subgroup, outcome, "km_plot.png"),
+    kmplotnewdir = here("output", "match", matchset, "km", "combined", "plots", glue("km_plot_{subgroup}_{outcome}.png")),
+  ) %>%
+  {walk2(.$kmplotdir, .$kmplotnewdir, ~fs::file_copy(.x, .y, overwrite = TRUE))}

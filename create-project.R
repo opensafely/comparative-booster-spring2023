@@ -153,6 +153,7 @@ action_km_combine <- function(
     ),
     moderately_sensitive = lst(
       csv = glue("output/match/{matchset}/km/combined/*.csv"),
+      png = glue("output/match/{matchset}/km/combined/plots/*.png"),
     )
   )
 }
