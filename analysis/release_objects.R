@@ -18,17 +18,18 @@ for(matchset in c("A", "B")){
 
   ## matching ----
 
-  fs::file_copy(here("output", "match", matchset, "report", "table1.csv"), here("output", "release-objects", matchset, "match_table1.csv"), overwrite = TRUE)
-  fs::file_copy(here("output", "match", matchset, "report", "table1by.csv"), here("output", "release-objects", matchset, "match_table1by.csv"), overwrite = TRUE)
-  fs::file_copy(here("output", "match", matchset, "report", "data_coverage.csv"), here("output", "release-objects", matchset, "match_coverage.csv"), overwrite = TRUE)
-  fs::file_copy(here("output", "match", matchset, "report", "data_smd.csv"), here("output", "release-objects", matchset, "match_smd.csv"), overwrite = TRUE)
-  fs::file_copy(here("output", "match", matchset, "report", "flowchart.csv"), here("output", "release-objects", matchset, "match_flowchart.csv"), overwrite = TRUE)
+  fs::file_copy(here("output", "match", matchset, "report", "table1.csv"), fs::path(output_dir, "match_table1.csv"), overwrite = TRUE)
+  fs::file_copy(here("output", "match", matchset, "report", "table1by.csv"), fs::path(output_dir, "match_table1by.csv"), overwrite = TRUE)
+  fs::file_copy(here("output", "match", matchset, "report", "data_coverage.csv"), fs::path(output_dir, "match_coverage.csv"), overwrite = TRUE)
+  fs::file_copy(here("output", "match", matchset, "report", "data_smd.csv"), fs::path(output_dir, "match_smd.csv"), overwrite = TRUE)
+  fs::file_copy(here("output", "match", matchset, "report", "flowchart.csv"), fs::path(output_dir, "match_flowchart.csv"), overwrite = TRUE)
 
-    ## KM ----
+  ## KM ----
 
-  fs::file_copy(here("output", "match", matchset, "km", "combined", "km_estimates.csv"), here("output", "release-objects", matchset, "km_estimates.csv"), overwrite = TRUE)
-  fs::file_copy(here("output", "match", matchset, "km", "combined", "contrasts_daily.csv"), here("output", "release-objects", matchset, "contrasts_daily.csv"), overwrite = TRUE)
-  fs::file_copy(here("output", "match", matchset, "km", "combined", "contrasts_overall.csv"), here("output", "release-objects", matchset, "contrasts_overall.csv"), overwrite = TRUE)
+  fs::file_copy(here("output", "match", matchset, "km", "combined", "km_estimates.csv"), fs::path(output_dir, "km_estimates.csv"), overwrite = TRUE)
+  fs::file_copy(here("output", "match", matchset, "km", "combined", "contrasts_daily.csv"), fs::path(output_dir, "contrasts_daily.csv"), overwrite = TRUE)
+  fs::file_copy(here("output", "match", matchset, "km", "combined", "contrasts_overall.csv"), fs::path(output_dir, "contrasts_overall.csv"), overwrite = TRUE)
+
 }
 
 ## create text for output review issue ----
