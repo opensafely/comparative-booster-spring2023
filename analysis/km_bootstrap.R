@@ -23,8 +23,8 @@ if(length(args)==0){
   # use for interactive testing
   removeobjects <- FALSE
   matchset <- "A"
-  subgroup <- "all"
-  #subgroup <- "vax12_type"
+  #subgroup <- "all"
+  subgroup <- "cev_cv"
   outcome <- "covidadmitted"
 
 } else {
@@ -299,6 +299,7 @@ write_csv(data_surv_rounded, fs::path(output_dir, "km_estimates.csv"))
 plot_km <- data_surv_rounded %>%
   ggplot(aes(group=treatment_descr, colour=treatment_descr, fill=treatment_descr)) +
   geom_step(aes(x=time, y=1-surv), direction = "vh")+
+  geom_hline(yintercept=0, colour="black")+
   geom_rect(aes(xmin=lagtime, xmax=time, ymin=1-surv.ll, ymax=1-surv.ul), alpha=0.1, colour="transparent")+
   facet_grid(rows=vars(!!subgroup_sym))+
   scale_color_brewer(type="qual", palette="Set1", na.value="grey") +
@@ -402,7 +403,7 @@ kmcontrast <- function(data_surv_boot, cuts=NULL, round_values=FALSE){
       cml.rate = last(cml.rate), # event rate from time zero to end of time period
 
       # cml.persontime = last(cml.persontime), # total person-time at risk from time zero to end of time period
-       cml.event = last(cml.event), # number of events from time zero to end of time period
+      cml.event = last(cml.event), # number of events from time zero to end of time period
       # cml.censor = last(cml.censor), # number censored from time zero to end of time period
 
       # cml.summand = last(cml.summand), # summand used for estimation of SE of survival
