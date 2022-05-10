@@ -161,7 +161,7 @@ boot_n <-
 boot_samples <- read_rds(here("output", "match", matchset, "boot_samples.rds")) %>%
   filter(boot_id <= boot_n) %>%
   bind_rows(
-    data_matched %>% transmute(boot_id=0L, match_id),
+    data_matched %>% transmute(boot_id=0L, match_id) %>% distinct(),
     .
   )
 
@@ -246,7 +246,7 @@ data_surv <-
   left_join(
     # point estimates
     data_surv_boot %>%
-      ungroup() %>%
+    ungroup() %>%
     filter(boot_id==0L) %>%
     select(
       !!subgroup_sym, treatment, treatment_descr,
@@ -345,8 +345,7 @@ kmcontrast <- function(data_surv_boot, cuts=NULL, round_values=FALSE){
           n.censor = diff(c(0,cml.censor)),
           n.risk = ceiling_any(max(n.risk, na.rm=TRUE), round_values) - lag(cml.event + cml.censor,1,0),
         )
-    }
-    } %>%
+    }} %>%
     transmute(
       boot_id,
       !!subgroup_sym,

@@ -56,7 +56,7 @@ km_estimates <- metaparams %>%
   mutate(
     data = pmap(list(matchset, subgroup, outcome), function(matchset, subgroup, outcome) {
       subgroup <- as.character(subgroup)
-      dat <- read_csv(here("output", "match", matchset, "km", subgroup, outcome, glue("km_estimates.csv")), na="NA", col_types = cols())
+      dat <- read_csv(here("output", "match", matchset, "km", subgroup, outcome, "km_estimates.csv"), na="NA", col_types = cols())
       dat %>%
       add_column(
         subgroup_level = as.character(.[[subgroup]]),
@@ -75,7 +75,7 @@ contrasts_daily <- metaparams %>%
   mutate(
     data = pmap(list(matchset, outcome, subgroup), function(matchset, outcome, subgroup){
       subgroup <- as.character(subgroup)
-      dat <- read_csv(here("output", "match", matchset, "km", subgroup, outcome, glue("contrasts_daily.csv")), na="NA", col_types = cols())
+      dat <- read_csv(here("output", "match", matchset, "km", subgroup, outcome, "contrasts_daily.csv"), na="NA", col_types = cols())
       dat %>%
         add_column(
           subgroup_level = as.character(.[[subgroup]]),
@@ -96,7 +96,7 @@ contrasts_overall <- metaparams %>%
   mutate(
     data = pmap(list(matchset, outcome, subgroup), function(matchset, outcome, subgroup) {
       subgroup <- as.character(subgroup)
-      dat <- read_csv(here("output", "match", matchset, "km", subgroup, outcome, glue("contrasts_overall.csv")), na="NA", col_types = cols())
+      dat <- read_csv(here("output", "match", matchset, "km", subgroup, outcome, "contrasts_overall.csv"), na="NA", col_types = cols())
       dat %>%
         add_column(
           subgroup_level = as.character(.[[subgroup]]),
