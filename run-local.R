@@ -32,7 +32,7 @@ action_match <- compose_action(
 )
 
 action_km <- compose_action(
-    here("analysis", "km_bootstrap.R")
+    here("analysis", "km.R")
 )
 
 action_km_combine <- compose_action(

@@ -212,33 +212,55 @@ data_surv_rounded <-
     #
     # Explanation:
     # ensure every "step" in the KM survival curve is based on no fewer than `threshold` outcome+censoring events
-    # max(n.risk, na.rm=TRUE) is the number at risk at time zero.
-    # max(n.risk, na.rm=TRUE)/threshold is the inverse of the minimum `step` size on the survival scale (0-1)
-    # floor(max(n.risk, na.rm=TRUE)/threshold) rounds down to nearest integer.
-    # 1/floor(max(n.risk, na.rm=TRUE)) is the minimum step size on the survival scale (0-1), ensuring increments no fewer than `threshold` on the events scale
+    # N = max(n.risk, na.rm=TRUE) is the number at risk at time zero.
+    # N/threshold is the inverse of the minimum `step` size on the survival scale (0-1)
+    # floor(N/threshold) rounds down to nearest integer.
+    # 1/floor(N) is the minimum step size on the survival scale (0-1), ensuring increments no fewer than `threshold` on the events scale
     # ceiling_any(x, min_increment) rounds up values of x on the survival scale, so that they lie on the grid of width `min_increment`.
 
-    surv = ceiling_any(surv, 1/floor(max(n.risk, na.rm=TRUE)/(threshold))),
-    surv.ll = ceiling_any(surv.ll, 1/floor(max(n.risk, na.rm=TRUE)/(threshold))),
-    surv.ul = ceiling_any(surv.ul, 1/floor(max(n.risk, na.rm=TRUE)/(threshold))),
+
+
+    N = max(n.risk, na.rm=TRUE),
     cml.event = ceiling_any(cumsum(replace_na(n.event, 0)), threshold),
     cml.censor = ceiling_any(cumsum(replace_na(n.censor, 0)), threshold),
     n.event = diff(c(0,cml.event)),
     n.censor = diff(c(0,cml.censor)),
-    n.risk = ceiling_any(max(n.risk, na.rm=TRUE), threshold) - lag(cml.event + cml.censor,1,0),
+    n.risk = ceiling_any(N, threshold) - lag(cml.event + cml.censor,1,0),
     summand = n.event / ((n.risk - n.event) * n.risk),
+
+    ## calculate surv based on rounded event counts
+    surv = cumprod(1 - n.event / n.risk),
     surv.se = surv * sqrt(cumsum(replace_na(summand, 0))),
+    llsurv = log(-log(surv)),
+    llsurv.se = sqrt((1 / log(surv)^2) * cumsum(summand)),
+    surv.ll = exp(-exp(llsurv + qnorm(0.025)*llsurv.se)),
+    surv.ul = exp(-exp(llsurv + qnorm(0.975)*llsurv.se)),
+
+    # Or round surv based on a grid of values representing increments of `threshold`
+    #surv = ceiling_any(surv, 1/floor(N/threshold)),
+    #surv.ll = ceiling_any(surv.ll, 1/floor(N/threshold)),
+    #surv.ul = ceiling_any(surv.ul, 1/floor(N/threshold)),
+
+    haz = -(surv-lag(surv, 1, 1))/lag(surv, 1, 1), # n.event / (n.risk * interval),
+    haz.se = haz * sqrt((n.risk - n.event) / (n.risk * n.event)),
+    cml.haz = cumsum(haz),
     cmlhaz.se = surv.se/surv,
   ) %>%
-  select(!!subgroup_sym, treatment, treatment_descr, time, lagtime, leadtime, interval, surv, surv.se, surv.ll, surv.ul, n.risk, n.event, n.censor, summand)
+  select(
+    !!subgroup_sym, treatment, treatment_descr, time, lagtime, leadtime, interval,
+    n.risk, n.event, n.censor, summand,
+    surv, surv.se, surv.ll, surv.ul,
+    haz, haz.se,
+    cml.haz, cml.haz.se
+  )
 
 
 write_csv(data_surv_rounded, fs::path(output_dir, "km_estimates.csv"))
 
-plot_km <- data_surv_rounded %>%
+plot_km <- data_surv %>%
   ggplot(aes(group=treatment_descr, colour=treatment_descr, fill=treatment_descr)) +
   geom_step(aes(x=time, y=1-surv))+
-  geom_rect(aes(xmin=time, xmax=leadtime, ymin=1-surv.ll, ymax=1-surv.ul), alpha=0.1, colour="transparent")+
+  geom_rect(aes(xmin=lagtime, xmax=time, ymin=1-surv.ll, ymax=1-surv.ul), alpha=0.1, colour="transparent")+
   facet_grid(rows=vars(!!subgroup_sym))+
   scale_color_brewer(type="qual", palette="Set1", na.value="grey") +
   scale_fill_brewer(type="qual", palette="Set1", guide="none", na.value="grey") +
@@ -264,9 +286,37 @@ plot_km
 ggsave(filename=fs::path(output_dir, "km_plot.png"), plot_km, width=20, height=15, units="cm")
 
 
+plot_km_rounded <- data_surv_rounded %>%
+  ggplot(aes(group=treatment_descr, colour=treatment_descr, fill=treatment_descr)) +
+  geom_step(aes(x=time, y=1-surv))+
+  geom_rect(aes(xmin=lagtime, xmax=time, ymin=1-surv.ll, ymax=1-surv.ul), alpha=0.1, colour="transparent")+
+  facet_grid(rows=vars(!!subgroup_sym))+
+  scale_color_brewer(type="qual", palette="Set1", na.value="grey") +
+  scale_fill_brewer(type="qual", palette="Set1", guide="none", na.value="grey") +
+  scale_x_continuous(breaks = seq(0,600,14))+
+  scale_y_continuous(expand = expansion(mult=c(0,0.01)))+
+  coord_cartesian(xlim=c(0, NA))+
+  labs(
+    x="Days",
+    y="Cumulative incidence",
+    colour=NULL,
+    title=NULL
+  )+
+  theme_minimal()+
+  theme(
+    axis.line.x = element_line(colour = "black"),
+    panel.grid.minor.x = element_blank(),
+    legend.position=c(.05,.95),
+    legend.justification = c(0,1),
+  )
+
+plot_km_rounded
+
+ggsave(filename=fs::path(output_dir, "km_plot_rounded.png"), plot_km, width=20, height=15, units="cm")
+
+
 ## calculate quantities relating to kaplan-meier curve and their ratio / difference / etc
 
-# issue?
 kmcontrast <- function(data, cuts=NULL){
 
   if(is.null(cuts)){cuts <- unique(c(0,data$time))}
@@ -377,27 +427,34 @@ kmcontrast <- function(data, cuts=NULL){
       irr.ul = exp(log(irr) + qnorm(0.975)*irr.ln.se),
 
       # incidence rate difference
-      ird = rate_1 - rate_0,
-
-
+      #ird = rate_1 - rate_0,
 
       ## quantities calculated from time zero until end of time period
       # these should be the same as values calculated on each day of follow up
 
       # survival ratio, standard error, and confidence limits
       kmsr = surv_1 / surv_0,
-      kmsr.ln = log(kmsr),
+      #kmsr.ln = log(kmsr),
       kmsr.ln.se = (surv.se_0/surv_0) + (surv.se_1/surv_1), #because cmlhaz = -log(surv) and cmlhaz.se = surv.se/surv
-      kmsr.ll = exp(kmsr.ln + qnorm(0.025)*kmsr.ln.se),
-      kmsr.ul = exp(kmsr.ln + qnorm(0.975)*kmsr.ln.se),
+      kmsr.ll = exp(log(kmsr) + qnorm(0.025)*kmsr.ln.se),
+      kmsr.ul = exp(log(kmsr) + qnorm(0.975)*kmsr.ln.se),
 
-      # risk ratio, standard error, and confidence limits
+      # risk ratio, standard error, and confidence limits, using delta method
       kmrr = risk_1 / risk_0,
+      #kmrr.ln = log(kmrr),
+      kmrr.ln.se = (risk.se_1/risk_1)^2 + (risk.se_0/risk_0)^2,
+      kmrr.ll = exp(log(kmrr) + qnorm(0.025)*kmrr.ln.se),
+      kmrr.ul = exp(log(kmrr) + qnorm(0.975)*kmrr.ln.se),
+
+      #kmrr.se = (kmrr^2)*((risk.se_1/risk_1)^2 + (risk.se_0/risk_0)^2),
+      #kmrr.ll2 = kmrr + qnorm(0.025)*kmrr.se,
+      #kmrr.ul2 = kmrr + qnorm(0.975)*kmrr.se,
+
 
       # risk difference, standard error and confidence limits
       kmrd = risk_1 - risk_0,
       #kmrd.se = sqrt( ((n.event_1*n.nonevent_1)/(n.atrisk_1^3)) + ((n.event_0*n.nonevent_0)/(n.atrisk_0^3)) ), # ignores censoring
-      kmrd.se = sqrt( (surv.se_0^2) + (surv.se_1^2) ), # combining SEs from greenwood's formula
+      kmrd.se = sqrt( (risk.se_0^2) + (risk.se_1^2) ), # combining SEs from greenwood's formula
       kmrd.ll = kmrd + qnorm(0.025)*kmrd.se,
       kmrd.ul = kmrd + qnorm(0.975)*kmrd.se,
 
@@ -409,13 +466,18 @@ kmcontrast <- function(data, cuts=NULL){
       cmlirr.ul = exp(log(cmlirr) + qnorm(0.975)*cmlirr.ln.se),
 
       # cumulative incidence rate difference
-      cmlird = cml.rate_1 - cml.rate_0
+      #cmlird = cml.rate_1 - cml.rate_0
     )
 }
 
-km_contrasts_daily <- kmcontrast(data_surv)
-km_contrasts_cuts <- kmcontrast(data_surv, postbaselinecuts)
-km_contrasts_overall <- kmcontrast(data_surv, c(0,maxfup))
+#km_contrasts_daily <- kmcontrast(data_surv)
+#km_contrasts_cuts <- kmcontrast(data_surv, postbaselinecuts)
+#km_contrasts_overall <- kmcontrast(data_surv, c(0,maxfup))
+
+
+km_contrasts_rounded_daily <- kmcontrast(data_surv_rounded)
+km_contrasts_rounded_cuts <- kmcontrast(data_surv_rounded, postbaselinecuts)
+km_contrasts_rounded_overall <- kmcontrast(data_surv_rounded, c(0,maxfup))
 
 
 
@@ -487,11 +549,12 @@ coxcontrast <- function(data, cuts=NULL){
 cox_contrasts_cuts <- coxcontrast(data_matched, postbaselinecuts)
 cox_contrasts_overall <- coxcontrast(data_matched, c(0,maxfup))
 
-contrasts_daily <-  km_contrasts_daily # don't bother with cox as HR within daily intervals will be imprecisely estimated or zero.
-contrasts_cuts <-  left_join(km_contrasts_cuts, cox_contrasts_cuts, by=c(subgroup, "period_start", "period_end"))
-contrasts_overall <-  left_join(km_contrasts_overall, cox_contrasts_overall, by=c(subgroup, "period_start", "period_end"))
+# cox HR is a safe statistic so no need to redact/round
+contrasts_rounded_daily <-  km_contrasts_rounded_daily # don't bother with cox as HR within daily intervals will be imprecisely estimated
+contrasts_rounded_cuts <-  left_join(km_contrasts_rounded_cuts, cox_contrasts_cuts, by=c(subgroup, "period_start", "period_end"))
+contrasts_rounded_overall <-  left_join(km_contrasts_rounded_overall, cox_contrasts_overall, by=c(subgroup, "period_start", "period_end"))
 
 
-write_csv(contrasts_daily, fs::path(output_dir, "contrasts_daily.csv"))
-write_csv(contrasts_cuts, fs::path(output_dir, "contrasts_cuts.csv"))
-write_csv(contrasts_overall, fs::path(output_dir, "contrasts_overall.csv"))
+write_csv(contrasts_rounded_daily, fs::path(output_dir, "contrasts_daily.csv"))
+write_csv(contrasts_rounded_cuts, fs::path(output_dir, "contrasts_cuts.csv"))
+write_csv(contrasts_rounded_overall, fs::path(output_dir, "contrasts_overall.csv"))

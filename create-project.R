@@ -115,7 +115,7 @@ action_km <- function(
 
     action(
       name = glue("km_{matchset}_{subgroup}_{outcome}"),
-      run = glue("r:latest analysis/km_bootstrap.R"),
+      run = glue("r:latest analysis/km.R"),
       arguments = c(matchset, subgroup, outcome),
       needs = list(
         glue("match_{matchset}"),

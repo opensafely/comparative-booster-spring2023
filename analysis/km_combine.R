@@ -121,3 +121,10 @@ metaparams %>%
     kmplotnewdir = here("output", "match", matchset, "km", "combined", "plots", glue("km_plot_{subgroup}_{outcome}.png")),
   ) %>%
   {walk2(.$kmplotdir, .$kmplotnewdir, ~fs::file_copy(.x, .y, overwrite = TRUE))}
+
+metaparams %>%
+  mutate(
+    kmplotdir = here("output", "match", matchset, "km", subgroup, outcome, "km_plot_rounded.png"),
+    kmplotnewdir = here("output", "match", matchset, "km", "combined", "plots", glue("km_plot_rounded_{subgroup}_{outcome}.png")),
+  ) %>%
+  {walk2(.$kmplotdir, .$kmplotnewdir, ~fs::file_copy(.x, .y, overwrite = TRUE))}

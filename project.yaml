@@ -101,7 +101,7 @@ actions:
   ## ### Overall models (''all'') 
 
   km_A_all_postest:
-    run: r:latest analysis/km_bootstrap.R A all postest
+    run: r:latest analysis/km.R A all postest
     needs:
     - match_A
     - data_selection
@@ -112,7 +112,7 @@ actions:
         png: output/match/A/km/all/postest/*.png
 
   km_A_all_covidemergency:
-    run: r:latest analysis/km_bootstrap.R A all covidemergency
+    run: r:latest analysis/km.R A all covidemergency
     needs:
     - match_A
     - data_selection
@@ -123,7 +123,7 @@ actions:
         png: output/match/A/km/all/covidemergency/*.png
 
   km_A_all_covidadmittedproxy1:
-    run: r:latest analysis/km_bootstrap.R A all covidadmittedproxy1
+    run: r:latest analysis/km.R A all covidadmittedproxy1
     needs:
     - match_A
     - data_selection
@@ -134,7 +134,7 @@ actions:
         png: output/match/A/km/all/covidadmittedproxy1/*.png
 
   km_A_all_covidadmitted:
-    run: r:latest analysis/km_bootstrap.R A all covidadmitted
+    run: r:latest analysis/km.R A all covidadmitted
     needs:
     - match_A
     - data_selection
@@ -145,7 +145,7 @@ actions:
         png: output/match/A/km/all/covidadmitted/*.png
 
   km_A_all_coviddeath:
-    run: r:latest analysis/km_bootstrap.R A all coviddeath
+    run: r:latest analysis/km.R A all coviddeath
     needs:
     - match_A
     - data_selection
@@ -156,7 +156,7 @@ actions:
         png: output/match/A/km/all/coviddeath/*.png
 
   km_A_all_noncoviddeath:
-    run: r:latest analysis/km_bootstrap.R A all noncoviddeath
+    run: r:latest analysis/km.R A all noncoviddeath
     needs:
     - match_A
     - data_selection
@@ -169,7 +169,7 @@ actions:
   ## ### Models by primary course (''vax12_type'') 
 
   km_A_vax12_type_postest:
-    run: r:latest analysis/km_bootstrap.R A vax12_type postest
+    run: r:latest analysis/km.R A vax12_type postest
     needs:
     - match_A
     - data_selection
@@ -180,7 +180,7 @@ actions:
         png: output/match/A/km/vax12_type/postest/*.png
 
   km_A_vax12_type_covidemergency:
-    run: r:latest analysis/km_bootstrap.R A vax12_type covidemergency
+    run: r:latest analysis/km.R A vax12_type covidemergency
     needs:
     - match_A
     - data_selection
@@ -191,7 +191,7 @@ actions:
         png: output/match/A/km/vax12_type/covidemergency/*.png
 
   km_A_vax12_type_covidadmittedproxy1:
-    run: r:latest analysis/km_bootstrap.R A vax12_type covidadmittedproxy1
+    run: r:latest analysis/km.R A vax12_type covidadmittedproxy1
     needs:
     - match_A
     - data_selection
@@ -202,7 +202,7 @@ actions:
         png: output/match/A/km/vax12_type/covidadmittedproxy1/*.png
 
   km_A_vax12_type_covidadmitted:
-    run: r:latest analysis/km_bootstrap.R A vax12_type covidadmitted
+    run: r:latest analysis/km.R A vax12_type covidadmitted
     needs:
     - match_A
     - data_selection
@@ -213,7 +213,7 @@ actions:
         png: output/match/A/km/vax12_type/covidadmitted/*.png
 
   km_A_vax12_type_coviddeath:
-    run: r:latest analysis/km_bootstrap.R A vax12_type coviddeath
+    run: r:latest analysis/km.R A vax12_type coviddeath
     needs:
     - match_A
     - data_selection
@@ -224,7 +224,7 @@ actions:
         png: output/match/A/km/vax12_type/coviddeath/*.png
 
   km_A_vax12_type_noncoviddeath:
-    run: r:latest analysis/km_bootstrap.R A vax12_type noncoviddeath
+    run: r:latest analysis/km.R A vax12_type noncoviddeath
     needs:
     - match_A
     - data_selection
@@ -237,7 +237,7 @@ actions:
   ## ### Models by clinically vulnerable group (''cev_cv'') 
 
   km_A_cev_cv_postest:
-    run: r:latest analysis/km_bootstrap.R A cev_cv postest
+    run: r:latest analysis/km.R A cev_cv postest
     needs:
     - match_A
     - data_selection
@@ -248,7 +248,7 @@ actions:
         png: output/match/A/km/cev_cv/postest/*.png
 
   km_A_cev_cv_covidemergency:
-    run: r:latest analysis/km_bootstrap.R A cev_cv covidemergency
+    run: r:latest analysis/km.R A cev_cv covidemergency
     needs:
     - match_A
     - data_selection
@@ -259,7 +259,7 @@ actions:
         png: output/match/A/km/cev_cv/covidemergency/*.png
 
   km_A_cev_cv_covidadmittedproxy1:
-    run: r:latest analysis/km_bootstrap.R A cev_cv covidadmittedproxy1
+    run: r:latest analysis/km.R A cev_cv covidadmittedproxy1
     needs:
     - match_A
     - data_selection
@@ -270,7 +270,7 @@ actions:
         png: output/match/A/km/cev_cv/covidadmittedproxy1/*.png
 
   km_A_cev_cv_covidadmitted:
-    run: r:latest analysis/km_bootstrap.R A cev_cv covidadmitted
+    run: r:latest analysis/km.R A cev_cv covidadmitted
     needs:
     - match_A
     - data_selection
@@ -281,7 +281,7 @@ actions:
         png: output/match/A/km/cev_cv/covidadmitted/*.png
 
   km_A_cev_cv_coviddeath:
-    run: r:latest analysis/km_bootstrap.R A cev_cv coviddeath
+    run: r:latest analysis/km.R A cev_cv coviddeath
     needs:
     - match_A
     - data_selection
@@ -292,7 +292,7 @@ actions:
         png: output/match/A/km/cev_cv/coviddeath/*.png
 
   km_A_cev_cv_noncoviddeath:
-    run: r:latest analysis/km_bootstrap.R A cev_cv noncoviddeath
+    run: r:latest analysis/km.R A cev_cv noncoviddeath
     needs:
     - match_A
     - data_selection
@@ -305,7 +305,7 @@ actions:
   ## ### Models by prior infection (''prior_covid_infection'') 
 
   km_A_prior_covid_infection_postest:
-    run: r:latest analysis/km_bootstrap.R A prior_covid_infection postest
+    run: r:latest analysis/km.R A prior_covid_infection postest
     needs:
     - match_A
     - data_selection
@@ -316,7 +316,7 @@ actions:
         png: output/match/A/km/prior_covid_infection/postest/*.png
 
   km_A_prior_covid_infection_covidemergency:
-    run: r:latest analysis/km_bootstrap.R A prior_covid_infection covidemergency
+    run: r:latest analysis/km.R A prior_covid_infection covidemergency
     needs:
     - match_A
     - data_selection
@@ -327,7 +327,7 @@ actions:
         png: output/match/A/km/prior_covid_infection/covidemergency/*.png
 
   km_A_prior_covid_infection_covidadmittedproxy1:
-    run: r:latest analysis/km_bootstrap.R A prior_covid_infection covidadmittedproxy1
+    run: r:latest analysis/km.R A prior_covid_infection covidadmittedproxy1
     needs:
     - match_A
     - data_selection
@@ -338,7 +338,7 @@ actions:
         png: output/match/A/km/prior_covid_infection/covidadmittedproxy1/*.png
 
   km_A_prior_covid_infection_covidadmitted:
-    run: r:latest analysis/km_bootstrap.R A prior_covid_infection covidadmitted
+    run: r:latest analysis/km.R A prior_covid_infection covidadmitted
     needs:
     - match_A
     - data_selection
@@ -349,7 +349,7 @@ actions:
         png: output/match/A/km/prior_covid_infection/covidadmitted/*.png
 
   km_A_prior_covid_infection_coviddeath:
-    run: r:latest analysis/km_bootstrap.R A prior_covid_infection coviddeath
+    run: r:latest analysis/km.R A prior_covid_infection coviddeath
     needs:
     - match_A
     - data_selection
@@ -360,7 +360,7 @@ actions:
         png: output/match/A/km/prior_covid_infection/coviddeath/*.png
 
   km_A_prior_covid_infection_noncoviddeath:
-    run: r:latest analysis/km_bootstrap.R A prior_covid_infection noncoviddeath
+    run: r:latest analysis/km.R A prior_covid_infection noncoviddeath
     needs:
     - match_A
     - data_selection
@@ -373,7 +373,7 @@ actions:
   ## ### Models by age (''age65plus'') 
 
   km_A_age65plus_postest:
-    run: r:latest analysis/km_bootstrap.R A age65plus postest
+    run: r:latest analysis/km.R A age65plus postest
     needs:
     - match_A
     - data_selection
@@ -384,7 +384,7 @@ actions:
         png: output/match/A/km/age65plus/postest/*.png
 
   km_A_age65plus_covidemergency:
-    run: r:latest analysis/km_bootstrap.R A age65plus covidemergency
+    run: r:latest analysis/km.R A age65plus covidemergency
     needs:
     - match_A
     - data_selection
@@ -395,7 +395,7 @@ actions:
         png: output/match/A/km/age65plus/covidemergency/*.png
 
   km_A_age65plus_covidadmittedproxy1:
-    run: r:latest analysis/km_bootstrap.R A age65plus covidadmittedproxy1
+    run: r:latest analysis/km.R A age65plus covidadmittedproxy1
     needs:
     - match_A
     - data_selection
@@ -406,7 +406,7 @@ actions:
         png: output/match/A/km/age65plus/covidadmittedproxy1/*.png
 
   km_A_age65plus_covidadmitted:
-    run: r:latest analysis/km_bootstrap.R A age65plus covidadmitted
+    run: r:latest analysis/km.R A age65plus covidadmitted
     needs:
     - match_A
     - data_selection
@@ -417,7 +417,7 @@ actions:
         png: output/match/A/km/age65plus/covidadmitted/*.png
 
   km_A_age65plus_coviddeath:
-    run: r:latest analysis/km_bootstrap.R A age65plus coviddeath
+    run: r:latest analysis/km.R A age65plus coviddeath
     needs:
     - match_A
     - data_selection
@@ -428,7 +428,7 @@ actions:
         png: output/match/A/km/age65plus/coviddeath/*.png
 
   km_A_age65plus_noncoviddeath:
-    run: r:latest analysis/km_bootstrap.R A age65plus noncoviddeath
+    run: r:latest analysis/km.R A age65plus noncoviddeath
     needs:
     - match_A
     - data_selection
@@ -441,7 +441,7 @@ actions:
   ## ### Models by variant era (''variantera'') 
 
   km_A_variantera_postest:
-    run: r:latest analysis/km_bootstrap.R A variantera postest
+    run: r:latest analysis/km.R A variantera postest
     needs:
     - match_A
     - data_selection
@@ -452,7 +452,7 @@ actions:
         png: output/match/A/km/variantera/postest/*.png
 
   km_A_variantera_covidemergency:
-    run: r:latest analysis/km_bootstrap.R A variantera covidemergency
+    run: r:latest analysis/km.R A variantera covidemergency
     needs:
     - match_A
     - data_selection
@@ -463,7 +463,7 @@ actions:
         png: output/match/A/km/variantera/covidemergency/*.png
 
   km_A_variantera_covidadmittedproxy1:
-    run: r:latest analysis/km_bootstrap.R A variantera covidadmittedproxy1
+    run: r:latest analysis/km.R A variantera covidadmittedproxy1
     needs:
     - match_A
     - data_selection
@@ -474,7 +474,7 @@ actions:
         png: output/match/A/km/variantera/covidadmittedproxy1/*.png
 
   km_A_variantera_covidadmitted:
-    run: r:latest analysis/km_bootstrap.R A variantera covidadmitted
+    run: r:latest analysis/km.R A variantera covidadmitted
     needs:
     - match_A
     - data_selection
@@ -485,7 +485,7 @@ actions:
         png: output/match/A/km/variantera/covidadmitted/*.png
 
   km_A_variantera_coviddeath:
-    run: r:latest analysis/km_bootstrap.R A variantera coviddeath
+    run: r:latest analysis/km.R A variantera coviddeath
     needs:
     - match_A
     - data_selection
@@ -496,7 +496,7 @@ actions:
         png: output/match/A/km/variantera/coviddeath/*.png
 
   km_A_variantera_noncoviddeath:
-    run: r:latest analysis/km_bootstrap.R A variantera noncoviddeath
+    run: r:latest analysis/km.R A variantera noncoviddeath
     needs:
     - match_A
     - data_selection
@@ -535,7 +535,7 @@ actions:
   ## ### Overall models (''all'') 
 
   km_B_all_postest:
-    run: r:latest analysis/km_bootstrap.R B all postest
+    run: r:latest analysis/km.R B all postest
     needs:
     - match_B
     - data_selection
@@ -546,7 +546,7 @@ actions:
         png: output/match/B/km/all/postest/*.png
 
   km_B_all_covidemergency:
-    run: r:latest analysis/km_bootstrap.R B all covidemergency
+    run: r:latest analysis/km.R B all covidemergency
     needs:
     - match_B
     - data_selection
@@ -557,7 +557,7 @@ actions:
         png: output/match/B/km/all/covidemergency/*.png
 
   km_B_all_covidadmittedproxy1:
-    run: r:latest analysis/km_bootstrap.R B all covidadmittedproxy1
+    run: r:latest analysis/km.R B all covidadmittedproxy1
     needs:
     - match_B
     - data_selection
@@ -568,7 +568,7 @@ actions:
         png: output/match/B/km/all/covidadmittedproxy1/*.png
 
   km_B_all_covidadmitted:
-    run: r:latest analysis/km_bootstrap.R B all covidadmitted
+    run: r:latest analysis/km.R B all covidadmitted
     needs:
     - match_B
     - data_selection
@@ -579,7 +579,7 @@ actions:
         png: output/match/B/km/all/covidadmitted/*.png
 
   km_B_all_coviddeath:
-    run: r:latest analysis/km_bootstrap.R B all coviddeath
+    run: r:latest analysis/km.R B all coviddeath
     needs:
     - match_B
     - data_selection
@@ -590,7 +590,7 @@ actions:
         png: output/match/B/km/all/coviddeath/*.png
 
   km_B_all_noncoviddeath:
-    run: r:latest analysis/km_bootstrap.R B all noncoviddeath
+    run: r:latest analysis/km.R B all noncoviddeath
     needs:
     - match_B
     - data_selection
@@ -603,7 +603,7 @@ actions:
   ## ### Models by primary course (''vax12_type'') 
 
   km_B_vax12_type_postest:
-    run: r:latest analysis/km_bootstrap.R B vax12_type postest
+    run: r:latest analysis/km.R B vax12_type postest
     needs:
     - match_B
     - data_selection
@@ -614,7 +614,7 @@ actions:
         png: output/match/B/km/vax12_type/postest/*.png
 
   km_B_vax12_type_covidemergency:
-    run: r:latest analysis/km_bootstrap.R B vax12_type covidemergency
+    run: r:latest analysis/km.R B vax12_type covidemergency
     needs:
     - match_B
     - data_selection
@@ -625,7 +625,7 @@ actions:
         png: output/match/B/km/vax12_type/covidemergency/*.png
 
   km_B_vax12_type_covidadmittedproxy1:
-    run: r:latest analysis/km_bootstrap.R B vax12_type covidadmittedproxy1
+    run: r:latest analysis/km.R B vax12_type covidadmittedproxy1
     needs:
     - match_B
     - data_selection
@@ -636,7 +636,7 @@ actions:
         png: output/match/B/km/vax12_type/covidadmittedproxy1/*.png
 
   km_B_vax12_type_covidadmitted:
-    run: r:latest analysis/km_bootstrap.R B vax12_type covidadmitted
+    run: r:latest analysis/km.R B vax12_type covidadmitted
     needs:
     - match_B
     - data_selection
@@ -647,7 +647,7 @@ actions:
         png: output/match/B/km/vax12_type/covidadmitted/*.png
 
   km_B_vax12_type_coviddeath:
-    run: r:latest analysis/km_bootstrap.R B vax12_type coviddeath
+    run: r:latest analysis/km.R B vax12_type coviddeath
     needs:
     - match_B
     - data_selection
@@ -658,7 +658,7 @@ actions:
         png: output/match/B/km/vax12_type/coviddeath/*.png
 
   km_B_vax12_type_noncoviddeath:
-    run: r:latest analysis/km_bootstrap.R B vax12_type noncoviddeath
+    run: r:latest analysis/km.R B vax12_type noncoviddeath
     needs:
     - match_B
     - data_selection
@@ -671,7 +671,7 @@ actions:
   ## ### Models by clinically vulnerable group (''cev_cv'') 
 
   km_B_cev_cv_postest:
-    run: r:latest analysis/km_bootstrap.R B cev_cv postest
+    run: r:latest analysis/km.R B cev_cv postest
     needs:
     - match_B
     - data_selection
@@ -682,7 +682,7 @@ actions:
         png: output/match/B/km/cev_cv/postest/*.png
 
   km_B_cev_cv_covidemergency:
-    run: r:latest analysis/km_bootstrap.R B cev_cv covidemergency
+    run: r:latest analysis/km.R B cev_cv covidemergency
     needs:
     - match_B
     - data_selection
@@ -693,7 +693,7 @@ actions:
         png: output/match/B/km/cev_cv/covidemergency/*.png
 
   km_B_cev_cv_covidadmittedproxy1:
-    run: r:latest analysis/km_bootstrap.R B cev_cv covidadmittedproxy1
+    run: r:latest analysis/km.R B cev_cv covidadmittedproxy1
     needs:
     - match_B
     - data_selection
@@ -704,7 +704,7 @@ actions:
         png: output/match/B/km/cev_cv/covidadmittedproxy1/*.png
 
   km_B_cev_cv_covidadmitted:
-    run: r:latest analysis/km_bootstrap.R B cev_cv covidadmitted
+    run: r:latest analysis/km.R B cev_cv covidadmitted
     needs:
     - match_B
     - data_selection
@@ -715,7 +715,7 @@ actions:
         png: output/match/B/km/cev_cv/covidadmitted/*.png
 
   km_B_cev_cv_coviddeath:
-    run: r:latest analysis/km_bootstrap.R B cev_cv coviddeath
+    run: r:latest analysis/km.R B cev_cv coviddeath
     needs:
     - match_B
     - data_selection
@@ -726,7 +726,7 @@ actions:
         png: output/match/B/km/cev_cv/coviddeath/*.png
 
   km_B_cev_cv_noncoviddeath:
-    run: r:latest analysis/km_bootstrap.R B cev_cv noncoviddeath
+    run: r:latest analysis/km.R B cev_cv noncoviddeath
     needs:
     - match_B
     - data_selection
@@ -739,7 +739,7 @@ actions:
   ## ### Models by prior infection (''prior_covid_infection'') 
 
   km_B_prior_covid_infection_postest:
-    run: r:latest analysis/km_bootstrap.R B prior_covid_infection postest
+    run: r:latest analysis/km.R B prior_covid_infection postest
     needs:
     - match_B
     - data_selection
@@ -750,7 +750,7 @@ actions:
         png: output/match/B/km/prior_covid_infection/postest/*.png
 
   km_B_prior_covid_infection_covidemergency:
-    run: r:latest analysis/km_bootstrap.R B prior_covid_infection covidemergency
+    run: r:latest analysis/km.R B prior_covid_infection covidemergency
     needs:
     - match_B
     - data_selection
@@ -761,7 +761,7 @@ actions:
         png: output/match/B/km/prior_covid_infection/covidemergency/*.png
 
   km_B_prior_covid_infection_covidadmittedproxy1:
-    run: r:latest analysis/km_bootstrap.R B prior_covid_infection covidadmittedproxy1
+    run: r:latest analysis/km.R B prior_covid_infection covidadmittedproxy1
     needs:
     - match_B
     - data_selection
@@ -772,7 +772,7 @@ actions:
         png: output/match/B/km/prior_covid_infection/covidadmittedproxy1/*.png
 
   km_B_prior_covid_infection_covidadmitted:
-    run: r:latest analysis/km_bootstrap.R B prior_covid_infection covidadmitted
+    run: r:latest analysis/km.R B prior_covid_infection covidadmitted
     needs:
     - match_B
     - data_selection
@@ -783,7 +783,7 @@ actions:
         png: output/match/B/km/prior_covid_infection/covidadmitted/*.png
 
   km_B_prior_covid_infection_coviddeath:
-    run: r:latest analysis/km_bootstrap.R B prior_covid_infection coviddeath
+    run: r:latest analysis/km.R B prior_covid_infection coviddeath
     needs:
     - match_B
     - data_selection
@@ -794,7 +794,7 @@ actions:
         png: output/match/B/km/prior_covid_infection/coviddeath/*.png
 
   km_B_prior_covid_infection_noncoviddeath:
-    run: r:latest analysis/km_bootstrap.R B prior_covid_infection noncoviddeath
+    run: r:latest analysis/km.R B prior_covid_infection noncoviddeath
     needs:
     - match_B
     - data_selection
@@ -807,7 +807,7 @@ actions:
   ## ### Models by age (''age65plus'') 
 
   km_B_age65plus_postest:
-    run: r:latest analysis/km_bootstrap.R B age65plus postest
+    run: r:latest analysis/km.R B age65plus postest
     needs:
     - match_B
     - data_selection
@@ -818,7 +818,7 @@ actions:
         png: output/match/B/km/age65plus/postest/*.png
 
   km_B_age65plus_covidemergency:
-    run: r:latest analysis/km_bootstrap.R B age65plus covidemergency
+    run: r:latest analysis/km.R B age65plus covidemergency
     needs:
     - match_B
     - data_selection
@@ -829,7 +829,7 @@ actions:
         png: output/match/B/km/age65plus/covidemergency/*.png
 
   km_B_age65plus_covidadmittedproxy1:
-    run: r:latest analysis/km_bootstrap.R B age65plus covidadmittedproxy1
+    run: r:latest analysis/km.R B age65plus covidadmittedproxy1
     needs:
     - match_B
     - data_selection
@@ -840,7 +840,7 @@ actions:
         png: output/match/B/km/age65plus/covidadmittedproxy1/*.png
 
   km_B_age65plus_covidadmitted:
-    run: r:latest analysis/km_bootstrap.R B age65plus covidadmitted
+    run: r:latest analysis/km.R B age65plus covidadmitted
     needs:
     - match_B
     - data_selection
@@ -851,7 +851,7 @@ actions:
         png: output/match/B/km/age65plus/covidadmitted/*.png
 
   km_B_age65plus_coviddeath:
-    run: r:latest analysis/km_bootstrap.R B age65plus coviddeath
+    run: r:latest analysis/km.R B age65plus coviddeath
     needs:
     - match_B
     - data_selection
@@ -862,7 +862,7 @@ actions:
         png: output/match/B/km/age65plus/coviddeath/*.png
 
   km_B_age65plus_noncoviddeath:
-    run: r:latest analysis/km_bootstrap.R B age65plus noncoviddeath
+    run: r:latest analysis/km.R B age65plus noncoviddeath
     needs:
     - match_B
     - data_selection
@@ -875,7 +875,7 @@ actions:
   ## ### Models by variant era (''variantera'') 
 
   km_B_variantera_postest:
-    run: r:latest analysis/km_bootstrap.R B variantera postest
+    run: r:latest analysis/km.R B variantera postest
     needs:
     - match_B
     - data_selection
@@ -886,7 +886,7 @@ actions:
         png: output/match/B/km/variantera/postest/*.png
 
   km_B_variantera_covidemergency:
-    run: r:latest analysis/km_bootstrap.R B variantera covidemergency
+    run: r:latest analysis/km.R B variantera covidemergency
     needs:
     - match_B
     - data_selection
@@ -897,7 +897,7 @@ actions:
         png: output/match/B/km/variantera/covidemergency/*.png
 
   km_B_variantera_covidadmittedproxy1:
-    run: r:latest analysis/km_bootstrap.R B variantera covidadmittedproxy1
+    run: r:latest analysis/km.R B variantera covidadmittedproxy1
     needs:
     - match_B
     - data_selection
@@ -908,7 +908,7 @@ actions:
         png: output/match/B/km/variantera/covidadmittedproxy1/*.png
 
   km_B_variantera_covidadmitted:
-    run: r:latest analysis/km_bootstrap.R B variantera covidadmitted
+    run: r:latest analysis/km.R B variantera covidadmitted
     needs:
     - match_B
     - data_selection
@@ -919,7 +919,7 @@ actions:
         png: output/match/B/km/variantera/covidadmitted/*.png
 
   km_B_variantera_coviddeath:
-    run: r:latest analysis/km_bootstrap.R B variantera coviddeath
+    run: r:latest analysis/km.R B variantera coviddeath
     needs:
     - match_B
     - data_selection
@@ -930,7 +930,7 @@ actions:
         png: output/match/B/km/variantera/coviddeath/*.png
 
   km_B_variantera_noncoviddeath:
-    run: r:latest analysis/km_bootstrap.R B variantera noncoviddeath
+    run: r:latest analysis/km.R B variantera noncoviddeath
     needs:
     - match_B
     - data_selection
