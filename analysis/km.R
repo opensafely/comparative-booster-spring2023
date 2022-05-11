@@ -312,7 +312,7 @@ plot_km_rounded <- data_surv_rounded %>%
 
 plot_km_rounded
 
-ggsave(filename=fs::path(output_dir, "km_plot_rounded.png"), plot_km, width=20, height=15, units="cm")
+ggsave(filename=fs::path(output_dir, "km_plot_rounded.png"), plot_km_rounded, width=20, height=15, units="cm")
 
 
 ## calculate quantities relating to kaplan-meier curve and their ratio / difference / etc
