@@ -100,7 +100,12 @@ data_matched <-
     .,
     by= c("patient_id")
   ) %>%
-  mutate(
+  transmute(
+
+    match_id,
+    patient_id,
+    {{subgroup_sym}},
+    treatment,
 
     treatment_date = vax3_date-1L, # -1 because we assume vax occurs at the start of the day, and so outcomes occurring on the same day as treatment are assumed "1 day" long
     outcome_date = .[[glue("{outcome}_date")]],
@@ -299,7 +304,7 @@ write_csv(data_surv_rounded, fs::path(output_dir, "km_estimates.csv"))
 
 ## plot KM curves ----
 
-plot_km <- data_surv_rounded %>%
+plot_km <- data_surv %>%
   ggplot(aes(group=treatment_descr, colour=treatment_descr, fill=treatment_descr)) +
   geom_step(aes(x=time, y=1-surv), direction = "vh")+
   geom_hline(yintercept=0, colour="black")+
@@ -328,445 +333,243 @@ plot_km
 
 ggsave(filename=fs::path(output_dir, "km_plot.png"), plot_km, width=20, height=15, units="cm")
 
-#
-#
-# ## calculate quantities relating to kaplan-meier curve and their ratio / difference / etc ----
-#
-#
-# kmcontrast <- function(data_surv, cuts=NULL, round_values=FALSE){
-#
-#   if(is.null(cuts)){cuts <- unique(c(0,data_surv$time))}
-#
-#   data_contrast <-
-#     data_surv %>%
-#     group_by(!!subgroup_sym, treatment) %>%
-#     {if(round_values==FALSE) . else {
-#       mutate(
-#         # round KM survival estimates (as described above) and base all contrasts on these values
-#         .,
-#         cml.event = ceiling_any(cumsum(replace_na(n.event, 0)), round_values),
-#         cml.censor = ceiling_any(cumsum(replace_na(n.censor, 0)), round_values),
-#         n.event = diff(c(0,cml.event)),
-#         n.censor = diff(c(0,cml.censor)),
-#         n.risk = ceiling_any(max(n.risk, na.rm=TRUE), round_values) - lag(cml.event + cml.censor,1,0),
-#       )
-#     }} %>%
-#     transmute(
-#       !!subgroup_sym,
-#       treatment,
-#
-#       time, lagtime, interval,
-#       period_start = as.integer(as.character(cut(time, cuts, right=TRUE, label=cuts[-length(cuts)]))),
-#       period_end = as.integer(as.character(cut(time, cuts, right=TRUE, label=cuts[-1]))),
-#       period = paste0(period_start, "-", period_end),
-#
-#       n.atrisk = n.risk,
-#       n.event,
-#       n.censor,
-#
-#       cml.persontime = cumsum(n.atrisk*interval),
-#       cml.event = cumsum(replace_na(n.event, 0)),
-#       cml.censor = cumsum(replace_na(n.censor, 0)),
-#
-#       surv = cumprod(1 - n.event / n.atrisk),
-#       risk = 1-surv,
-#
-#       haz = n.event / (n.atrisk * interval),
-#       cml.haz = cumsum(haz),
-#
-#       cml.persontime = cumsum(n.atrisk*interval),
-#       rate = n.event / (n.atrisk*interval),
-#       cml.rate = cml.event / cml.persontime,
-#
-#     ) %>%
-#     group_by(!!subgroup_sym, treatment, period_start, period_end, period) %>%
-#     summarise(
-#
-#       ## time-period-specific quantities
-#       ## as defined by period_start and period_end
-#
-#       persontime = sum(n.atrisk*interval), # total person-time at risk within time period
-#
-#       n.atrisk = first(n.atrisk), # number at risk at start of time period
-#       n.event = sum(n.event, na.rm=TRUE), # number of events within time period
-#       n.censor = sum(n.censor, na.rm=TRUE), # number censored within time period
-#
-#       rate = n.event/persontime, # = weighted.mean(haz, n.atrisk*interval), incidence rate. this is equivalent to a weighted average of the hazard ratio, with time-exposed as the weights
-#
-#       interval = sum(interval), # width of time period
-#
-#       ## quantities calculated from time zero until end of time period
-#       ## these should be the same as the daily values as at the end of the time period
-#
-#       surv = last(surv),
-#       risk = last(risk),
-#
-#       cml.haz = last(cml.haz),  # cumulative hazard from time zero to end of time period
-#
-#       cml.rate = last(cml.rate), # event rate from time zero to end of time period
-#
-#       # cml.persontime = last(cml.persontime), # total person-time at risk from time zero to end of time period
-#       cml.event = last(cml.event), # number of events from time zero to end of time period
-#       # cml.censor = last(cml.censor), # number censored from time zero to end of time period
-#
-#       # cml.summand = last(cml.summand), # summand used for estimation of SE of survival
-#
-#       .groups="drop"
-#     ) %>%
-#     pivot_wider(
-#       id_cols= all_of(c(subgroup, "period_start", "period_end", "period",  "interval")),
-#       names_from=treatment,
-#       names_glue="{.value}_{treatment}",
-#       values_from=c(
-#
-#         #persontime,
-#         #n.atrisk, n.event, n.censor,
-#         rate,
-#
-#         cml.haz,
-#         surv, risk,
-#         cml.event, cml.rate
-#       )
-#     ) %>%
-#     mutate(
-#
-#       ## time-period-specific quantities
-#
-#       # incidence rate ratio (equivalent to hazard ratio)
-#       irr = rate_1 / rate_0,
-#
-#       # incidence rate difference
-#       ird = rate_1 - rate_0,
-#
-#       ## quantities calculated from time zero until end of time period
-#       # these should be the same as values calculated on each day of follow up
-#       #eg compare final values in "daily" dataset with final values in "cut" or "overall" dataset and they should be identical
-#
-#       # survival ratio, standard error, and confidence limits
-#       kmsr = surv_1 / surv_0,
-#
-#       # risk ratio, standard error, and confidence limits
-#       kmrr = risk_1 / risk_0,
-#
-#       # risk difference, standard error and confidence limits
-#       kmrd = risk_1 - risk_0,
-#
-#       # cumulative incidence rate ratio
-#       cmlirr = cml.rate_1 / cml.rate_0,
-#
-#       # cumulative incidence rate difference
-#       cmlird = cml.rate_1 - cml.rate_0
-#     )
-# }
-#
-#
-#
-# cluster <- parallel::makeCluster(
-#   n_threads,
-#   type = "PSOCK" # this should work across multi-core windows or linux machines
-# )
-# #register it to be used by %dopar%
-# doParallel::registerDoParallel(cl = cluster)
-#
-# #### survival table in parallel ----
-#
-# test <- foreach(
-#     boot_id = boot_ids,
-#     .combine = 'bind_rows',
-#     .packages = c("dplyr", "tibble", "tidyr", "purrr")#,
-#     #.export = c("contrast_daily", "contrast_cuts", "contrast_overall")
-#   ) %dopar% {
-#     boot_id0 <- boot_id
-#
-#     data_surv_booti <-
-#       data_surv_boot %>%
-#       filter(boot_id==boot_id0)
-#
-#     contrast_daily <- kmcontrast(data_surv_booti, cuts=NULL, round_values=threshold) %>% add_column(boot_id=boot_id, .before=1)
-#     contrast_cuts <- kmcontrast(data_surv_booti, cuts=postbaselinecuts, round_values=threshold) %>% add_column(boot_id=boot_id, .before=1)
-#     contrast_overall <- kmcontrast(data_surv_booti, cuts=c(0,maxfup), round_values=threshold) %>% add_column(boot_id=boot_id, .before=1)
-#   }
-#
-# parallel::stopCluster(cl = cluster)
-#
-#
-# data_contrast_CL <-
-#   data_contrast_boot %>%
-#   filter(boot_id!=0) %>%
-#   group_by(!!subgroup_sym, period_start, period_end, period, interval) %>%
-#   summarise(
-#
-#     surv.median_0 = quantile_bs(surv_0, 0.5),
-#     surv.ll_0 = quantile_bs(surv_0, 0.025),
-#     surv.ul_0 = quantile_bs(surv_0, 0.975),
-#     surv.se_0 = sd(surv_0),
-#
-#     surv.median_1 = quantile_bs(surv_1, 0.5),
-#     surv.ll_1 = quantile_bs(surv_1, 0.025),
-#     surv.ul_1 = quantile_bs(surv_1, 0.975),
-#     surv.se_1 = sd(surv_1),
-#
-#     irr.median = quantile_bs(irr, 0.5),
-#     irr.ll = quantile_bs(irr, 0.025),
-#     irr.ul = quantile_bs(irr, 0.975),
-#     irr.se = sd(irr),
-#
-#     ird.median = quantile_bs(ird, 0.5),
-#     ird.ll = quantile_bs(ird, 0.025),
-#     ird.ul = quantile_bs(ird, 0.975),
-#     ird.se = sd(ird),
-#
-#     kmsr.median = quantile_bs(kmsr, 0.5),
-#     kmsr.ll = quantile_bs(kmsr, 0.025),
-#     kmsr.ul = quantile_bs(kmsr, 0.975),
-#     kmsr.se = sd(kmsr),
-#
-#     kmrr.median = quantile_bs(kmrr, 0.5),
-#     kmrr.ll = quantile_bs(kmrr, 0.025),
-#     kmrr.ul = quantile_bs(kmrr, 0.975),
-#     kmrr.se = sd(kmrr),
-#
-#     kmrd.median = quantile_bs(kmrd, 0.5),
-#     kmrd.ll = quantile_bs(kmrd, 0.025),
-#     kmrd.ul = quantile_bs(kmrd, 0.975),
-#     kmrd.se = sd(kmrd),
-#
-#     cmlirr.median = quantile_bs(cmlirr, 0.5),
-#     cmlirr.ll = quantile_bs(cmlirr, 0.025),
-#     cmlirr.ul = quantile_bs(cmlirr, 0.975),
-#     cmlirr.se = sd(cmlirr),
-#
-#     cmlird.median = quantile_bs(cmlird, 0.5),
-#     cmlird.ll = quantile_bs(cmlird, 0.025),
-#     cmlird.ul = quantile_bs(cmlird, 0.975),
-#     cmlird.se = sd(cmlird),
-#
-#     .groups="drop"
-#   )
-#
-# left_join(
-#   data_contrast_boot %>% filter(boot_id==0),
-#   data_contrast_CL,
-#   by=c(subgroup, "period_start", "period_end", "period", "interval")
-# )
-#
-#
-#
-#
-#
-#
-#
-#
-#
-#
-#
-#
-#
-#
-# kmcontrast_boot <- function(data_surv_boot, cuts=NULL, round_values=FALSE){
-#
-#   if(is.null(cuts)){cuts <- unique(c(0,data_surv_boot$time))}
-#
-#   data_contrast_boot <-
-#     data_surv_boot %>%
-#     group_by(boot_id, !!subgroup_sym, treatment) %>%
-#     {if(round_values==FALSE) . else {
-#         mutate(
-#           # round KM survival estimates (as described above) and base all contrasts on these values
-#           .,
-#           cml.event = ceiling_any(cumsum(replace_na(n.event, 0)), round_values),
-#           cml.censor = ceiling_any(cumsum(replace_na(n.censor, 0)), round_values),
-#           n.event = diff(c(0,cml.event)),
-#           n.censor = diff(c(0,cml.censor)),
-#           n.risk = ceiling_any(max(n.risk, na.rm=TRUE), round_values) - lag(cml.event + cml.censor,1,0),
-#         )
-#     }} %>%
-#     transmute(
-#       boot_id,
-#       !!subgroup_sym,
-#       treatment,
-#
-#       time, lagtime, interval,
-#       period_start = as.integer(as.character(cut(time, cuts, right=TRUE, label=cuts[-length(cuts)]))),
-#       period_end = as.integer(as.character(cut(time, cuts, right=TRUE, label=cuts[-1]))),
-#       period = paste0(period_start, "-", period_end),
-#
-#       n.atrisk = n.risk,
-#       n.event,
-#       n.censor,
-#
-#       cml.persontime = cumsum(n.atrisk*interval),
-#       cml.event = cumsum(replace_na(n.event, 0)),
-#       cml.censor = cumsum(replace_na(n.censor, 0)),
-#
-#       surv = cumprod(1 - n.event / n.atrisk),
-#       risk = 1-surv,
-#
-#       haz = n.event / (n.atrisk * interval),
-#       cml.haz = cumsum(haz),
-#
-#       cml.persontime = cumsum(n.atrisk*interval),
-#       rate = n.event / (n.atrisk*interval),
-#       cml.rate = cml.event / cml.persontime,
-#
-#     ) %>%
-#     group_by(boot_id, !!subgroup_sym, treatment, period_start, period_end, period) %>%
-#     summarise(
-#
-#       ## time-period-specific quantities
-#       ## as defined by period_start and period_end
-#
-#       persontime = sum(n.atrisk*interval), # total person-time at risk within time period
-#
-#       n.atrisk = first(n.atrisk), # number at risk at start of time period
-#       n.event = sum(n.event, na.rm=TRUE), # number of events within time period
-#       n.censor = sum(n.censor, na.rm=TRUE), # number censored within time period
-#
-#       rate = n.event/persontime, # = weighted.mean(haz, n.atrisk*interval), incidence rate. this is equivalent to a weighted average of the hazard ratio, with time-exposed as the weights
-#
-#       interval = sum(interval), # width of time period
-#
-#       ## quantities calculated from time zero until end of time period
-#       ## these should be the same as the daily values as at the end of the time period
-#
-#       surv = last(surv),
-#       #risk = last(risk),
-#
-#       cml.haz = last(cml.haz),  # cumulative hazard from time zero to end of time period
-#
-#       cml.rate = last(cml.rate), # event rate from time zero to end of time period
-#
-#       # cml.persontime = last(cml.persontime), # total person-time at risk from time zero to end of time period
-#       cml.event = last(cml.event), # number of events from time zero to end of time period
-#       # cml.censor = last(cml.censor), # number censored from time zero to end of time period
-#
-#       # cml.summand = last(cml.summand), # summand used for estimation of SE of survival
-#
-#       .groups="drop"
-#     ) %>%
-#     pivot_wider(
-#       id_cols= all_of(c("boot_id", subgroup, "period_start", "period_end")),
-#       names_from=treatment,
-#       names_glue="{.value}_{treatment}",
-#       values_from=c(
-#
-#         persontime,
-#         #n.atrisk, n.event, n.censor,
-#         rate,
-#
-#         cml.haz,
-#         surv, #risk,
-#         cml.event, cml.rate
-#         )
-#     ) %>%
-#     mutate(
-#
-#       ## time-period-specific quantities
-#
-#       # incidence rate ratio (equivalent to hazard ratio)
-#       irr = rate_1 / rate_0,
-#
-#       # incidence rate difference
-#       ird = rate_1 - rate_0,
-#
-#       ## quantities calculated from time zero until end of time period
-#       # these should be the same as values calculated on each day of follow up
-#       #eg compare final values in "daily" dataset with final values in "cut" or "overall" dataset and they should be identical
-#
-#       # survival ratio, standard error, and confidence limits
-#       kmsr = surv_1 / surv_0,
-#
-#       # risk ratio, standard error, and confidence limits
-#       kmrr = (1-surv_1) / (1-surv_0),
-#
-#       # risk difference, standard error and confidence limits
-#       kmrd = (1-surv_1) - (1-surv_0),
-#
-#       # cumulative incidence rate ratio
-#       cmlirr = cml.rate_1 / cml.rate_0,
-#
-#       # cumulative incidence rate difference
-#       cmlird = cml.rate_1 - cml.rate_0
-#     )
-#
-#   data_contrast_CL <-
-#     data_contrast_boot %>%
-#     filter(boot_id!=0) %>%
-#     group_by(!!subgroup_sym, period_start, period_end, period, interval) %>%
-#     summarise(
-#
-#       #surv.median_0 = quantile_bs(surv_0, 0.5),
-#       surv.ll_0 = quantile_bs(surv_0, 0.025),
-#       surv.ul_0 = quantile_bs(surv_0, 0.975),
-#       surv.se_0 = sd(surv_0),
-#
-#       #surv.median_1 = quantile_bs(surv_1, 0.5),
-#       surv.ll_1 = quantile_bs(surv_1, 0.025),
-#       surv.ul_1 = quantile_bs(surv_1, 0.975),
-#       surv.se_1 = sd(surv_1),
-#
-#       #irr.median = quantile_bs(irr, 0.5),
-#       irr.ll = quantile_bs(irr, 0.025),
-#       irr.ul = quantile_bs(irr, 0.975),
-#       irr.se = sd(irr),
-#
-#       #ird.median = quantile_bs(ird, 0.5),
-#       ird.ll = quantile_bs(ird, 0.025),
-#       ird.ul = quantile_bs(ird, 0.975),
-#       ird.se = sd(ird),
-#
-#       #kmsr.median = quantile_bs(kmsr, 0.5),
-#       kmsr.ll = quantile_bs(kmsr, 0.025),
-#       kmsr.ul = quantile_bs(kmsr, 0.975),
-#       kmsr.se = sd(kmsr),
-#
-#       #kmrr.median = quantile_bs(kmrr, 0.5),
-#       kmrr.ll = quantile_bs(kmrr, 0.025),
-#       kmrr.ul = quantile_bs(kmrr, 0.975),
-#       kmrr.se = sd(kmrr),
-#
-#       #kmrd.median = quantile_bs(kmrd, 0.5),
-#       kmrd.ll = quantile_bs(kmrd, 0.025),
-#       kmrd.ul = quantile_bs(kmrd, 0.975),
-#       kmrd.se = sd(kmrd),
-#
-#       #cmlirr.median = quantile_bs(cmlirr, 0.5),
-#       cmlirr.ll = quantile_bs(cmlirr, 0.025),
-#       cmlirr.ul = quantile_bs(cmlirr, 0.975),
-#       cmlirr.se = sd(cmlirr),
-#
-#       #cmlird.median = quantile_bs(cmlird, 0.5),
-#       cmlird.ll = quantile_bs(cmlird, 0.025),
-#       cmlird.ul = quantile_bs(cmlird, 0.975),
-#       cmlird.se = sd(cmlird),
-#
-#       .groups="drop"
-#     )
-#
-#     left_join(
-#       data_contrast_boot %>% filter(boot_id==0),
-#       data_contrast_CL,
-#       by=c(subgroup, "period_start", "period_end", "period", "interval")
-#     )
-#
-# }
-#
-# km_contrasts_daily <- kmcontrast(data_surv_boot, cuts=NULL, round_values=FALSE)
-# km_contrasts_cuts <- kmcontrast(data_surv_boot, cuts=postbaselinecuts, round_values=FALSE)
-# km_contrasts_overall <- kmcontrast(data_surv_boot, cuts=c(0,maxfup), round_values=FALSE)
-#
-# km_contrasts_rounded_daily <- kmcontrast(data_surv_boot, cuts=NULL, round_values=threshold)
-# km_contrasts_rounded_cuts <- kmcontrast(data_surv_boot, cuts=postbaselinecuts, round_values=threshold)
-# km_contrasts_rounded_overall <- kmcontrast(data_surv_boot, cuts=c(0,maxfup), round_values=threshold)
-#
-# write_csv(km_contrasts_rounded_daily, fs::path(output_dir, "contrasts_daily.csv"))
-# write_csv(km_contrasts_rounded_cuts, fs::path(output_dir, "contrasts_cuts.csv"))
-# write_csv(km_contrasts_rounded_overall, fs::path(output_dir, "contrasts_overall.csv"))
-#
-#
-# ## Cox models ----
-#
-# # Not done, because it will be slow
-# # use incidence rate ratio (IRR) instead, which is similar
-# # The Cox model assumes proportional hazards within each follow-up period, so the "shape" (in some sense) of the hazard across treatment groups is the same
-# # The IRR makes no such assumption, instead it just calculates the person-time-weighted hazard within each follow up period and takes the ratio
+
+plot_km_rounded <- data_surv_rounded %>%
+  ggplot(aes(group=treatment_descr, colour=treatment_descr, fill=treatment_descr)) +
+  geom_step(aes(x=time, y=1-surv))+
+  geom_rect(aes(xmin=lagtime, xmax=time, ymin=1-surv.ll, ymax=1-surv.ul), alpha=0.1, colour="transparent")+
+  facet_grid(rows=vars(!!subgroup_sym))+
+  scale_color_brewer(type="qual", palette="Set1", na.value="grey") +
+  scale_fill_brewer(type="qual", palette="Set1", guide="none", na.value="grey") +
+  scale_x_continuous(breaks = seq(0,600,14))+
+  scale_y_continuous(expand = expansion(mult=c(0,0.01)))+
+  coord_cartesian(xlim=c(0, NA))+
+  labs(
+    x="Days",
+    y="Cumulative incidence",
+    colour=NULL,
+    title=NULL
+  )+
+  theme_minimal()+
+  theme(
+    axis.line.x = element_line(colour = "black"),
+    panel.grid.minor.x = element_blank(),
+    legend.position=c(.05,.95),
+    legend.justification = c(0,1),
+  )
+
+plot_km_rounded
+
+ggsave(filename=fs::path(output_dir, "km_plot_rounded.png"), plot_km, width=20, height=15, units="cm")
+
+
+
+## calculate quantities relating to kaplan-meier curve and their ratio / difference / etc ----
+
+kmcontrast_boot <- function(data_surv_boot, cuts=NULL, round_values=FALSE){
+
+  if(is.null(cuts)){cuts <- unique(c(0,data_surv_boot$time))}
+
+  data_contrast_boot <-
+    data_surv_boot %>%
+    group_by(boot_id, !!subgroup_sym, treatment) %>%
+    {if(round_values==FALSE) . else {
+        mutate(
+          # round KM survival estimates (as described above) and base all contrasts on these values
+          .,
+          cml.event = ceiling_any(cumsum(replace_na(n.event, 0)), round_values),
+          cml.censor = ceiling_any(cumsum(replace_na(n.censor, 0)), round_values),
+          n.event = diff(c(0,cml.event)),
+          n.censor = diff(c(0,cml.censor)),
+          n.risk = ceiling_any(max(n.risk, na.rm=TRUE), round_values) - lag(cml.event + cml.censor,1,0),
+        )
+    }} %>%
+    transmute(
+      boot_id,
+      !!subgroup_sym,
+      treatment,
+
+      time, lagtime, interval,
+      period_start = as.integer(as.character(cut(time, cuts, right=TRUE, label=cuts[-length(cuts)]))),
+      period_end = as.integer(as.character(cut(time, cuts, right=TRUE, label=cuts[-1]))),
+      period = paste0(period_start, "-", period_end),
+
+      n.atrisk = n.risk,
+      n.event,
+      n.censor,
+
+      cml.persontime = cumsum(n.atrisk*interval),
+      cml.event = cumsum(replace_na(n.event, 0)),
+      cml.censor = cumsum(replace_na(n.censor, 0)),
+
+      surv = cumprod(1 - n.event / n.atrisk),
+      risk = 1-surv,
+
+      haz = n.event / (n.atrisk * interval),
+      cml.haz = cumsum(haz),
+
+      cml.persontime = cumsum(n.atrisk*interval),
+      rate = n.event / (n.atrisk*interval),
+      cml.rate = cml.event / cml.persontime,
+
+    ) %>%
+    group_by(boot_id, !!subgroup_sym, treatment, period_start, period_end, period) %>%
+    summarise(
+
+      ## time-period-specific quantities
+      ## as defined by period_start and period_end
+
+      persontime = sum(n.atrisk*interval), # total person-time at risk within time period
+
+      n.atrisk = first(n.atrisk), # number at risk at start of time period
+      n.event = sum(n.event, na.rm=TRUE), # number of events within time period
+      n.censor = sum(n.censor, na.rm=TRUE), # number censored within time period
+
+      rate = n.event/persontime, # = weighted.mean(haz, n.atrisk*interval), incidence rate. this is equivalent to a weighted average of the hazard ratio, with time-exposed as the weights
+
+      interval = sum(interval), # width of time period
+
+      ## quantities calculated from time zero until end of time period
+      ## these should be the same as the daily values as at the end of the time period
+
+      surv = last(surv),
+      #risk = last(risk),
+
+      cml.haz = last(cml.haz),  # cumulative hazard from time zero to end of time period
+
+      cml.rate = last(cml.rate), # event rate from time zero to end of time period
+
+      # cml.persontime = last(cml.persontime), # total person-time at risk from time zero to end of time period
+      cml.event = last(cml.event), # number of events from time zero to end of time period
+      # cml.censor = last(cml.censor), # number censored from time zero to end of time period
+
+      # cml.summand = last(cml.summand), # summand used for estimation of SE of survival
+
+      .groups="drop"
+    ) %>%
+    pivot_wider(
+      id_cols= all_of(c("boot_id", subgroup, "period_start", "period_end")),
+      names_from=treatment,
+      names_glue="{.value}_{treatment}",
+      values_from=c(
+
+        persontime,
+        #n.atrisk, n.event, n.censor,
+        rate,
+
+        cml.haz,
+        surv, #risk,
+        cml.event, cml.rate
+        )
+    ) %>%
+    mutate(
+
+      ## time-period-specific quantities
+
+      # incidence rate ratio (equivalent to hazard ratio)
+      irr = rate_1 / rate_0,
+
+      # incidence rate difference
+      ird = rate_1 - rate_0,
+
+      ## quantities calculated from time zero until end of time period
+      # these should be the same as values calculated on each day of follow up
+      #eg compare final values in "daily" dataset with final values in "cut" or "overall" dataset and they should be identical
+
+      # survival ratio, standard error, and confidence limits
+      kmsr = surv_1 / surv_0,
+
+      # risk ratio, standard error, and confidence limits
+      kmrr = (1-surv_1) / (1-surv_0),
+
+      # risk difference, standard error and confidence limits
+      kmrd = (1-surv_1) - (1-surv_0),
+
+      # cumulative incidence rate ratio
+      cmlirr = cml.rate_1 / cml.rate_0,
+
+      # cumulative incidence rate difference
+      cmlird = cml.rate_1 - cml.rate_0
+    )
+
+  data_contrast_CL <-
+    data_contrast_boot %>%
+    filter(boot_id!=0) %>%
+    group_by(!!subgroup_sym, period_start, period_end) %>%
+    summarise(
+
+      #surv.median_0 = quantile_bs(surv_0, 0.5),
+      surv.ll_0 = quantile_bs(surv_0, 0.025),
+      surv.ul_0 = quantile_bs(surv_0, 0.975),
+      surv.se_0 = sd(surv_0),
+
+      #surv.median_1 = quantile_bs(surv_1, 0.5),
+      surv.ll_1 = quantile_bs(surv_1, 0.025),
+      surv.ul_1 = quantile_bs(surv_1, 0.975),
+      surv.se_1 = sd(surv_1),
+
+      #irr.median = quantile_bs(irr, 0.5),
+      irr.ll = quantile_bs(irr, 0.025),
+      irr.ul = quantile_bs(irr, 0.975),
+      irr.se = sd(irr),
+
+      #ird.median = quantile_bs(ird, 0.5),
+      ird.ll = quantile_bs(ird, 0.025),
+      ird.ul = quantile_bs(ird, 0.975),
+      ird.se = sd(ird),
+
+      #kmsr.median = quantile_bs(kmsr, 0.5),
+      kmsr.ll = quantile_bs(kmsr, 0.025),
+      kmsr.ul = quantile_bs(kmsr, 0.975),
+      kmsr.se = sd(kmsr),
+
+      #kmrr.median = quantile_bs(kmrr, 0.5),
+      kmrr.ll = quantile_bs(kmrr, 0.025),
+      kmrr.ul = quantile_bs(kmrr, 0.975),
+      kmrr.se = sd(kmrr),
+
+      #kmrd.median = quantile_bs(kmrd, 0.5),
+      kmrd.ll = quantile_bs(kmrd, 0.025),
+      kmrd.ul = quantile_bs(kmrd, 0.975),
+      kmrd.se = sd(kmrd),
+
+      #cmlirr.median = quantile_bs(cmlirr, 0.5),
+      cmlirr.ll = quantile_bs(cmlirr, 0.025),
+      cmlirr.ul = quantile_bs(cmlirr, 0.975),
+      cmlirr.se = sd(cmlirr),
+
+      #cmlird.median = quantile_bs(cmlird, 0.5),
+      cmlird.ll = quantile_bs(cmlird, 0.025),
+      cmlird.ul = quantile_bs(cmlird, 0.975),
+      cmlird.se = sd(cmlird),
+
+      .groups="drop"
+    )
+
+    left_join(
+      data_contrast_boot %>% filter(boot_id==0),
+      data_contrast_CL,
+      by=c(subgroup, "period_start", "period_end")
+    )
+
+}
+
+km_contrasts_daily <- kmcontrast_boot(data_surv_boot, cuts=NULL, round_values=FALSE)
+km_contrasts_cuts <- kmcontrast_boot(data_surv_boot, cuts=postbaselinecuts, round_values=FALSE)
+km_contrasts_overall <- kmcontrast_boot(data_surv_boot, cuts=c(0,maxfup), round_values=FALSE)
+
+km_contrasts_rounded_daily <- kmcontrast_boot(data_surv_boot, cuts=NULL, round_values=threshold)
+km_contrasts_rounded_cuts <- kmcontrast_boot(data_surv_boot, cuts=postbaselinecuts, round_values=threshold)
+km_contrasts_rounded_overall <- kmcontrast_boot(data_surv_boot, cuts=c(0,maxfup), round_values=threshold)
+
+write_csv(km_contrasts_rounded_daily, fs::path(output_dir, "contrasts_daily.csv"))
+write_csv(km_contrasts_rounded_cuts, fs::path(output_dir, "contrasts_cuts.csv"))
+write_csv(km_contrasts_rounded_overall, fs::path(output_dir, "contrasts_overall.csv"))
+
+
+## Cox models ----
+
+# Not done, because it will be slow
+# use incidence rate ratio (IRR) instead, which is similar
+# The Cox model assumes proportional hazards within each follow-up period, so the "shape" (in some sense) of the hazard across treatment groups is the same
+# The IRR makes no such assumption, instead it just calculates the person-time-weighted hazard within each follow up period and takes the ratio
