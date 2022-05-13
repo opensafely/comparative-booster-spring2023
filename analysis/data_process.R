@@ -233,7 +233,7 @@ data_processed <- data_extract %>%
 
     prior_tests_cat = cut(prior_covid_test_frequency, breaks=c(0, 1, 2, 3, Inf), labels=c("0", "1", "2", "3+"), right=FALSE),
 
-    prior_covid_infection = !is.na(postest_0_date)  | !is.na(covidemergency_0_date) | !is.na(covidadmitted_0_date) | !is.na(primary_care_covid_case_0_date),
+    prior_covid_infection = (!is.na(postest_0_date))  | (!is.na(covidemergency_0_date)) | (!is.na(covidadmitted_0_date)) | (!is.na(primary_care_covid_case_0_date)),
 
     covidemergency_date = pmin(covidemergency_date, covidadmitted_date, na.rm=TRUE),
 
