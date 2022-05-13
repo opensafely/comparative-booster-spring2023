@@ -167,10 +167,10 @@ if(exists("matchset")){
     exact <- c(
 
       "vax3_date",
-      "jcvi_ageband",
-      "cev_cv",
       "vax12_type",
+      "jcvi_ageband",
       "region",
+      "cev_cv",
       "imd_Q5",
       NULL
     )
