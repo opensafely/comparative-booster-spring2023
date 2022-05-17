@@ -11,4 +11,4 @@ venv/
 .Rproj.user/
 /write-up/figures/*
 /write-up/*.html
-/released-outputs/*
+/released_outputs/*
