@@ -33,7 +33,7 @@ events_lookup <- tribble(
   "noncovidadmitted", "noncovidadmitted_date", "Non-COVID-19 hospitalisation",
   "covidadmittedproxy1", "covidadmittedproxy1_date", "COVID-19 hospitalisation (A&E proxy)",
   "covidadmittedproxy2", "covidadmittedproxy2_date", "COVID-19 hospitalisation (A&E proxy v2)",
-  "covidcc", "covidcc_date", "COVID-19 critical care",
+  "covidcritcare", "covidcritcare_date", "COVID-19 critical care",
   "coviddeath", "coviddeath_date", "COVID-19 death",
   "noncoviddeath", "noncoviddeath_date", "Non-COVID-19 death",
   "death", "death_date", "Any death",
@@ -87,7 +87,7 @@ recoder <-
       "COVID-19 hospitalisation" = "covidadmitted",
       "COVID-19 hospitalisation (A&E proxy)" = "covidadmittedproxy1",
       "COVID-19 hospitalisation (A&E proxy v2)" = "covidadmittedproxy2",
-      "COVID-19 critical care" = "covidcc",
+      "COVID-19 critical care" = "covidcritcare",
       "COVID-19 death" = "coviddeath",
       "Non-COVID-19 death" = "noncoviddeath",
       "All-cause death" = "death"

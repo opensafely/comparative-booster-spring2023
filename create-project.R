@@ -348,7 +348,7 @@ actions_list <- splice(
   action_km("A", "all", "covidadmittedproxy1"),
   action_km("A", "all", "covidadmitted"),
   #action_km("A", "all", "noncovidadmitted"),
-  #action_km("A", "all", "covidcc"),
+  #action_km("A", "all", "covidcritcare"),
   action_km("A", "all", "coviddeath"),
   action_km("A", "all", "noncoviddeath"),
 
@@ -360,7 +360,7 @@ actions_list <- splice(
   action_km("A", "vax12_type", "covidadmittedproxy1"),
   action_km("A", "vax12_type", "covidadmitted"),
   #action_km("A", "vax12_type", "noncovidadmitted"),
-  #action_km("A", "vax12_type", "covidcc"),
+  #action_km("A", "vax12_type", "covidcritcare"),
   action_km("A", "vax12_type", "coviddeath"),
   action_km("A", "vax12_type", "noncoviddeath"),
 
@@ -372,7 +372,7 @@ actions_list <- splice(
   action_km("A", "cev_cv", "covidadmittedproxy1"),
   action_km("A", "cev_cv", "covidadmitted"),
   #action_km("A", "cev_cv", "noncovidadmitted"),
-  #action_km("A", "cev_cv", "covidcc"),
+  #action_km("A", "cev_cv", "covidcritcare"),
   action_km("A", "cev_cv", "coviddeath"),
   action_km("A", "cev_cv", "noncoviddeath"),
 
@@ -384,7 +384,7 @@ actions_list <- splice(
   action_km("A", "prior_covid_infection", "covidadmittedproxy1"),
   action_km("A", "prior_covid_infection", "covidadmitted"),
   #action_km("A", "prior_covid_infection", "noncovidadmitted"),
-  #action_km("A", "prior_covid_infection", "covidcc"),
+  #action_km("A", "prior_covid_infection", "covidcritcare"),
   action_km("A", "prior_covid_infection", "coviddeath"),
   action_km("A", "prior_covid_infection", "noncoviddeath"),
 
@@ -396,7 +396,7 @@ actions_list <- splice(
   action_km("A", "age65plus", "covidadmittedproxy1"),
   action_km("A", "age65plus", "covidadmitted"),
   #action_km("A", "age65plus", "noncovidadmitted"),
-  #action_km("A", "age65plus", "covidcc"),
+  #action_km("A", "age65plus", "covidcritcare"),
   action_km("A", "age65plus", "coviddeath"),
   action_km("A", "age65plus", "noncoviddeath"),
 
@@ -407,7 +407,7 @@ actions_list <- splice(
   action_km("A", "variantera", "covidadmittedproxy1"),
   action_km("A", "variantera", "covidadmitted"),
   #action_km("A", "variantera", "noncovidadmitted"),
-  #action_km("A", "variantera", "covidcc"),
+  #action_km("A", "variantera", "covidcritcare"),
   action_km("A", "variantera", "coviddeath"),
   action_km("A", "variantera", "noncoviddeath"),
 
@@ -423,7 +423,7 @@ actions_list <- splice(
   action_km("B", "all", "covidadmittedproxy1"),
   action_km("B", "all", "covidadmitted"),
   #action_km("B", "all", "noncovidadmitted"),
-  #action_km("B", "all", "covidcc"),
+  #action_km("B", "all", "covidcritcare"),
   action_km("B", "all", "coviddeath"),
   action_km("B", "all", "noncoviddeath"),
 
@@ -435,7 +435,7 @@ actions_list <- splice(
   action_km("B", "vax12_type", "covidadmittedproxy1"),
   action_km("B", "vax12_type", "covidadmitted"),
   #action_km("B", "vax12_type", "noncovidadmitted"),
-  #action_km("B", "vax12_type", "covidcc"),
+  #action_km("B", "vax12_type", "covidcritcare"),
   action_km("B", "vax12_type", "coviddeath"),
   action_km("B", "vax12_type", "noncoviddeath"),
 
@@ -447,7 +447,7 @@ actions_list <- splice(
   action_km("B", "cev_cv", "covidadmittedproxy1"),
   action_km("B", "cev_cv", "covidadmitted"),
   #action_km("B", "cev_cv", "noncovidadmitted"),
-  #action_km("B", "cev_cv", "covidcc"),
+  #action_km("B", "cev_cv", "covidcritcare"),
   action_km("B", "cev_cv", "coviddeath"),
   action_km("B", "cev_cv", "noncoviddeath"),
 
@@ -459,7 +459,7 @@ actions_list <- splice(
   action_km("B", "prior_covid_infection", "covidadmittedproxy1"),
   action_km("B", "prior_covid_infection", "covidadmitted"),
   #action_km("B", "prior_covid_infection", "noncovidadmitted"),
-  #action_km("B", "prior_covid_infection", "covidcc"),
+  #action_km("B", "prior_covid_infection", "covidcritcare"),
   action_km("B", "prior_covid_infection", "coviddeath"),
   action_km("B", "prior_covid_infection", "noncoviddeath"),
 
@@ -471,7 +471,7 @@ actions_list <- splice(
   action_km("B", "age65plus", "covidadmittedproxy1"),
   action_km("B", "age65plus", "covidadmitted"),
   #action_km("B", "age65plus", "noncovidadmitted"),
-  #action_km("B", "age65plus", "covidcc"),
+  action_km("B", "age65plus", "covidcritcare"),
   action_km("B", "age65plus", "coviddeath"),
   action_km("B", "age65plus", "noncoviddeath"),
 
@@ -482,7 +482,7 @@ actions_list <- splice(
   action_km("B", "variantera", "covidadmittedproxy1"),
   action_km("B", "variantera", "covidadmitted"),
   #action_km("B", "variantera", "noncovidadmitted"),
-  #action_km("B", "variantera", "covidcc"),
+  #action_km("B", "variantera", "covidcritcare"),
   action_km("B", "variantera", "coviddeath"),
   action_km("B", "variantera", "noncoviddeath"),
 

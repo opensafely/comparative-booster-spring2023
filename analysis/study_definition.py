@@ -68,6 +68,113 @@ def vaccination_date_X(name, index_date, n, product_name_matches=None, target_di
 
 
 
+def critcare_dates(name, on_or_after, n, with_these_diagnoses, with_admission_method):
+  
+  
+  def var_signature_date(
+    # variable signature for date of hosp admission
+    name,
+    on_or_after,
+    with_these_diagnoses,
+    with_admission_method
+  ):
+    return {
+      name: patients.admitted_to_hospital(
+        returning = "date_admitted",
+        with_these_diagnoses = with_these_diagnoses,
+        with_admission_method = with_admission_method,
+        on_or_after = on_or_after,
+        date_format = "YYYY-MM-DD",
+        find_first_match_in_period = True
+      )
+    }
+    
+  
+  def var_signature_ccdays(
+    # variable signature for days in critical care
+    name,
+    event_date,
+    with_these_diagnoses,
+    with_admission_method
+  ):
+    return {
+      name: patients.admitted_to_hospital(
+        returning = "days_in_critical_care",
+        with_these_diagnoses = with_these_diagnoses,
+        with_admission_method = with_admission_method,
+        between = [event_date, event_date],
+        find_first_match_in_period = True,
+        return_expectations = {
+          "category":{"ratios": {"0": 0.8, "1": 0.1, "2": 0.1}}
+        }
+      )
+    }
+    
+  # define a sequence of n variables for date of admission and associated number of days in critical care
+  
+  # initialise for first date
+  variables_date = var_signature_date(f"{name}_1_date", on_or_after, with_these_diagnoses, with_admission_method)
+  variables_ccdays = var_signature_ccdays(f"{name}_1_ccdays", f"{name}_1_date", with_these_diagnoses, with_admission_method)
+  #isadmission_cc = {"1" : f"{name}_1_date AND ({name}_1_ccdays > 0)"}
+  
+  # loop for subsequent dates 
+  for i in range(2, n+1):
+    variables_date.update(
+      var_signature_date(
+        name = f"{name}_{i}_date", 
+        on_or_after = f"{name}_{i-1}_date + 1 days",
+        with_these_diagnoses = with_these_diagnoses,
+        with_admission_method = with_admission_method
+      )
+    )
+    
+    variables_ccdays.update(
+      var_signature_ccdays(
+        name = f"{name}_{i}_ccdays", 
+        event_date = f"{name}_{i}_date",
+        with_these_diagnoses = with_these_diagnoses,
+        with_admission_method = with_admission_method
+      )
+    )
+    
+    # isadmission_cc.update(
+    #   {i : f"{name}_{i}_date AND ({name}_{i}_ccdays > 0)"}
+    # )
+  
+  
+  # if no critical care admission
+  #isadmission_cc.update({"0" : "DEFAULT"})
+    
+  # collect variables into single dict
+  variables = {**variables_date , **variables_ccdays}
+  
+  ## further logic if study definition functionality improves!
+  
+  # variable to identify the first admission after "on_or_after", if any, that was a critical care admission
+  # critcareindex_signature = {
+  #   critcare_index : patients.categorised_as(
+  #     isadmission_cc,
+  #     **variables
+  #   ),
+  #   return_expectations={
+  #       "category":{"ratios": {"0": 0.8, "1": 0.1, "2": 0.1}}
+  #   },
+  # }
+  
+  
+  # variable_names = variables.keys() # FIXME and then also make non-critcare dates in this list null or "" on a patient-pby-patient basis
+  # # put into single "minimum_of" statement
+  # var_signature = {
+  #   name : patients.minimum_of(
+  #     *variable_names,
+  #     **variables
+  #   )
+  # }
+  
+  return variables
+
+
+
 # Specify study defeinition
 study = StudyDefinition(
   
@@ -976,15 +1083,12 @@ study = StudyDefinition(
     find_first_match_in_period=True,
   ),
   
-  covidadmitted_ccdays = patients.admitted_to_hospital(
-    returning = "days_in_critical_care",
-    find_first_match_in_period = True,
-    with_admission_method=["21", "22", "23", "24", "25", "2A", "2B", "2C", "2D", "28"],
-    with_these_diagnoses=codelists.covid_icd10,
-    on_or_after="covid_vax_disease_3_date",
-    return_expectations={
-      "category": {"ratios": {"0": 0.75, "1": 0.20,  "2": 0.05}},
-    },
+  **critcare_dates(
+    name = "potentialcovidcritcare", 
+    on_or_after = "covid_vax_disease_3_date", 
+    n = 3,
+    with_admission_method = ["21", "22", "23", "24", "25", "2A", "2B", "2C", "2D", "28"],
+    with_these_diagnoses = codelists.covid_icd10
   ),
   
   # Covid-related death

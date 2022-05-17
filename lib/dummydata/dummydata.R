@@ -308,10 +308,42 @@ sim_list = lst(
     missing_rate = ~0.7
   ),
 
-  covidadmitted_ccdays = bn_node(
-    ~as.factor(as.integer(rpois(n=..n, 0.5))),
-    missing_rate = ~is.na(covidadmitted_day)
+  #placeholder for single criticalcare variable ---
+  # covidcritcare_day = bn_node(
+  #   ~as.integer(runif(n=..n, covid_vax_disease_3_day, covid_vax_disease_3_day+100)),
+  #   missing_rate = ~0.8
+  # ),
+
+  potentialcovidcritcare_1_day = bn_node(
+    ~as.integer(runif(n=..n, covid_vax_disease_3_day, covid_vax_disease_3_day+70)),
+    missing_rate = ~0.8
   ),
+
+  potentialcovidcritcare_2_day = bn_node(
+    ~as.integer(runif(n=..n, potentialcovidcritcare_1_day, potentialcovidcritcare_1_day+70)),
+    missing_rate = ~0.8
+  ),
+
+  potentialcovidcritcare_3_day = bn_node(
+    ~as.integer(runif(n=..n, potentialcovidcritcare_2_day, potentialcovidcritcare_2_day+70)),
+    missing_rate = ~0.8
+  ),
+
+  potentialcovidcritcare_1_ccdays = bn_node(
+    ~as.factor(as.integer(rexp(n=..n, 1))),
+    needs = "potentialcovidcritcare_1_day"
+  ),
+
+  potentialcovidcritcare_2_ccdays = bn_node(
+    ~as.factor(as.integer(rexp(n=..n, 1))),
+    needs = "potentialcovidcritcare_2_day"
+  ),
+
+  potentialcovidcritcare_3_ccdays = bn_node(
+    ~as.factor(as.integer(rexp(n=..n, 1))),
+    needs = "potentialcovidcritcare_3_day"
+  ),
+
 
   admitted_unplanned_day = bn_node(
     ~as.integer(runif(n=..n, covid_vax_disease_3_day, covid_vax_disease_3_day+100)),
