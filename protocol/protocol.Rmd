@@ -136,7 +136,7 @@ Essential matching criteria:
 
   * Lower Layer Super Output Area (LSOA)
   * Middle Layer Super Output Area (MSOA)
-  * NHS Strategic Health Partnership (STP)
+  * NHS Sustainability and Transformation Partnership (STP)
   * NHS region (East of England, Midlands, London, North East and Yorkshire, North West, South East, South West)
 
 Additional matching criteria if possible:
@@ -157,13 +157,12 @@ Deprivation (IMD) is defined within LSOAs (lower-layer super output areas). Each
 
 ## Statistical Analysis
 
-We estimated Kaplan-Meier (KM) cumulative incidence curves separately by vaccine brand, and compared brands using the 10-week risk differences and risk ratios. 
+We estimated Kaplan-Meier (KM) cumulative incidence curves separately by vaccine brand, and compared brands using the 10-week risk differences and risk ratios. The incidence rate ratio (events per person-time-at-risk) in time-period specific intervals will also be reported. This is equivalent to a period-specific hazard ratio if a constant hazard within each time period is assumed. 
 
-Confidence limits for the KM estimate will be derived from complimentary log-log transformation.
-Confidence limits for the risk difference will be derived from the square root of the sum of squares the treatment-specific KM standard errors. The KM standard errors will use Greenwood's formula.
-Confidence limits for the survival ratio are straight-forward, and can be based on the standard error of the cumulative hazard. But confidence limits for the risk ratio (or relative risk) are more complicated. TBD.
+95% confidence limits for the KM estimates, risk differences, risk ratios, and incidence rate ratios are derived by bootstrapping the matched pairs. 500 bootstrap replicates will be used.
 
-Alternatively, we could bootstrap.
+<!-- Alternatively, analytic confidence limits can be derived as follows: Confidence limits for the KM estimate can be derived from complementary log-log transformation. Confidence limits for the risk difference can be derived from the square root of the sum of squares the treatment-specific KM standard errors. The KM standard errors can use Greenwood’s formula. Confidence limits for the survival ratio are straight-forward, and can be based on the standard error of the cumulative hazard. Confidence limits for the risk ratio (or relative risk) are TBD. -->
+
 
 <!-- [The primary estimand is the average treatment effect in the recruited population. To estimate this, expected cumulative incidence rates are estimated for each participant assuming treatment was received by everyone in both treatment groups at time zero. These curves are then averaged over all participants to give the marginal cumulative incidence. This is repeated assuming nobody is treated in either group, and their difference taken. Calculating standard errors for these quantities is challenging, whether approached analytically (due to complex variance components) or computationally (via bootstrapping, due to the large sample sizes involved) and are therefore not reported. ] -->
 

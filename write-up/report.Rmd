@@ -37,8 +37,8 @@ library('scales')
 # library('osutils')
 
 # where are the outputs (ie the inputs for this manuscript!) saved?
-output_dir_os <- here("output", "release-objects")
-#output_dir_os <- here("released_output", "release-objects")
+#output_dir_os <- here("output", "release-objects")
+output_dir_os <- here("released-output", "release-objects")
 
 # where should we put the objects created within this rmd script?
 output_dir_rmd <- here("write-up", "figures")
@@ -57,48 +57,21 @@ source(here("lib", "functions", "utility.R"))
 ## Import design elements
 source(here("lib", "design", "design.R"))
 
-matchset <- "A"
-
-match_flowchart <-  read_csv(here("output", "release-objects", matchset, "match_flowchart.csv"))
-match_coverage <- read_csv(here("output", "release-objects", matchset, "match_coverage.csv")) %>%
-   mutate(
-    treatment_descr = fct_recoderelevel(as.character(treatment),  recoder$treatment),
-  )
-
-match_table1 <- read_csv(here("output", "release-objects", matchset, "match_table1.csv"))
-match_table1by <- read_csv(here("output", "release-objects", matchset, "match_table1by.csv"))
-match_smd <-  read_csv(here("output", "release-objects", matchset, "match_smd.csv"))
-
-km_estimates <- read_csv(here("output", "release-objects", matchset, "km_estimates.csv")) %>% 
-  mutate(
-    outcome_descr = fct_recoderelevel(as.character(outcome),  recoder$outcome),
-    subgroup_descr = fct_recoderelevel(subgroup,  recoder$subgroup),
-    subgroup_level_descr = replace_na(subgroup_level_descr, "")
-  )
-contrasts_daily <- read_csv(here("output", "release-objects", matchset, "contrasts_daily.csv")) %>% 
-  mutate(
-    outcome_descr = fct_recoderelevel(as.character(outcome),  recoder$outcome),
-    subgroup_descr = fct_recoderelevel(subgroup,  recoder$subgroup),
-    subgroup_level_descr = replace_na(subgroup_level_descr, "")
-  )
-contrasts_overall <- read_csv(here("output", "release-objects", matchset, "contrasts_overall.csv")) %>% 
-  mutate(
-    outcome_descr = fct_recoderelevel(as.character(outcome),  recoder$outcome),
-    subgroup_descr = fct_recoderelevel(subgroup,  recoder$subgroup),
-    subgroup_level_descr = replace_na(subgroup_level_descr, "")
-  )
-
 
   outcomes <- 
     c(
       "postest",
       #"covidemergency",
       "covidadmitted",
+      "covidadmittedproxy1",
       #"covidcc",
       "coviddeath",
       "noncoviddeath"
     ) %>% 
     set_names(., .)
+
+
+
 
 
 ```
@@ -123,8 +96,18 @@ We considered all adults aged $\ge$ 18 years who received a booster dose of BNT1
 
 ## Matching 
 
-BNT162b2 booster recipients were matched with Moderna booster recipients on the following characteristics: date of booster dose; primary course vaccine brand; date of second vaccine dose, within 7 days; NHS region (East of England, Midlands, London, North East and Yorkshire, North West, South East, South West); evidence of prior SARS-CoV-2 infection (positive SARS-CoV-2 test, "probable" infection documented in primary care, or COVID-19 hospital admission); clinical risk groups used for prioritisation (clinically extremely vulnerable, clinically at-risk, neither); age, within 3 years; and age groups used by JCVI for prioritisation. 
-These matching criteria ensure that treatment groups are also matched within JCVI priority group.
+BNT162b2 booster recipients were matched with Moderna booster recipients using two different matching strategies. one simpler strategy that will identify more matches but the risk of greater imbalance between treatment groups, and another more complex strategy that will identify fewer matches but with less imbalance. 
+
+#### Matching strategy A
+
+Booster recipients were matched on the following characteristics: date of booster dose; primary course vaccine brand; date of second vaccine dose, within 7 days; NHS region (East of England, Midlands, London, North East and Yorkshire, North West, South East, South West); clinical risk groups used for prioritisation (clinically extremely vulnerable, clinically at-risk, neither); age, within 3 years and age groups used by JCVI for prioritisation; English Index of Multiple Deprivation, grouped by quintile.
+
+#### Matching strategy B
+
+Booster recipients were matched on the following characteristics: date of booster dose; primary course vaccine brand; date of second vaccine dose, within 7 days; Sustainability and Transformation Partnership (STP) a geographical grouping of NHS and local authorities; evidence of prior SARS-CoV-2 infection (positive SARS-CoV-2 test, "probable" infection documented in primary care, or COVID-19 hospital admission); clinical risk groups used for prioritisation (clinically extremely vulnerable, clinically at-risk, neither); age, within 3 years; and age groups used by JCVI for prioritisation; English Index of Multiple Deprivation, grouped by quintile; sex; and morbidity count (0, 1, 2 or more).
+
+Morbidity count included the following conditions: diabetes, BMI \> 40kg/m^2^, chronic heart disease, chronic kidney disease, chronic liver disease, chronic respiratory disease or severe asthma, chronic neurological disease.
+
 
 ## Outcomes
 
@@ -140,7 +123,6 @@ The following outcomes were considered:
 
 <!--# COVID-19 related A&E attendance and critical/intensive care admission we also considered but there were doubts over data the reliability of event ascertainment in these cases. -->
 
-<!--#
 
 ## Follow-up
 
@@ -148,7 +130,11 @@ Each person was followed from the day of boosting (i.e., time zero) until the ea
 
 ## Statistical Analysis
 
-We estimated Kaplan-Meier cumulative incidence curves separately by vaccine brand, and compared groups using the 10-week risk differences and risk ratios. 
+We estimated Kaplan-Meier (KM) cumulative incidence curves separately by vaccine brand, and compared brands using the 10-week risk differences and risk ratios. The incidence rate ratio (events per person-time-at-risk) in time-period specific intervals will also be reported. This is equivalent to a period-specific hazard ratio if a constant hazard within each time period is assumed. 
+
+<!-- 95% confidence limits for the KM estimates, risk differences, risk ratios, and incidence rate ratios are derived by bootstrapping the matched pairs. 500 bootstrap replicates will be used. -->
+
+95% confidence limits for the KM estimates were derived from the complementary log-log transformation. Confidence limits for the risk difference were derived from the sum of squares of the treatment-specific KM standard errors, derived from Greenwood’s formula. Confidence limits for the survival ratio were based on the standard error of the cumulative hazard. Confidence limits for the risk ratio were derived using the Delta method.
 
 
 <!-- [The primary estimand is the average treatment effect in the recruited population. To estimate this, expected cumulative incidence rates are estimated for each participant assuming treatment was received by everyone in both treatment groups at time zero. These curves are then averaged over all participants to give the marginal cumulative incidence. This is repeated assuming nobody is treated in either group, and their difference taken. Calculating standard errors for these quantities is challenging, whether approached analytically (due to complex variance components) or computationally (via bootstrapping, due to the large sample sizes involved) and are therefore not reported. ] -->
@@ -160,15 +146,63 @@ We also estimated comparative effectiveness separately in the following subgroup
 
 ## Software, code, and reproducibility
 
-Data management and analyses were conducted in Python version 3.8.10 and R version 4.0.2. All code is shared openly for review and re-use under MIT open license at <https://github.com/opensafely/comparative-booster>. The supplementary materials provide further details of the codelists and data sources used for all variables in the study. Detailed pseudonymised patient data is potentially re-identifiable and therefore not shared. Any reported figures based on counts below 6 are redacted or rounded for disclosure control.
+Data management and analyses were conducted in Python version 3.8.10 and R version 4.0.2. All code is shared openly for review and re-use under MIT open license at <https://github.com/opensafely/comparative-booster>. The supplementary materials provide further details of the codelists and data sources used for all variables in the study. Detailed pseudonymised patient data is potentially re-identifiable and therefore not shared. 
 
-This study will follow the STROBE-RECORD reporting guidelines.
+## Disclosure control
+Any reported figures based on counts below 6 must be redacted or rounded for disclosure control. To reduce secondary disclosure risk (e.g., by using two unredacted values to derive a redacted value), rounding is preferred.
+
+In this study, we round counts up to the nearest multiple of 7. Kaplan-Meier survival estimates are rounded upwards by deferring event-times until there are at least 7 events, so that each KM “step” is based on at least 7 events. All other quantities will be derived from these rounded KM estimates. 
+
+
 
 # Results
 
+
+
+```{r match-A, echo=FALSE, warning=FALSE, message=FALSE}
+
+matchset <- "A"
+
+match_flowchart <-  read_csv(fs::path(output_dir_os, matchset, "match_flowchart.csv"))
+match_coverage <- read_csv(fs::path(output_dir_os, matchset, "match_coverage.csv")) %>%
+   mutate(
+    treatment_descr = fct_recoderelevel(as.character(treatment),  recoder$treatment),
+  )
+
+match_table1 <- read_csv(fs::path(output_dir_os, matchset, "match_table1.csv"))
+match_table1by <- read_csv(fs::path(output_dir_os, matchset, "match_table1by.csv"))
+match_smd <-  read_csv(fs::path(output_dir_os, matchset, "match_smd.csv"))
+
+km_estimates <- read_csv(fs::path(output_dir_os, matchset, "km_estimates.csv")) %>% 
+  mutate(
+    outcome_descr = fct_recoderelevel(as.character(outcome),  recoder$outcome),
+    subgroup_descr = fct_recoderelevel(subgroup,  recoder$subgroup),
+    subgroup_level_descr = replace_na(subgroup_level_descr, "")
+  )
+contrasts_daily <- read_csv(fs::path(output_dir_os, matchset, "contrasts_daily.csv")) %>% 
+  mutate(
+    outcome_descr = fct_recoderelevel(as.character(outcome),  recoder$outcome),
+    subgroup_descr = fct_recoderelevel(subgroup,  recoder$subgroup),
+    subgroup_level_descr = replace_na(subgroup_level_descr, "")
+  )
+contrasts_overall <- read_csv(fs::path(output_dir_os, matchset, "contrasts_overall.csv")) %>% 
+  mutate(
+    outcome_descr = fct_recoderelevel(as.character(outcome),  recoder$outcome),
+    subgroup_descr = fct_recoderelevel(subgroup,  recoder$subgroup),
+    subgroup_level_descr = replace_na(subgroup_level_descr, "")
+  )
+
+```
+
+
 ## Study population and matching
 
-`r label_number(1, big.mark=",")(filter(match_flowchart, crit=="c0") %>% pull(n) %>% sum)` adults registered at a TPP practice received a booster vaccination of either BNT162b2 (`r label_number(1, big.mark=",")(filter(match_flowchart, crit=="c0", vax3_type=="pfizer") %>% pull(n))`) or Moderna (`r label_number(1, big.mark=",")(filter(match_flowchart, crit=="c0", vax3_type=="moderna") %>% pull(n))`) during the study period, with `r label_number(1, big.mark=",")(filter(match_flowchart, crit=="c6", vax3_type=="pfizer") %>% pull(n))` (`r label_percent(0.1)(filter(match_flowchart, crit=="c6", vax3_type=="pfizer") %>% pull(pct_all))`) and `r label_number(1, big.mark=",")(filter(match_flowchart, crit=="c6", vax3_type=="pfizer") %>% pull(n))` (`r label_percent(0.1)(filter(match_flowchart, crit=="c6", vax3_type=="moderna") %>% pull(pct_all))`) eligible for matching. `r label_number(1, big.mark=",")(filter(match_flowchart, crit=="c7", vax3_type=="pfizer") %>% pull(n))` were successfully matched in each group, `r label_percent(0.1)(filter(match_flowchart, crit=="c7", vax3_type=="pfizer") %>% pull(pct_step))` and `r label_percent(0.1)(filter(match_flowchart, crit=="c7", vax3_type=="moderna") %>% pull(pct_step))` respectively (Table 1, Figure 1).
+`r label_number(1, big.mark=",")(filter(match_flowchart, crit=="c0") %>% pull(n) %>% sum)` adults registered at a TPP practice received a booster vaccination of either BNT162b2 (`r label_number(1, big.mark=",")(filter(match_flowchart, crit=="c0", vax3_type=="pfizer") %>% pull(n))`) or Moderna (`r label_number(1, big.mark=",")(filter(match_flowchart, crit=="c0", vax3_type=="moderna") %>% pull(n))`) during the study period, with `r label_number(1, big.mark=",")(filter(match_flowchart, crit=="c6", vax3_type=="pfizer") %>% pull(n))` (`r label_percent(0.1)(filter(match_flowchart, crit=="c6", vax3_type=="pfizer") %>% pull(pct_all))`) and `r label_number(1, big.mark=",")(filter(match_flowchart, crit=="c6", vax3_type=="pfizer") %>% pull(n))` (`r label_percent(0.1)(filter(match_flowchart, crit=="c6", vax3_type=="moderna") %>% pull(pct_all))`) eligible for matching. 
+
+
+## Matching strategy A
+
+For the simpler matching criteria, `r label_number(1, big.mark=",")(filter(match_flowchart, crit=="c7", vax3_type=="pfizer") %>% pull(n))` were successfully matched in each group, `r label_percent(0.1)(filter(match_flowchart, crit=="c7", vax3_type=="pfizer") %>% pull(pct_step))` and `r label_percent(0.1)(filter(match_flowchart, crit=="c7", vax3_type=="moderna") %>% pull(pct_step))` respectively (Table 1, Figure 1).
 
 
 #### Table 1: inclusion criteria
@@ -396,9 +430,9 @@ contrasts_overall %>%
     persontime_1=label_number(1)(persontime_1/7),
     n.event_0, 
     n.event_1,
-    riskCI_0 = paste0(label_number(0.01)(1-surv_0), " (", label_number(0.01)(1-surv.ul_0), "-", label_number(0.01)(1-surv.ll_0), ")"),
-    riskCI_1 = paste0(label_number(0.01)(1-surv_1), " (", label_number(0.01)(1-surv.ul_1), "-", label_number(0.01)(1-surv.ll_1), ")"),
-    kmrdCI = paste0(label_number(0.01)(kmrd), " (", label_number(0.01)(kmrd.ll), "-", label_number(0.01)(kmrd.ul), ")"),
+    riskCI_0 = paste0(label_number(0.1, 10000)(1-surv_0), " (", label_number(0.1, 10000)(1-surv.ul_0), "-", label_number(0.1, 10000)(1-surv.ll_0), ")"),
+    riskCI_1 = paste0(label_number(0.1, 10000)(1-surv_1), " (", label_number(0.1, 10000)(1-surv.ul_1), "-", label_number(0.1, 10000)(1-surv.ll_1), ")"),
+    kmrdCI = paste0(label_number(0.1, 10000)(kmrd), " (", label_number(0.1, 10000)(kmrd.ll), "-", label_number(1, 10000)(kmrd.ul), ")"),
     kmrrCI = paste0(label_number(0.01)(kmrr), " (", label_number(0.01)(kmrr.ll), "-", label_number(0.01)(kmrr.ul), ")"),
     irrCI =  paste0(label_number(0.01)(irr), " (", label_number(0.01)(irr.ll), "-", label_number(0.01)(irr.ul), ")"),
     #coxhrCI =  paste0(label_number(0.01)(kmrr), " (", label_number(0.01)(coxhr.ll), "-", label_number(0.01)(coxhr.ul), ")"),
@@ -426,10 +460,10 @@ contrasts_overall %>%
     n.event_0 = "Events",
     n.event_1 = "Events",
     
-    riskCI_0 = "10-week Risk (95% CI)",
-    riskCI_1 = "10-week Risk (95% CI)",
+    riskCI_0 = "10-week Risk per 10,000 people (95% CI)",
+    riskCI_1 = "10-week Risk per 10,000 people (95% CI)",
     
-    kmrdCI = "Risk difference (95% CI)",
+    kmrdCI = "Risk difference per 10,000 people (95% CI)",
     kmrrCI = "Risk ratio (95% CI)",
     irrCI = "Incidence rate ratio (95% CI)",
     #coxhrCI = "Hazard ratio (95% CI)"
@@ -443,7 +477,7 @@ contrasts_overall %>%
     columns = ends_with("_1")
   )  %>%
    tab_spanner(
-    label = "Comparison",
+    label = "Comparison (reference=BNT162b2)",
     columns = ends_with("CI")
   ) %>%
   cols_align(
@@ -472,204 +506,191 @@ cat("  \n\n")
 
 &nbsp; &nbsp; &nbsp;
 
-#### Figure 3: Kaplan-Meier cumulative incidence estimates
+```{r, function-km, echo=FALSE, message=FALSE, warning=FALSE, out.width='100%', out.height='50%', results='asis', out.extra=''}
 
-Counts and survival estimates are based on values rounded up to the nearest 7, for disclosure control.
-
-```{r, figure-km, echo=FALSE, message=FALSE, warning=FALSE, out.width='90%', out.height='50%', results='asis', out.extra=''}
-plot_km <- km_estimates %>%
-  filter(
-    subgroup=="all",
-    outcome %in% outcomes
-  ) %>%
-  ggplot(aes(group=treatment_descr, colour=treatment_descr, fill=treatment_descr)) +
-  geom_step(aes(x=time, y=1-surv))+
-  geom_rect(aes(xmin=lagtime, xmax=time, ymin=1-surv.ll, ymax=1-surv.ul), alpha=0.1, colour="transparent")+
-  geom_hline(aes(yintercept=0), colour="black")+
-  facet_grid(rows=vars(outcome_descr), scales="free_y", switch="y")+
-  scale_color_brewer(type="qual", palette="Set1", na.value="grey") +
-  scale_fill_brewer(type="qual", palette="Set1", guide="none", na.value="grey") +
-  scale_x_continuous(breaks = seq(0,600,14), expand = expansion(mult=c(0,0.01)))+
-  scale_y_continuous(expand = expansion(mult=c(0,0.01)), )+
-  coord_cartesian(xlim=c(0, NA))+
-  labs(
-    x="Days",
-    y=NULL,
-    title="Risk",
-    colour=NULL
-  )+
-  theme_minimal(base_size = 9)+
-    theme(
-      legend.position=c(0.05,0.1),
-      legend.justification = c(0,0),
-      legend.direction = "vertical",
-      axis.text.x.top=element_text(hjust=0),
-
-      panel.border = element_blank(),
-      axis.line.y = element_line(colour = "black"),
-      axis.line.x.top = element_line(colour = "black"),
-
-      panel.grid.minor.x = element_blank(),
-      panel.grid.minor.y = element_blank(),
-      strip.background = element_blank(),
-      strip.placement="outside",
-      strip.text.x = element_text(angle=0),
-
-
-      panel.spacing = unit(0.8, "lines"),
-
-    )+
-    NULL
-
-
-
-plot_kmrd <- contrasts_daily %>%
-  filter(
-    subgroup=="all",
-    outcome %in% outcomes
-  ) %>%
-  ggplot(aes(group=subgroup_level_descr, colour=subgroup_level_descr, fill=subgroup_level_descr)) +
-  geom_step(aes(x=period_start, y=kmrd))+
-  geom_rect(aes(xmin=period_start, xmax=period_end, ymin=kmrd.ll, ymax=kmrd.ul), alpha=0.1, colour="transparent")+
-  geom_hline(aes(yintercept=0), colour="black")+
-  facet_grid(rows=vars(outcome_descr), scales="free_y")+
-  scale_color_brewer(type="qual", palette="Set1", na.value="grey") +
-  scale_fill_brewer(type="qual", palette="Set1", guide="none", na.value="grey") +
-  scale_x_continuous(breaks = seq(0,600,14), expand = expansion(mult=c(0,0.01)))+
-  scale_y_continuous(expand = expansion(mult=c(0,0.01)))+
-  coord_cartesian(xlim=c(0, NA))+
-  labs(
-    x="Days",
-    y=NULL,
-    title="Risk difference",
-    colour=NULL
-  )+
-  theme_minimal(base_size = 9)+
-    theme(
-      legend.position="none",
-      legend.direction = "vertical",
-      axis.text.x.top=element_text(hjust=0),
-
-      panel.border = element_blank(),
-      axis.line.y = element_line(colour = "black"),
-      axis.line.x.top = element_line(colour = "black"),
-
-      panel.grid.minor.x = element_blank(),
-      panel.grid.minor.y = element_blank(),
-      strip.background = element_blank(),
-      strip.text = element_blank(),
-
-
-      panel.spacing = unit(0.8, "lines"),
-
-    )+
-    NULL
-
-
-
-plot_kmrr <- contrasts_daily %>%
-  filter(
-    subgroup=="all",
-    outcome %in% outcomes
-  ) %>%
-  ggplot(aes(group=subgroup_level_descr, colour=subgroup_level_descr, fill=subgroup_level_descr)) +
-  geom_step(aes(x=period_start, y=kmrr))+
-  geom_rect(aes(xmin=period_start, xmax=period_end, ymin=kmrr.ll, ymax=kmrr.ul), alpha=0.1, colour="transparent")+
-  geom_hline(aes(yintercept=1), colour="black")+
-  facet_grid(rows=vars(outcome_descr), scales="free_y")+
-  scale_color_brewer(type="qual", palette="Set1", na.value="grey") +
-  scale_fill_brewer(type="qual", palette="Set1", guide="none", na.value="grey") +
-  scale_x_continuous(breaks = seq(0,600,14), expand = expansion(mult=c(0,0.01)))+
-  scale_y_log10(expand = expansion(mult=c(0,0.01)))+
-  coord_cartesian(xlim=c(0, NA))+
-  labs(
-    x="Days",
-    y=NULL,
-    title="Risk ratio",
-    colour=NULL
-  )+
-  theme_minimal(base_size = 9)+
-    theme(
-      legend.position="none",
-      legend.direction = "vertical",
-      axis.text.x.top=element_text(hjust=0),
-
-      panel.border = element_blank(),
-      axis.line.y = element_line(colour = "black"),
-      axis.line.x.top = element_line(colour = "black"),
-
-      panel.grid.minor.x = element_blank(),
-      panel.grid.minor.y = element_blank(),
-      strip.background = element_blank(),
-      strip.text = element_blank(),
-
-
-      panel.spacing = unit(0.8, "lines"),
-
-    )+
-    NULL
-
-
-plot_irr <- contrasts_daily %>%
-  # equivalent to the hazard
-  filter(
-    subgroup=="all",
-    outcome %in% outcomes
-  ) %>%
-  ggplot(aes(group=subgroup_level_descr, colour=subgroup_level_descr, fill=subgroup_level_descr)) +
-  geom_step(aes(x=period_start, y=irr))+
-  geom_rect(aes(xmin=period_start, xmax=period_end, ymin=irr.ll, ymax=irr.ul), alpha=0.1, colour="transparent")+
-  geom_hline(aes(yintercept=0), colour="black")+
-  facet_grid(rows=vars(outcome_descr), scales="free_y")+
-  scale_color_brewer(type="qual", palette="Set1", na.value="grey") +
-  scale_fill_brewer(type="qual", palette="Set1", guide="none", na.value="grey") +
-  scale_x_continuous(breaks = seq(0,600,14), expand = expansion(mult=c(0,0.01)))+
-  scale_y_log10(expand = expansion(mult=c(0,0.01)))+
-  coord_cartesian(xlim=c(0, NA))+
-  labs(
-    x="Days",
-    y=NULL,
-    title="Hazard ratio",
-    colour=NULL
-  )+
-  theme_minimal(base_size = 9)+
+km_theme <- function(...) {
   theme(
-    legend.position="none",
-    legend.direction = "vertical",
-    axis.text.x.top=element_text(hjust=0),
-    
-    panel.border = element_blank(),
-    axis.line.y = element_line(colour = "black"),
-    axis.line.x.top = element_line(colour = "black"),
-    
-    panel.grid.minor.x = element_blank(),
-    panel.grid.minor.y = element_blank(),
-    strip.background = element_blank(),
-    strip.text = element_blank(),
-    
-    
-    panel.spacing = unit(0.8, "lines"),
-    
-  )+
-  NULL
+      legend.position="none",
+      axis.text.x.top=element_text(hjust=0),
+      axis.line.y = element_line(colour = "black"),
+      axis.line.x.top = element_line(colour = "black"),
+      
+      panel.grid.minor.x = element_blank(),
+      panel.grid.minor.y = element_blank(),
+      strip.background = element_blank(),
+      strip.text = element_blank(),
+      
+      panel.border = element_blank(),
+      panel.spacing = unit(0.8, "lines"),
+      ...
+    )
+}
 
-plot_combined <- patchwork::wrap_plots(
-  plot_km, 
-  plot_kmrd, 
-  plot_kmrr, 
-  #plot_irr,
-  ncol=4
-)
+colourvalues <- RColorBrewer::brewer.pal(10, "Paired")[c(1,2,5,6,3,4,7,8,9,10)]
 
-ggsave(
-  filename="km.png",
-  path=output_dir_rmd,
-  plot=plot_combined,
-)
+plot_km_subgroup <- function(subgroup){
+    
+  subgroup0 <- subgroup
+  
+  if(subgroup=="all"){
+    colour_guide <- list(guides(colour="none"))
+  } else{
+    colour_guide <- NULL
+  }
+    
+  plot_km <- km_estimates %>%
+    filter(
+      subgroup==subgroup0,
+      outcome %in% outcomes
+    ) %>%
+    mutate(
+      colgroup = interaction(treatment_descr, subgroup_level_descr, sep=", "),
+      outcome_descr = fct_relabel(outcome_descr, str_wrap, width=10)
+    ) %>%
+    ggplot(aes(group=colgroup, colour=subgroup_level_descr, fill=subgroup_level_descr, alpha=treatment_descr)) +
+    geom_step(aes(x=time, y=1-surv))+
+    geom_rect(aes(xmin=lagtime, xmax=time, ymin=1-surv.ll, ymax=1-surv.ul), alpha=0.1, colour="transparent")+
+    geom_hline(aes(yintercept=0), colour="black")+
+    facet_grid(rows=vars(outcome_descr), scales="free_y", switch="y")+
+    scale_color_brewer(type="qual", palette="Set1", na.value="grey") +
+    scale_fill_brewer(type="qual", palette="Set1", guide="none", na.value="grey") +
+    #scale_color_manual(values=colourvalues, na.value="grey") +
+    #scale_fill_manual(values=colourvalues, guide="none", na.value="grey") +
+    scale_x_continuous(breaks = seq(0,600,14), expand = expansion(mult=c(0,0.01)))+
+    scale_y_continuous(expand = expansion(mult=c(0,0.01)), label=label_number(0.1, 10000))+
+    scale_alpha_discrete(range=c(0.3,0.9))+
+    coord_cartesian(xlim=c(0, NA))+
+    labs(
+      x="Days",
+      y=NULL,
+      title="Risk per 10,000",
+      colour=NULL,
+      alpha=NULL
+    )+
+    colour_guide+
+    theme_minimal(base_size = 9)+
+      theme(
+        legend.position = c(0.05,0.1),
+        legend.justification = c(0,0),
+        legend.direction = "vertical",
+        axis.text.x.top=element_text(hjust=0),
+  
+        panel.grid.minor.x = element_blank(),
+        panel.grid.minor.y = element_blank(),
+        strip.background = element_blank(),
+        strip.placement="outside",
+        strip.text.y.left = element_text(angle=0),
+  
+        panel.border = element_blank(),
+        panel.spacing = unit(0.8, "lines"),
+  
+      )+
+      NULL
+  
+  plot_kmrd <- contrasts_daily %>%
+    filter(
+      subgroup==subgroup0,
+      outcome %in% outcomes
+    ) %>%
+    ggplot(aes(group=subgroup_level_descr, colour=subgroup_level_descr, fill=subgroup_level_descr)) +
+    geom_step(aes(x=period_start, y=kmrd))+
+    geom_rect(aes(xmin=period_start, xmax=period_end, ymin=kmrd.ll, ymax=kmrd.ul), alpha=0.1, colour="transparent")+
+    geom_hline(aes(yintercept=0), colour="black")+
+    facet_grid(rows=vars(outcome_descr), scales="free_y")+
+    scale_color_brewer(type="qual", palette="Set1", na.value="grey") +
+    scale_fill_brewer(type="qual", palette="Set1", guide="none", na.value="grey") +
+    scale_x_continuous(breaks = seq(0,600,14), expand = expansion(mult=c(0,0.01)))+
+    scale_y_continuous(expand = expansion(mult=c(0,0.01)), label=label_number(0.1, 10000))+
+    coord_cartesian(xlim=c(0, NA))+
+    labs(
+      x="Days",
+      y=NULL,
+      title="Risk difference",
+      colour=NULL
+    )+
+    theme_minimal(base_size = 9)+
+    km_theme()+
+    NULL
+  
+  
+  
+  plot_kmrr <- contrasts_daily %>%
+    filter(
+      subgroup==subgroup0,
+      outcome %in% outcomes
+    ) %>%
+    ggplot(aes(group=subgroup_level_descr, colour=subgroup_level_descr, fill=subgroup_level_descr)) +
+    geom_step(aes(x=period_start, y=kmrr))+
+    geom_rect(aes(xmin=period_start, xmax=period_end, ymin=kmrr.ll, ymax=kmrr.ul), alpha=0.1, colour="transparent")+
+    geom_hline(aes(yintercept=1), colour="black")+
+    facet_grid(rows=vars(outcome_descr), scales="free_y")+
+    scale_color_brewer(type="qual", palette="Set1", na.value="grey") +
+    scale_fill_brewer(type="qual", palette="Set1", guide="none", na.value="grey") +
+    scale_x_continuous(breaks = seq(0,600,14), expand = expansion(mult=c(0,0.01)))+
+    scale_y_log10(expand = expansion(mult=c(0,0.01)))+
+    coord_cartesian(xlim=c(0, NA))+
+    labs(
+      x="Days",
+      y=NULL,
+      title="Risk ratio",
+      colour=NULL
+    )+
+    theme_minimal(base_size = 9)+
+    km_theme()+
+    NULL
+  
+  
+  plot_irr <- contrasts_daily %>%
+    # equivalent to the hazard
+    filter(
+      subgroup==subgroup0,
+      outcome %in% outcomes
+    ) %>%
+    ggplot(aes(group=subgroup_level_descr, colour=subgroup_level_descr, fill=subgroup_level_descr)) +
+    geom_step(aes(x=period_start, y=irr))+
+    geom_rect(aes(xmin=period_start, xmax=period_end, ymin=irr.ll, ymax=irr.ul), alpha=0.1, colour="transparent")+
+    geom_hline(aes(yintercept=0), colour="black")+
+    facet_grid(rows=vars(outcome_descr), scales="free_y")+
+    scale_color_brewer(type="qual", palette="Set1", na.value="grey") +
+    scale_fill_brewer(type="qual", palette="Set1", guide="none", na.value="grey") +
+    scale_x_continuous(breaks = seq(0,600,14), expand = expansion(mult=c(0,0.01)))+
+    scale_y_log10(expand = expansion(mult=c(0,0.01)))+
+    coord_cartesian(xlim=c(0, NA))+
+    labs(
+      x="Days",
+      y=NULL,
+      title="Hazard ratio",
+      colour=NULL
+    )+
+    theme_minimal(base_size = 9)+
+    km_theme()+
+    NULL
+  
+  plot_combined <- patchwork::wrap_plots(
+    plot_km, 
+    plot_kmrd, 
+    plot_kmrr, 
+    #plot_irr,
+    ncol=3
+  )
+  
+  ggsave(
+    filename=glue("km_{subgroup}.png"),
+    path=output_dir_rmd,
+    plot=plot_combined,
+  )
 
-plot_combined
-cat("  \n\n")
+  plot_combined
+}
 
+```
+
+
+#### Figure 3a: Kaplan-Meier cumulative incidence estimates
+
+
+```{r, figure-km-all, echo=FALSE, message=FALSE, warning=FALSE, out.width='100%', out.height='50%', results='asis', out.extra=''}
+plot_km_subgroup("all")
 ```
 
 &nbsp; &nbsp; &nbsp;
@@ -678,47 +699,96 @@ cat("  \n\n")
 
 &nbsp; &nbsp; &nbsp;
 
+#### Figure 3b: Kaplan-Meier cumulative incidence estimates, by primary course type
+
+```{r, figure-km-vax12_type, echo=FALSE, message=FALSE, warning=FALSE, out.width='100%', out.height='50%', results='asis', out.extra=''}
+plot_km_subgroup("vax12_type")
+```
+
+&nbsp; &nbsp; &nbsp;
+
+&nbsp; &nbsp; &nbsp;
+
+&nbsp; &nbsp; &nbsp;
+
+
+#### Figure 3c: Kaplan-Meier cumulative incidence estimates, by age group
+
+```{r, figure-km-age65plus, echo=FALSE, message=FALSE, warning=FALSE, out.width='100%', out.height='50%', results='asis', out.extra=''}
+plot_km_subgroup("age65plus")
+```
+
+&nbsp; &nbsp; &nbsp;
+
+&nbsp; &nbsp; &nbsp;
+
+&nbsp; &nbsp; &nbsp;
+
+#### Figure 3d Kaplan-Meier cumulative incidence estimates, by prior infection status
+
+```{r, figure-km-prior_covid_infection, echo=FALSE, message=FALSE, warning=FALSE, out.width='100%', out.height='50%', results='asis', out.extra=''}
+plot_km_subgroup("prior_covid_infection")
+```
+
+&nbsp; &nbsp; &nbsp;
+
+&nbsp; &nbsp; &nbsp;
+
+&nbsp; &nbsp; &nbsp;
+
+
+#### Figure 3e Kaplan-Meier cumulative incidence estimates, by clinical vulnerability
+
+```{r, figure-km-cev_cv, echo=FALSE, message=FALSE, warning=FALSE, out.width='100%', out.height='50%', results='asis', out.extra=''}
+plot_km_subgroup("cev_cv")
+```
+
+&nbsp; &nbsp; &nbsp;
+
+&nbsp; &nbsp; &nbsp;
+
+&nbsp; &nbsp; &nbsp;
 
 \newpage 
-# Supplement
+<!-- # Supplement -->
 
 
-## JCVI vaccine priority groups
+<!-- ## JCVI vaccine priority groups -->
 
-The Joint Committee on Vaccine and Immunisation (JCVI) priority groups were defined as follows:
-
-
-```{r, table-jcvi, echo=FALSE, message=FALSE, warning=FALSE}
-
-tibble(
-  `Priority group` = c("1", "2", "3", "4", "5", "6", "7", "8", "9", "10a", "10b"),
-  `Description` = c(
-    "Residents in a care home for older adults\nStaff working in care homes for older adults",
-    "All those 80 years of age and over\nFrontline health and social care workers",
-    "All those 75-79 years of age",
-    "All those 70-74 years of age\nIndividuals aged 16-69 in a high risk group",
-    "All those 65-69 years of age",
-    "Adults aged 16-64 years in an at-risk group",
-    "All those 60-64 years of age",
-    "All those 55-59 years of age",
-    "All those 50-54 years of age",
-    "All those 40-49 years of age",
-    "All those 18-39 years of age"
-  )
-) %>%
-mutate(Description = str_replace_all(Description, "\n", "<br>")) %>% 
-gt() %>% 
-fmt_markdown(columns = TRUE)
-
-cat("  \n\n")
-```
-
-See original priority groups here: https://assets.publishing.service.gov.uk/government/uploads/system/uploads/attachment_data/file/1007737/Greenbook_chapter_14a_30July2021.pdf#page=15
-See revised priority groups here: https://www.england.nhs.uk/coronavirus/wp-content/uploads/sites/52/2021/07/C1327-covid-19-vaccination-autumn-winter-phase-3-planning.pdf
-
-Note that we excluded care home residents and health care workers in our analysis, so members of JCVI group 1 are not included and JCVI group 2 includes only those aged 80 and over. The original priority group list has 9 groups, with a 10th group implicitly defined as "everybody else". Here we explicitly define this group, and split into two (10a and 10b) because of the earlier booster eligibility in the 40-49 group from 15 November 2021 onwards. (https://www.gov.uk/government/news/jcvi-issues-advice-on-covid-19-booster-vaccines-for-those-aged-40-to-49-and-second-doses-for-16-to-17-year-olds)
+<!-- The Joint Committee on Vaccine and Immunisation (JCVI) priority groups were defined as follows: -->
 
 
-\newpage
+<!-- ```{r, table-jcvi, echo=FALSE, message=FALSE, warning=FALSE} -->
 
-## References
+<!-- tibble( -->
+<!--   `Priority group` = c("1", "2", "3", "4", "5", "6", "7", "8", "9", "10a", "10b"), -->
+<!--   `Description` = c( -->
+<!--     "Residents in a care home for older adults\nStaff working in care homes for older adults", -->
+<!--     "80 years of age and over\nFrontline health and social care workers", -->
+<!--     "75-79 years of age", -->
+<!--     "70-74 years of age\nIndividuals aged 16-69 in a high risk group", -->
+<!--     "65-69 years of age", -->
+<!--     "Adults aged 16-64 years in an at-risk group", -->
+<!--     "60-64 years of age", -->
+<!--     "55-59 years of age", -->
+<!--     "50-54 years of age", -->
+<!--     "40-49 years of age", -->
+<!--     "18-39 years of age" -->
+<!--   ) -->
+<!-- ) %>% -->
+<!-- mutate(Description = str_replace_all(Description, "\n", "<br>")) %>%  -->
+<!-- gt() %>%  -->
+<!-- fmt_markdown(columns = TRUE) -->
+
+<!-- cat("  \n\n") -->
+<!-- ``` -->
+
+<!-- See original priority groups here: https://assets.publishing.service.gov.uk/government/uploads/system/uploads/attachment_data/file/1007737/Greenbook_chapter_14a_30July2021.pdf#page=15 -->
+<!-- See revised priority groups here: https://www.england.nhs.uk/coronavirus/wp-content/uploads/sites/52/2021/07/C1327-covid-19-vaccination-autumn-winter-phase-3-planning.pdf -->
+
+<!-- Note that we excluded care home residents and health care workers in our analysis, so members of JCVI group 1 are not included and JCVI group 2 includes only those aged 80 and over. The original priority group list has 9 groups, with a 10th group implicitly defined as "everybody else". Here we explicitly define this group, and split into two (10a and 10b) because of the earlier booster eligibility in the 40-49 group from 15 November 2021 onwards. (https://www.gov.uk/government/news/jcvi-issues-advice-on-covid-19-booster-vaccines-for-those-aged-40-to-49-and-second-doses-for-16-to-17-year-olds) -->
+
+
+<!-- \newpage -->
+
+<!-- ## References -->
