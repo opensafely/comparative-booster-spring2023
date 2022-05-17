@@ -442,7 +442,7 @@ kmcontrast <- function(data, cuts=NULL){
       # risk ratio, standard error, and confidence limits, using delta method
       kmrr = risk_1 / risk_0,
       #kmrr.ln = log(kmrr),
-      kmrr.ln.se = (risk.se_1/risk_1)^2 + (risk.se_0/risk_0)^2,
+      kmrr.ln.se = sqrt((risk.se_1/risk_1)^2 + (risk.se_0/risk_0)^2),
       kmrr.ll = exp(log(kmrr) + qnorm(0.025)*kmrr.ln.se),
       kmrr.ul = exp(log(kmrr) + qnorm(0.975)*kmrr.ln.se),
 
