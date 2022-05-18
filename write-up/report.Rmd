@@ -64,7 +64,7 @@ source(here("lib", "design", "design.R"))
       #"covidemergency",
       "covidadmitted",
       "covidadmittedproxy1",
-      #"covidcc",
+      "covidcritcare",
       "coviddeath",
       "noncoviddeath"
     ) %>% 
