@@ -10,7 +10,7 @@ remotes::install_github("https://github.com/wjchulme/dd4d")
 library('dd4d')
 
 
-population_size <- 100000
+population_size <- 200000
 
 # get nth largest value from list
 nthmax <- function(x, n=1){
@@ -214,8 +214,8 @@ sim_list = lst(
   asplenia = bn_node( ~rbernoulli(n=..n, p = 0.02)),
   learndis = bn_node( ~rbernoulli(n=..n, p = 0.02)),
 
-  cev_ever = bn_node( ~rbernoulli(n=..n, p = 0.02)),
-  cev = bn_node( ~rbernoulli(n=..n, p = 0.02)),
+  cev_ever = bn_node( ~rbernoulli(n=..n, p = 0.05)),
+  cev = bn_node( ~rbernoulli(n=..n, p = 0.05)),
 
   endoflife = bn_node( ~rbernoulli(n=..n, p = 0.001)),
   housebound = bn_node( ~rbernoulli(n=..n, p = 0.001)),

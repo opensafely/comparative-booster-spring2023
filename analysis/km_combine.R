@@ -43,7 +43,7 @@ fs::dir_create(output_dir)
 
 metaparams <-
   expand_grid(
-    outcome = factor(c("postest", "covidemergency", "covidadmittedproxy1", "covidadmitted", "coviddeath", "noncoviddeath")),
+    outcome = factor(c("postest", "covidemergency", "covidadmittedproxy1", "covidadmitted", "covidcritcare", "coviddeath", "noncoviddeath")),
     subgroup = factor(recoder$subgroups),
   ) %>%
   mutate(
@@ -128,3 +128,4 @@ metaparams %>%
     kmplotnewdir = here("output", "match", matchset, "km", "combined", "plots", glue("km_plot_rounded_{subgroup}_{outcome}.png")),
   ) %>%
   {walk2(.$kmplotdir, .$kmplotnewdir, ~fs::file_copy(.x, .y, overwrite = TRUE))}
+
