@@ -55,7 +55,7 @@ treatement_lookup <-
   )
 
 # where to split follow-up time after recruitment
-postbaselinecuts <- c(0,7,14,28,42,70)
+postbaselinecuts <- c(0,7,14,21,28,42,56,70,84)
 
 # maximum follow-up duration
 
@@ -119,42 +119,6 @@ recoder <-
 ## model formulae ----
 
 treated_period_variables <- paste0("treatment_period_id", "_", seq_len(length(postbaselinecuts)-1))
-
-
-# unadjusted
-formula_vaxonly <- as.formula(
-  str_c(
-    "Surv(tstart, tstop, ind_outcome) ~ ",
-    str_c(treated_period_variables, collapse = " + ")
-  )
-)
-
-#formula_vaxonly <- Surv(tstart, tstop, ind_outcome) ~ treated:strata(fup_period)
-
-# cox stratification
-formula_strata <- . ~ . +
-  strata(vax3_date) +
-  strata(region) +
-  #strata(jcvi_group) +
-  strata(vax12_type)
-
-formula_demog <- . ~ . +
-  poly(age, degree=2, raw=TRUE) +
-  sex +
-  imd_Q5 +
-  ethnicity_combined
-
-formula_clinical <- . ~ . +
-  prior_tests_cat +
-  multimorb +
-  learndis +
-  sev_mental +
-  immunosuppressed +
-  asplenia
-
-formula_timedependent <- . ~ . +
-  prior_covid_infection +
-  inhospital_planned
 
 
 if(exists("matchset")){
@@ -222,21 +186,4 @@ if(exists("matchset")){
 
   })
 
-  # remove matching variables from formulae, as treatment groups are already balanced
-  formula_remove_matching <- as.formula(paste(". ~ . - ", paste(matching_variables[[matchset]]$all, collapse=" -"), "- poly(age, degree=2, raw=TRUE)"))
-
-  formula0_pw <- formula_vaxonly %>% update(formula_remove_matching)
-  formula1_pw <- formula_vaxonly %>% update(formula_strata) %>% update(formula_remove_matching)
-  formula2_pw <- formula_vaxonly %>% update(formula_strata) %>% update(formula_demog) %>% update(formula_remove_matching)
-  formula3_pw <- formula_vaxonly %>% update(formula_strata) %>% update(formula_demog) %>% update(formula_clinical) %>% update(formula_timedependent) %>% update(formula_remove_matching)
-
-  formula_allcovariates <- as.formula("1 ~ 1") %>% update(formula_strata) %>% update(formula_demog) %>% update(formula_clinical) %>% update(formula_timedependent) %>% update(formula_remove_matching)
-
 }
-
-model_descr = c(
-  "Unadjusted" = "0",
-  #"region- and trial-stratified" = "1",
-  #"Demographic adjustment" = "2",
-  "Full adjustment" = "3"
-)

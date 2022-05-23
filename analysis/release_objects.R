@@ -26,9 +26,15 @@ for(matchset in c("A", "B")){
 
   ## KM ----
 
-  fs::file_copy(here("output", "match", matchset, "km", "combined", "km_estimates.csv"), fs::path(output_dir, "km_estimates.csv"), overwrite = TRUE)
-  fs::file_copy(here("output", "match", matchset, "km", "combined", "contrasts_daily.csv"), fs::path(output_dir, "contrasts_daily.csv"), overwrite = TRUE)
-  fs::file_copy(here("output", "match", matchset, "km", "combined", "contrasts_overall.csv"), fs::path(output_dir, "contrasts_overall.csv"), overwrite = TRUE)
+  #fs::file_copy(here("output", "match", matchset, "km", "combined", "km_estimates.csv"), fs::path(output_dir, "km_estimates.csv"), overwrite = TRUE)
+  #fs::file_copy(here("output", "match", matchset, "km", "combined", "contrasts_daily.csv"), fs::path(output_dir, "km_contrasts_daily.csv"), overwrite = TRUE)
+  #fs::file_copy(here("output", "match", matchset, "km", "combined", "contrasts_overall.csv"), fs::path(output_dir, "km_contrasts_overall.csv"), overwrite = TRUE)
+
+  ## CI ----
+
+  fs::file_copy(here("output", "match", matchset, "ci", "combined", "ci_estimates.csv"), fs::path(output_dir, "ci_estimates.csv"), overwrite = TRUE)
+  fs::file_copy(here("output", "match", matchset, "ci", "combined", "contrasts_daily.csv"), fs::path(output_dir, "ci_contrasts_daily.csv"), overwrite = TRUE)
+  fs::file_copy(here("output", "match", matchset, "ci", "combined", "contrasts_overall.csv"), fs::path(output_dir, "ci_contrasts_overall.csv"), overwrite = TRUE)
 
 }
 
