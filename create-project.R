@@ -92,12 +92,14 @@ action_match <- function(matchset){
 
 }
 
-## kaplan-meier action function ----
-action_km <- function(
+## get km or ci actions function ----
+action_contrasts <- function(
   matchset, subgroup, outcome
 ){
 
   splice(
+
+    ## kaplan-meier action
     # action(
     #   name = glue("km_{matchset}_{subgroup}_{outcome}"),
     #   run = glue("r:latest analysis/km.R"),
@@ -113,18 +115,19 @@ action_km <- function(
     #   )
     # ),
 
+    ## competing risks action, including kaplan-meier estimates
     action(
-      name = glue("km_{matchset}_{subgroup}_{outcome}"),
-      run = glue("r:latest analysis/km.R"),
+      name = glue("ci_{matchset}_{subgroup}_{outcome}"),
+      run = glue("r:latest analysis/ci.R"),
       arguments = c(matchset, subgroup, outcome),
       needs = list(
         glue("match_{matchset}"),
         "data_selection"
       ),
       moderately_sensitive = lst(
-        txt = glue("output/match/{matchset}/km/{subgroup}/{outcome}/*.txt"),
-        csv = glue("output/match/{matchset}/km/{subgroup}/{outcome}/*.csv"),
-        png = glue("output/match/{matchset}/km/{subgroup}/{outcome}/*.png"),
+        txt = glue("output/match/{matchset}/ci/{subgroup}/{outcome}/*.txt"),
+        csv = glue("output/match/{matchset}/ci/{subgroup}/{outcome}/*.csv"),
+        png = glue("output/match/{matchset}/ci/{subgroup}/{outcome}/*.png"),
       )
     )
   )
@@ -132,29 +135,56 @@ action_km <- function(
 
 
 
+
+
 ## model action function ----
-action_km_combine <- function(
+action_contrasts_combine <- function(
     matchset, subgroups, outcomes
 ){
-  action(
-    name = glue("km_combine_{matchset}"),
-    run = glue("r:latest analysis/km_combine.R"),
-    arguments = c(matchset),
-    needs = splice(
-      as.list(
-        glue_data(
-          .x=expand_grid(
-            subgroup=subgroups,
-            outcome=outcomes
-          ),
-          "km_{matchset}_{subgroup}_{outcome}"
+
+  splice(
+    # action(
+    #   name = glue("km_combine_{matchset}"),
+    #   run = glue("r:latest analysis/km_combine.R"),
+    #   arguments = c(matchset),
+    #   needs = splice(
+    #     as.list(
+    #       glue_data(
+    #         .x=expand_grid(
+    #           subgroup=subgroups,
+    #           outcome=outcomes
+    #         ),
+    #         "km_{matchset}_{subgroup}_{outcome}"
+    #       )
+    #     )
+    #   ),
+    #   moderately_sensitive = lst(
+    #     csv = glue("output/match/{matchset}/km/combined/*.csv"),
+    #     png = glue("output/match/{matchset}/km/combined/plots/*.png"),
+    #   )
+    # ),
+
+    action(
+      name = glue("ci_combine_{matchset}"),
+      run = glue("r:latest analysis/ci_combine.R"),
+      arguments = c(matchset),
+      needs = splice(
+        as.list(
+          glue_data(
+            .x=expand_grid(
+              subgroup=subgroups,
+              outcome=outcomes
+            ),
+            "ci_{matchset}_{subgroup}_{outcome}"
+          )
         )
+      ),
+      moderately_sensitive = lst(
+        csv = glue("output/match/{matchset}/ci/combined/*.csv"),
+        png = glue("output/match/{matchset}/ci/combined/plots/*.png"),
       )
-    ),
-    moderately_sensitive = lst(
-      csv = glue("output/match/{matchset}/km/combined/*.csv"),
-      png = glue("output/match/{matchset}/km/combined/plots/*.png"),
     )
+
   )
 }
 
@@ -343,73 +373,73 @@ actions_list <- splice(
 
   comment("### Overall models ('all')"),
 
-  action_km("A", "all", "postest"),
-  action_km("A", "all", "covidemergency"),
-  action_km("A", "all", "covidadmittedproxy1"),
-  action_km("A", "all", "covidadmitted"),
-  #action_km("A", "all", "noncovidadmitted"),
-  #action_km("A", "all", "covidcritcare"),
-  action_km("A", "all", "coviddeath"),
-  action_km("A", "all", "noncoviddeath"),
+  action_contrasts("A", "all", "postest"),
+  action_contrasts("A", "all", "covidemergency"),
+  action_contrasts("A", "all", "covidadmittedproxy1"),
+  action_contrasts("A", "all", "covidadmitted"),
+  #action_contrasts("A", "all", "noncovidadmitted"),
+  #action_contrasts("A", "all", "covidcritcare"),
+  action_contrasts("A", "all", "coviddeath"),
+  action_contrasts("A", "all", "noncoviddeath"),
 
 
   comment("### Models by primary course ('vax12_type')"),
 
-  action_km("A", "vax12_type", "postest"),
-  action_km("A", "vax12_type", "covidemergency"),
-  action_km("A", "vax12_type", "covidadmittedproxy1"),
-  action_km("A", "vax12_type", "covidadmitted"),
-  #action_km("A", "vax12_type", "noncovidadmitted"),
-  #action_km("A", "vax12_type", "covidcritcare"),
-  action_km("A", "vax12_type", "coviddeath"),
-  action_km("A", "vax12_type", "noncoviddeath"),
+  action_contrasts("A", "vax12_type", "postest"),
+  action_contrasts("A", "vax12_type", "covidemergency"),
+  action_contrasts("A", "vax12_type", "covidadmittedproxy1"),
+  action_contrasts("A", "vax12_type", "covidadmitted"),
+  #action_contrasts("A", "vax12_type", "noncovidadmitted"),
+  #action_contrasts("A", "vax12_type", "covidcritcare"),
+  action_contrasts("A", "vax12_type", "coviddeath"),
+  action_contrasts("A", "vax12_type", "noncoviddeath"),
 
 
   comment("### Models by clinically vulnerable group ('cev_cv')"),
 
-  action_km("A", "cev_cv", "postest"),
-  action_km("A", "cev_cv", "covidemergency"),
-  action_km("A", "cev_cv", "covidadmittedproxy1"),
-  action_km("A", "cev_cv", "covidadmitted"),
-  #action_km("A", "cev_cv", "noncovidadmitted"),
-  #action_km("A", "cev_cv", "covidcritcare"),
-  action_km("A", "cev_cv", "coviddeath"),
-  action_km("A", "cev_cv", "noncoviddeath"),
+  action_contrasts("A", "cev_cv", "postest"),
+  action_contrasts("A", "cev_cv", "covidemergency"),
+  action_contrasts("A", "cev_cv", "covidadmittedproxy1"),
+  action_contrasts("A", "cev_cv", "covidadmitted"),
+  #action_contrasts("A", "cev_cv", "noncovidadmitted"),
+  #action_contrasts("A", "cev_cv", "covidcritcare"),
+  action_contrasts("A", "cev_cv", "coviddeath"),
+  action_contrasts("A", "cev_cv", "noncoviddeath"),
 
 
   comment("### Models by prior infection ('prior_covid_infection')"),
 
-  action_km("A", "prior_covid_infection", "postest"),
-  action_km("A", "prior_covid_infection", "covidemergency"),
-  action_km("A", "prior_covid_infection", "covidadmittedproxy1"),
-  action_km("A", "prior_covid_infection", "covidadmitted"),
-  #action_km("A", "prior_covid_infection", "noncovidadmitted"),
-  #action_km("A", "prior_covid_infection", "covidcritcare"),
-  action_km("A", "prior_covid_infection", "coviddeath"),
-  action_km("A", "prior_covid_infection", "noncoviddeath"),
+  action_contrasts("A", "prior_covid_infection", "postest"),
+  action_contrasts("A", "prior_covid_infection", "covidemergency"),
+  action_contrasts("A", "prior_covid_infection", "covidadmittedproxy1"),
+  action_contrasts("A", "prior_covid_infection", "covidadmitted"),
+  #action_contrasts("A", "prior_covid_infection", "noncovidadmitted"),
+  #action_contrasts("A", "prior_covid_infection", "covidcritcare"),
+  action_contrasts("A", "prior_covid_infection", "coviddeath"),
+  action_contrasts("A", "prior_covid_infection", "noncoviddeath"),
 
 
   comment("### Models by age ('age65plus')"),
 
-  action_km("A", "age65plus", "postest"),
-  action_km("A", "age65plus", "covidemergency"),
-  action_km("A", "age65plus", "covidadmittedproxy1"),
-  action_km("A", "age65plus", "covidadmitted"),
-  #action_km("A", "age65plus", "noncovidadmitted"),
-  #action_km("A", "age65plus", "covidcritcare"),
-  action_km("A", "age65plus", "coviddeath"),
-  action_km("A", "age65plus", "noncoviddeath"),
+  action_contrasts("A", "age65plus", "postest"),
+  action_contrasts("A", "age65plus", "covidemergency"),
+  action_contrasts("A", "age65plus", "covidadmittedproxy1"),
+  action_contrasts("A", "age65plus", "covidadmitted"),
+  #action_contrasts("A", "age65plus", "noncovidadmitted"),
+  #action_contrasts("A", "age65plus", "covidcritcare"),
+  action_contrasts("A", "age65plus", "coviddeath"),
+  action_contrasts("A", "age65plus", "noncoviddeath"),
 
   comment("### Models by variant era ('variantera')"),
 
-  action_km("A", "variantera", "postest"),
-  action_km("A", "variantera", "covidemergency"),
-  action_km("A", "variantera", "covidadmittedproxy1"),
-  action_km("A", "variantera", "covidadmitted"),
-  #action_km("A", "variantera", "noncovidadmitted"),
-  #action_km("A", "variantera", "covidcritcare"),
-  action_km("A", "variantera", "coviddeath"),
-  action_km("A", "variantera", "noncoviddeath"),
+  action_contrasts("A", "variantera", "postest"),
+  action_contrasts("A", "variantera", "covidemergency"),
+  action_contrasts("A", "variantera", "covidadmittedproxy1"),
+  action_contrasts("A", "variantera", "covidadmitted"),
+  #action_contrasts("A", "variantera", "noncovidadmitted"),
+  #action_contrasts("A", "variantera", "covidcritcare"),
+  action_contrasts("A", "variantera", "coviddeath"),
+  action_contrasts("A", "variantera", "noncoviddeath"),
 
 
   comment("# # # # # # # # # # # # # # # # # # #", "matching set B", "# # # # # # # # # # # # # # # # # # #"),
@@ -418,84 +448,84 @@ actions_list <- splice(
 
   comment("### Overall models ('all')"),
 
-  action_km("B", "all", "postest"),
-  action_km("B", "all", "covidemergency"),
-  action_km("B", "all", "covidadmittedproxy1"),
-  action_km("B", "all", "covidadmitted"),
-  #action_km("B", "all", "noncovidadmitted"),
-  #action_km("B", "all", "covidcritcare"),
-  action_km("B", "all", "coviddeath"),
-  action_km("B", "all", "noncoviddeath"),
+  action_contrasts("B", "all", "postest"),
+  action_contrasts("B", "all", "covidemergency"),
+  action_contrasts("B", "all", "covidadmittedproxy1"),
+  action_contrasts("B", "all", "covidadmitted"),
+  #action_contrasts("B", "all", "noncovidadmitted"),
+  #action_contrasts("B", "all", "covidcritcare"),
+  action_contrasts("B", "all", "coviddeath"),
+  action_contrasts("B", "all", "noncoviddeath"),
 
 
   comment("### Models by primary course ('vax12_type')"),
 
-  action_km("B", "vax12_type", "postest"),
-  action_km("B", "vax12_type", "covidemergency"),
-  action_km("B", "vax12_type", "covidadmittedproxy1"),
-  action_km("B", "vax12_type", "covidadmitted"),
-  #action_km("B", "vax12_type", "noncovidadmitted"),
-  #action_km("B", "vax12_type", "covidcritcare"),
-  action_km("B", "vax12_type", "coviddeath"),
-  action_km("B", "vax12_type", "noncoviddeath"),
+  action_contrasts("B", "vax12_type", "postest"),
+  action_contrasts("B", "vax12_type", "covidemergency"),
+  action_contrasts("B", "vax12_type", "covidadmittedproxy1"),
+  action_contrasts("B", "vax12_type", "covidadmitted"),
+  #action_contrasts("B", "vax12_type", "noncovidadmitted"),
+  #action_contrasts("B", "vax12_type", "covidcritcare"),
+  action_contrasts("B", "vax12_type", "coviddeath"),
+  action_contrasts("B", "vax12_type", "noncoviddeath"),
 
 
   comment("### Models by clinically vulnerable group ('cev_cv')"),
 
-  action_km("B", "cev_cv", "postest"),
-  action_km("B", "cev_cv", "covidemergency"),
-  action_km("B", "cev_cv", "covidadmittedproxy1"),
-  action_km("B", "cev_cv", "covidadmitted"),
-  #action_km("B", "cev_cv", "noncovidadmitted"),
-  #action_km("B", "cev_cv", "covidcritcare"),
-  action_km("B", "cev_cv", "coviddeath"),
-  action_km("B", "cev_cv", "noncoviddeath"),
+  action_contrasts("B", "cev_cv", "postest"),
+  action_contrasts("B", "cev_cv", "covidemergency"),
+  action_contrasts("B", "cev_cv", "covidadmittedproxy1"),
+  action_contrasts("B", "cev_cv", "covidadmitted"),
+  #action_contrasts("B", "cev_cv", "noncovidadmitted"),
+  #action_contrasts("B", "cev_cv", "covidcritcare"),
+  action_contrasts("B", "cev_cv", "coviddeath"),
+  action_contrasts("B", "cev_cv", "noncoviddeath"),
 
 
   comment("### Models by prior infection ('prior_covid_infection')"),
 
-  action_km("B", "prior_covid_infection", "postest"),
-  action_km("B", "prior_covid_infection", "covidemergency"),
-  action_km("B", "prior_covid_infection", "covidadmittedproxy1"),
-  action_km("B", "prior_covid_infection", "covidadmitted"),
-  #action_km("B", "prior_covid_infection", "noncovidadmitted"),
-  #action_km("B", "prior_covid_infection", "covidcritcare"),
-  action_km("B", "prior_covid_infection", "coviddeath"),
-  action_km("B", "prior_covid_infection", "noncoviddeath"),
+  action_contrasts("B", "prior_covid_infection", "postest"),
+  action_contrasts("B", "prior_covid_infection", "covidemergency"),
+  action_contrasts("B", "prior_covid_infection", "covidadmittedproxy1"),
+  action_contrasts("B", "prior_covid_infection", "covidadmitted"),
+  #action_contrasts("B", "prior_covid_infection", "noncovidadmitted"),
+  #action_contrasts("B", "prior_covid_infection", "covidcritcare"),
+  action_contrasts("B", "prior_covid_infection", "coviddeath"),
+  action_contrasts("B", "prior_covid_infection", "noncoviddeath"),
 
 
   comment("### Models by age ('age65plus')"),
 
-  action_km("B", "age65plus", "postest"),
-  action_km("B", "age65plus", "covidemergency"),
-  action_km("B", "age65plus", "covidadmittedproxy1"),
-  action_km("B", "age65plus", "covidadmitted"),
-  #action_km("B", "age65plus", "noncovidadmitted"),
-  action_km("B", "age65plus", "covidcritcare"),
-  action_km("B", "age65plus", "coviddeath"),
-  action_km("B", "age65plus", "noncoviddeath"),
+  action_contrasts("B", "age65plus", "postest"),
+  action_contrasts("B", "age65plus", "covidemergency"),
+  action_contrasts("B", "age65plus", "covidadmittedproxy1"),
+  action_contrasts("B", "age65plus", "covidadmitted"),
+  #action_contrasts("B", "age65plus", "noncovidadmitted"),
+  action_contrasts("B", "age65plus", "covidcritcare"),
+  action_contrasts("B", "age65plus", "coviddeath"),
+  action_contrasts("B", "age65plus", "noncoviddeath"),
 
   comment("### Models by variant era ('variantera')"),
 
-  action_km("B", "variantera", "postest"),
-  action_km("B", "variantera", "covidemergency"),
-  action_km("B", "variantera", "covidadmittedproxy1"),
-  action_km("B", "variantera", "covidadmitted"),
-  #action_km("B", "variantera", "noncovidadmitted"),
-  #action_km("B", "variantera", "covidcritcare"),
-  action_km("B", "variantera", "coviddeath"),
-  action_km("B", "variantera", "noncoviddeath"),
+  action_contrasts("B", "variantera", "postest"),
+  action_contrasts("B", "variantera", "covidemergency"),
+  action_contrasts("B", "variantera", "covidadmittedproxy1"),
+  action_contrasts("B", "variantera", "covidadmitted"),
+  #action_contrasts("B", "variantera", "noncovidadmitted"),
+  #action_contrasts("B", "variantera", "covidcritcare"),
+  action_contrasts("B", "variantera", "coviddeath"),
+  action_contrasts("B", "variantera", "noncoviddeath"),
 
 
-  comment("# # # # # # # # # # # # # # # # # # #", "Combine KM estimates across outcomes and subgroups", "# # # # # # # # # # # # # # # # # # #"),
+  comment("# # # # # # # # # # # # # # # # # # #", "Combine KM / CI estimates across outcomes and subgroups", "# # # # # # # # # # # # # # # # # # #"),
 
-  action_km_combine(
+  action_contrasts_combine(
     "A",
     subgroups = c("all", "vax12_type", "prior_covid_infection", "age65plus", "cev_cv", "variantera"),
     outcomes=c("postest", "covidemergency", "covidadmittedproxy1", "covidadmitted", "coviddeath", "noncoviddeath")
   ),
 
-  action_km_combine(
+  action_contrasts_combine(
     "B",
     subgroups = c("all", "vax12_type", "prior_covid_infection", "age65plus", "cev_cv", "variantera"),
     outcomes=c("postest", "covidemergency", "covidadmittedproxy1", "covidadmitted", "coviddeath", "noncoviddeath")
@@ -511,8 +541,10 @@ actions_list <- splice(
       "data_selection",
       "match_report_A",
       "match_report_B",
-      "km_combine_A",
-      "km_combine_B"
+      #"km_combine_A",
+      #"km_combine_B",
+      "ci_combine_A",
+      "ci_combine_B"
     ),
     moderately_sensitive = lst(
       txt = "output/files-for-release.txt",
