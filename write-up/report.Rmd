@@ -202,7 +202,7 @@ contrasts_overall <- read_csv(fs::path(output_dir_os, matchset, "contrasts_overa
 
 ## Matching strategy A
 
-For the simpler matching criteria, `r label_number(1, big.mark=",")(filter(match_flowchart, crit=="c7", vax3_type=="pfizer") %>% pull(n))` were successfully matched in each group, `r label_percent(0.1)(filter(match_flowchart, crit=="c7", vax3_type=="pfizer") %>% pull(pct_step))` and `r label_percent(0.1)(filter(match_flowchart, crit=="c7", vax3_type=="moderna") %>% pull(pct_step))` respectively (Table 1, Figure 1).
+For the simpler matching criteria, `r label_number(1, big.mark=",")(filter(match_flowchart, crit=="c7", vax3_type=="pfizer") %>% pull(n))` were matched in each group, `r label_percent(0.1)(filter(match_flowchart, crit=="c7", vax3_type=="pfizer") %>% pull(pct_step))` and `r label_percent(0.1)(filter(match_flowchart, crit=="c7", vax3_type=="moderna") %>% pull(pct_step))` respectively (Table 1, Figure 1).
 
 
 #### Table 1: inclusion criteria
@@ -214,7 +214,7 @@ match_flowchart %>%
    pivot_wider(
     id_cols = c(criteria, vax3_type),
     names_from = vax3_type,
-    values_from = c(n, n_exclude, pct_all)
+    values_from = c(n, n_exclude, pct_all, pct_step)
   ) %>%
   gt() %>%
   cols_label(
@@ -226,8 +226,10 @@ match_flowchart %>%
     n_exclude_pfizer = "N excluded",
     n_exclude_moderna = "N excluded",
     
-    pct_all_pfizer = "% remaining",
-    pct_all_moderna = "% remaining",
+    pct_all_pfizer = "% (of all)",
+    pct_all_moderna = "% (of all)",
+    pct_step_pfizer = "% (previous)",
+    pct_step_moderna = "% (previous)",
   ) %>%
   tab_spanner(
     label = "BNT162b2",
@@ -272,9 +274,9 @@ cat("  \n\n")
 
 &nbsp; &nbsp; &nbsp;
 
-#### Figure 1: Cumulative matching success
+#### Figure 1: Cumulative numbers included in the matched sample
 
-```{r, figure-matchingsuccess, echo=FALSE, message=FALSE, warning=FALSE, out.width='90%', out.height='50%', results='asis', out.extra=''}
+```{r, figure-matchingrates, echo=FALSE, message=FALSE, warning=FALSE, out.width='90%', out.height='50%', results='asis', out.extra=''}
 #read_rds(fs::path(output_dir_os, "descriptive", "vaxdate", "plot_vaxdate_stack.rds"))
 
 xmin <- min(match_coverage$vax3_date )
@@ -420,21 +422,25 @@ Counts and survival estimates are based on values rounded up to the nearest 7, f
 
 ```{r table-km, echo=FALSE, warning=FALSE, message=FALSE}
 
+label_number_n <- label_number(1, 1, big.mark=",")
+label_number_risk <- label_number(0.1, 10000, style_negative="minus", big.mark=",")
+label_number_rr <- label_number(0.01, 1, style_negative="minus")
+
 contrasts_overall %>%
   transmute(
     outcome_descr,
     subgroup_descr,
     subgroup_level_descr,
-    n.atrisk=n.atrisk_0,
-    persontime_0=label_number(1)(persontime_0/7), 
-    persontime_1=label_number(1)(persontime_1/7),
-    n.event_0, 
-    n.event_1,
-    riskCI_0 = paste0(label_number(0.1, 10000)(1-surv_0), " (", label_number(0.1, 10000)(1-surv.ul_0), "-", label_number(0.1, 10000)(1-surv.ll_0), ")"),
-    riskCI_1 = paste0(label_number(0.1, 10000)(1-surv_1), " (", label_number(0.1, 10000)(1-surv.ul_1), "-", label_number(0.1, 10000)(1-surv.ll_1), ")"),
-    kmrdCI = paste0(label_number(0.1, 10000)(kmrd), " (", label_number(0.1, 10000)(kmrd.ll), "-", label_number(1, 10000)(kmrd.ul), ")"),
-    kmrrCI = paste0(label_number(0.01)(kmrr), " (", label_number(0.01)(kmrr.ll), "-", label_number(0.01)(kmrr.ul), ")"),
-    irrCI =  paste0(label_number(0.01)(irr), " (", label_number(0.01)(irr.ll), "-", label_number(0.01)(irr.ul), ")"),
+    n.atrisk=label_number_n(n.atrisk_0),
+    persontime_0=label_number_n(persontime_0/7), 
+    persontime_1=label_number_n(persontime_1/7),
+    n.event_0=label_number_n(n.event_0), 
+    n.event_1=label_number_n(n.event_1),
+    riskCI_0 = glue("{label_number_risk(1-surv_0)} ({label_number_risk(1-surv.ul_0)} - {label_number_risk(1-surv.ll_0)})"),
+    riskCI_1 = glue("{label_number_risk(1-surv_1)} ({label_number_risk(1-surv.ul_1)} - {label_number_risk(1-surv.ll_1)})"),
+    kmrdCI = glue("{label_number_risk(kmrd)} ({label_number_risk(kmrd.ll)} - {label_number_risk(kmrd.ul)})"),
+    kmrrCI = glue("{label_number_rr(kmrr)} ({label_number_rr(kmrr.ll)} - {label_number_rr(kmrr.ul)})"),
+    irrCI =   glue("{label_number_rr(irr)} ({label_number_rr(irr.ll)} - {label_number_rr(irr.ul)})"),
     #coxhrCI =  paste0(label_number(0.01)(kmrr), " (", label_number(0.01)(coxhr.ll), "-", label_number(0.01)(coxhr.ul), ")"),
   ) %>%
   group_by(outcome_descr) %>%
