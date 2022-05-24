@@ -91,9 +91,7 @@ data_matched <-
     patient_id, vax3_date,
     all_of(subgroup),
     all_of(paste0(c(outcome, "death", "dereg", "coviddeath", "noncoviddeath", "vax4"), "_date")),
-    all_of(matching_variables[[matchset]]$all), # model formula with all variables
   ) %>%
-  #filter(patient_id %in% data_matchstatus$patient_id[data_matchstatus$matched]) %>%
   left_join(
     data_matchstatus %>% filter(matched) %>% select(-vax3_date),
     .,
