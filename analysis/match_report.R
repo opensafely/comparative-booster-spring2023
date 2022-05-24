@@ -104,14 +104,14 @@ data_coverage <-
 
 
 
-## round to nearest 7 for disclosure control
-threshold <- 7
+## round to nearest 6 for disclosure control
+threshold <- 6
 
 data_coverage_rounded <-
   data_coverage %>%
   group_by(treatment, status) %>%
   mutate(
-    cumuln = ceiling_any(cumuln, to = threshold),
+    cumuln = roundmid_any(cumuln, to = threshold),
     n = diff(c(0,cumuln)),
   )
 
@@ -428,7 +428,7 @@ data_flowchart_match_rounded <-
   select(-patient_id, -matched) %>%
   group_by(vax3_type) %>%
   summarise(
-    across(.fns=~ceiling_any(sum(.), 7))
+    across(.fns=~roundmid_any(sum(.), threshold))
   ) %>%
   pivot_longer(
     cols=-vax3_type,

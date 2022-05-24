@@ -176,7 +176,7 @@ outcomes_per_treated <- table(outcome=data_matched$ind_outcome, treated=data_mat
 
 ## redaction threshold ----
 
-threshold <- 7
+threshold <- 6
 
 ## competing risks cumulative risk differences ----
 
