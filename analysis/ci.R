@@ -92,7 +92,6 @@ data_matched <-
     all_of(subgroup),
     all_of(paste0(c(outcome, "death", "dereg", "coviddeath", "noncoviddeath", "vax4"), "_date")),
     all_of(matching_variables[[matchset]]$all), # model formula with all variables
-    all_of(all.vars(formula_allcovariates)), # model formula with all variables
   ) %>%
   #filter(patient_id %in% data_matchstatus$patient_id[data_matchstatus$matched]) %>%
   left_join(
@@ -399,13 +398,20 @@ cicontrast <- function(data, cuts=NULL){
       cml.event = cumsum(replace_na(n.event, 0)),
       cml.censor = cumsum(replace_na(n.censor, 0)),
 
-      rate = n.event / n.atrisk,
+      kmrate = n.event / n.atrisk,
       cml.rate = cml.event / cml.persontime,
 
       kmsurv, kmsurv.se, kmsurv.ll, kmsurv.ul,
       kmrisk = 1-kmsurv, kmrisk.se = kmsurv.se, kmrisk.ll = 1-kmsurv.ul, kmrisk.ul = 1-kmsurv.ll,
+      kmhaz = -(kmsurv-lag(kmsurv,1,1))/lag(kmsurv,1,1),
+
+
       surv, surv.se, surv.ll, surv.ul,
       risk, risk.se, risk.ll, risk.ul,
+
+      ciinc = -(surv-lag(surv,1,1))/lag(surv,1,1),
+
+      ciinc2 = diff(c(0,-log(surv)))
 
     ) %>%
     group_by(!!subgroup_sym, treatment, period_start, period_end, period) %>%
@@ -415,11 +421,14 @@ cicontrast <- function(data, cuts=NULL){
 
       persontime = sum(n.atrisk*interval), # total person-time at risk within time period
 
+      ciinc = weighted.mean(ciinc, n.atrisk*interval),
+      ciinc2 = weighted.mean(ciinc2, n.atrisk*interval),
+
       n.atrisk = first(n.atrisk), # number at risk at start of time period
       n.event = sum(n.event, na.rm=TRUE), # number of events within time period
       n.censor = sum(n.censor, na.rm=TRUE), # number censored within time period
 
-      rate = n.event/persontime, # = weighted.mean(haz, n.atrisk*interval), incidence rate. this is equivalent to a weighted average of the hazard ratio, with time-exposed as the weights
+      kminc = n.event/persontime, # = weighted.mean(kmhaz, n.atrisk*interval), incidence rate. this is equivalent to a weighted average of the hazard ratio, with time-exposed as the weights
 
       interval = sum(interval), # width of time period
 
@@ -467,12 +476,13 @@ cicontrast <- function(data, cuts=NULL){
       values_from=c(
 
         persontime, n.atrisk, n.event, n.censor,
-        rate,
+        kminc, ciinc, ciinc2,
 
         kmsurv, kmsurv.se, kmsurv.ll, kmsurv.ul,
         kmrisk, kmrisk.se, kmrisk.ll, kmrisk.ul,
         surv, surv.se, surv.ll, surv.ul,
         risk, risk.se, risk.ll, risk.ul,
+
 
         cml.event, cml.rate
         )
@@ -486,10 +496,23 @@ cicontrast <- function(data, cuts=NULL){
       # hazard ratio, standard error and confidence limits
 
       # incidence rate ratio
-      irr = rate_1 / rate_0,
-      irr.ln.se = sqrt((1/n.event_0) + (1/n.event_1)),
-      irr.ll = exp(log(irr) + qnorm(0.025)*irr.ln.se),
-      irr.ul = exp(log(irr) + qnorm(0.975)*irr.ln.se),
+      kmirr = kminc_1 / kminc_0,
+      kmirr.ln.se = sqrt((1/n.event_0) + (1/n.event_1)),
+      kmirr.ll = exp(log(kmirr) + qnorm(0.025)*kmirr.ln.se),
+      kmirr.ul = exp(log(kmirr) + qnorm(0.975)*kmirr.ln.se),
+
+
+      # incidence rate ratio, derived from cumulative incidence, not KM
+      ciirr = ciinc_1 / ciinc_0,
+      ciirr.ln.se = sqrt((1/n.event_0) + (1/n.event_1)),
+      ciirr.ll = exp(log(ciirr) + qnorm(0.025)*ciirr.ln.se),
+      ciirr.ul = exp(log(ciirr) + qnorm(0.975)*ciirr.ln.se),
+
+      # incidence rate ratio, derived from cumulative incidence, not KM
+      ciirr2 = ciinc2_1 / ciinc2_0,
+      ciirr2.ln.se = sqrt((1/n.event_0) + (1/n.event_1)),
+      ciirr2.ll = exp(log(ciirr2) + qnorm(0.025)*ciirr2.ln.se),
+      ciirr2.ul = exp(log(ciirr2) + qnorm(0.975)*ciirr2.ln.se),
 
       # incidence rate difference
       #ird = rate_1 - rate_0,
