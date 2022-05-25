@@ -1083,42 +1083,42 @@ actions:
     - ci_A_all_covidemergency
     - ci_A_all_covidadmittedproxy1
     - ci_A_all_covidadmitted
-    - ci_A_all_covidcriticalcare
+    - ci_A_all_covidcritcare
     - ci_A_all_coviddeath
     - ci_A_all_noncoviddeath
     - ci_A_vax12_type_postest
     - ci_A_vax12_type_covidemergency
     - ci_A_vax12_type_covidadmittedproxy1
     - ci_A_vax12_type_covidadmitted
-    - ci_A_vax12_type_covidcriticalcare
+    - ci_A_vax12_type_covidcritcare
     - ci_A_vax12_type_coviddeath
     - ci_A_vax12_type_noncoviddeath
     - ci_A_prior_covid_infection_postest
     - ci_A_prior_covid_infection_covidemergency
     - ci_A_prior_covid_infection_covidadmittedproxy1
     - ci_A_prior_covid_infection_covidadmitted
-    - ci_A_prior_covid_infection_covidcriticalcare
+    - ci_A_prior_covid_infection_covidcritcare
     - ci_A_prior_covid_infection_coviddeath
     - ci_A_prior_covid_infection_noncoviddeath
     - ci_A_age65plus_postest
     - ci_A_age65plus_covidemergency
     - ci_A_age65plus_covidadmittedproxy1
     - ci_A_age65plus_covidadmitted
-    - ci_A_age65plus_covidcriticalcare
+    - ci_A_age65plus_covidcritcare
     - ci_A_age65plus_coviddeath
     - ci_A_age65plus_noncoviddeath
     - ci_A_cev_cv_postest
     - ci_A_cev_cv_covidemergency
     - ci_A_cev_cv_covidadmittedproxy1
     - ci_A_cev_cv_covidadmitted
-    - ci_A_cev_cv_covidcriticalcare
+    - ci_A_cev_cv_covidcritcare
     - ci_A_cev_cv_coviddeath
     - ci_A_cev_cv_noncoviddeath
     - ci_A_variantera_postest
     - ci_A_variantera_covidemergency
     - ci_A_variantera_covidadmittedproxy1
     - ci_A_variantera_covidadmitted
-    - ci_A_variantera_covidcriticalcare
+    - ci_A_variantera_covidcritcare
     - ci_A_variantera_coviddeath
     - ci_A_variantera_noncoviddeath
     outputs:
@@ -1133,42 +1133,42 @@ actions:
     - ci_B_all_covidemergency
     - ci_B_all_covidadmittedproxy1
     - ci_B_all_covidadmitted
-    - ci_B_all_covidcriticalcare
+    - ci_B_all_covidcritcare
     - ci_B_all_coviddeath
     - ci_B_all_noncoviddeath
     - ci_B_vax12_type_postest
     - ci_B_vax12_type_covidemergency
     - ci_B_vax12_type_covidadmittedproxy1
     - ci_B_vax12_type_covidadmitted
-    - ci_B_vax12_type_covidcriticalcare
+    - ci_B_vax12_type_covidcritcare
     - ci_B_vax12_type_coviddeath
     - ci_B_vax12_type_noncoviddeath
     - ci_B_prior_covid_infection_postest
     - ci_B_prior_covid_infection_covidemergency
     - ci_B_prior_covid_infection_covidadmittedproxy1
     - ci_B_prior_covid_infection_covidadmitted
-    - ci_B_prior_covid_infection_covidcriticalcare
+    - ci_B_prior_covid_infection_covidcritcare
     - ci_B_prior_covid_infection_coviddeath
     - ci_B_prior_covid_infection_noncoviddeath
     - ci_B_age65plus_postest
     - ci_B_age65plus_covidemergency
     - ci_B_age65plus_covidadmittedproxy1
     - ci_B_age65plus_covidadmitted
-    - ci_B_age65plus_covidcriticalcare
+    - ci_B_age65plus_covidcritcare
     - ci_B_age65plus_coviddeath
     - ci_B_age65plus_noncoviddeath
     - ci_B_cev_cv_postest
     - ci_B_cev_cv_covidemergency
     - ci_B_cev_cv_covidadmittedproxy1
     - ci_B_cev_cv_covidadmitted
-    - ci_B_cev_cv_covidcriticalcare
+    - ci_B_cev_cv_covidcritcare
     - ci_B_cev_cv_coviddeath
     - ci_B_cev_cv_noncoviddeath
     - ci_B_variantera_postest
     - ci_B_variantera_covidemergency
     - ci_B_variantera_covidadmittedproxy1
     - ci_B_variantera_covidadmitted
-    - ci_B_variantera_covidcriticalcare
+    - ci_B_variantera_covidcritcare
     - ci_B_variantera_coviddeath
     - ci_B_variantera_noncoviddeath
     outputs:
