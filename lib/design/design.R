@@ -71,7 +71,8 @@ recoder <-
       `Primary vaccine course` = "vax12_type",
       `Age` = "age65plus",
       `Prior SARS-CoV-2 infection status` = "prior_covid_infection",
-      `Clinical vulnerability` = "cev_cv"
+      `Clinical vulnerability` = "cev_cv",
+      `Variant era` = "variantera"
     ),
     status = c(
       `Unmatched`= "unmatched",

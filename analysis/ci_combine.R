@@ -49,6 +49,9 @@ metaparams <-
   mutate(
     outcome_descr = fct_recoderelevel(outcome,  recoder$outcome),
     subgroup_descr = fct_recoderelevel(subgroup,  recoder$subgroups),
+  ) %>%
+  filter(
+    subgroup != "variantera"
   )
 
 
