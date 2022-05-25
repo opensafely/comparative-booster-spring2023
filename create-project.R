@@ -522,13 +522,13 @@ actions_list <- splice(
   action_contrasts_combine(
     "A",
     subgroups = c("all", "vax12_type", "prior_covid_infection", "age65plus", "cev_cv", "variantera"),
-    outcomes=c("postest", "covidemergency", "covidadmittedproxy1", "covidadmitted", "coviddeath", "noncoviddeath")
+    outcomes=c("postest", "covidemergency", "covidadmittedproxy1", "covidadmitted", "covidcriticalcare", "coviddeath", "noncoviddeath")
   ),
 
   action_contrasts_combine(
     "B",
     subgroups = c("all", "vax12_type", "prior_covid_infection", "age65plus", "cev_cv", "variantera"),
-    outcomes=c("postest", "covidemergency", "covidadmittedproxy1", "covidadmitted", "coviddeath", "noncoviddeath")
+    outcomes=c("postest", "covidemergency", "covidadmittedproxy1", "covidadmitted", "covidcriticalcare", "coviddeath", "noncoviddeath")
   ),
 
 
