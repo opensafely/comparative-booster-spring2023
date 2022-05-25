@@ -1114,13 +1114,6 @@ actions:
     - ci_A_cev_cv_covidcritcare
     - ci_A_cev_cv_coviddeath
     - ci_A_cev_cv_noncoviddeath
-    - ci_A_variantera_postest
-    - ci_A_variantera_covidemergency
-    - ci_A_variantera_covidadmittedproxy1
-    - ci_A_variantera_covidadmitted
-    - ci_A_variantera_covidcritcare
-    - ci_A_variantera_coviddeath
-    - ci_A_variantera_noncoviddeath
     outputs:
       moderately_sensitive:
         csv: output/match/A/ci/combined/*.csv
@@ -1164,13 +1157,6 @@ actions:
     - ci_B_cev_cv_covidcritcare
     - ci_B_cev_cv_coviddeath
     - ci_B_cev_cv_noncoviddeath
-    - ci_B_variantera_postest
-    - ci_B_variantera_covidemergency
-    - ci_B_variantera_covidadmittedproxy1
-    - ci_B_variantera_covidadmitted
-    - ci_B_variantera_covidcritcare
-    - ci_B_variantera_coviddeath
-    - ci_B_variantera_noncoviddeath
     outputs:
       moderately_sensitive:
         csv: output/match/B/ci/combined/*.csv
