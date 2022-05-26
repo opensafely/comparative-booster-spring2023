@@ -199,7 +199,7 @@ data_surv <-
           time, lagtime=lag(time,1,0), leadtime=lead(time), interval=time-lagtime,
           n.risk, n.allevents, n.event, n.censor,
 
-          kmsummand = n.event / ((n.risk - n.event) * n.risk),
+          kmsummand = (1/(n.risk-n.event)) - (1/n.risk), # = n.event / ((n.risk - n.event) * n.risk) but re-written to prevent integer overflow
           kmsurv = cumprod(1 - n.event / n.risk),
           kmsurv.se = kmsurv * sqrt(cumsum(kmsummand)),
 
@@ -250,7 +250,7 @@ data_surv_rounded <-
     ## calculate surv based on rounded event counts
 
     # KM estimate for event of interest, combining censored and competing events as censored
-    kmsummand = n.event / ((n.risk - n.event) * n.risk),
+    kmsummand = (1/(n.risk-n.event)) - (1/n.risk), # = n.event / ((n.risk - n.event) * n.risk) but re-written to prevent integer overflow
     kmsurv = cumprod(1 - n.event / n.risk),
     kmsurv.se = kmsurv * sqrt(cumsum(kmsummand)), #greenwood's formula
     kmsurv.ln.se = kmsurv.se/kmsurv,
@@ -258,7 +258,7 @@ data_surv_rounded <-
     kmsurv.ul = exp(log(risk) + qnorm(0.975)*kmsurv.ln.se),
 
     # CI estimate, treating comepting events as competing events
-    allsummand = n.allevents / ((n.risk - n.allevents) * n.risk),
+    allsummand = (1/(n.risk-n.allevents)) - (1/n.risk), # n.allevents / ((n.risk - n.allevents) * n.risk) but re-written to prevent integer overflow
     allsurv = cumprod(1 - n.allevents / n.risk),
     summand = (n.event / n.risk) * lag(allsurv, 1, 1),
     risk = cumsum(summand),
