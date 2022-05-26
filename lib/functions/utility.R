@@ -8,8 +8,7 @@ ceiling_any <- function(x, to=1){
 
 roundmid_any <- function(x, to=1){
   # like ceiling_any, but centers on (integer) midpoint of the rounding points
-  ceiling(plyr::round_any(x/to, 1/100000000))*to - floor(to/2)
-  #plyr::round_any(x+floor(to/2), to)-floor(to/2)
+  ceiling(x/to)*to - (floor(to/2)*(x!=0))
 }
 
 fct_case_when <- function(...) {
