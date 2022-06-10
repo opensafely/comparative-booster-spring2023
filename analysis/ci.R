@@ -630,8 +630,8 @@ coxcontrast <- function(data, cuts=NULL){
       period_id = tdc(fup_time, period_id)
     ) %>%
     mutate(
-      period_start = postbaselinecuts[period_id],
-      period_end = postbaselinecuts[period_id+1],
+      period_start = as.integer(cuts[period_id]),
+      period_end = as.integer(cuts[period_id+1]),
     )
 
   data_cox <-
@@ -669,9 +669,9 @@ contrasts_rounded_cuts <-  left_join(ci_contrasts_rounded_cuts, cox_contrasts_cu
 contrasts_rounded_overall <-  left_join(ci_contrasts_rounded_overall, cox_contrasts_overall, by=c(subgroup, "period_start", "period_end"))
 
 
-write_csv(ci_contrasts_rounded_daily, fs::path(output_dir, "contrasts_daily.csv"))
-write_csv(ci_contrasts_rounded_cuts, fs::path(output_dir, "contrasts_cuts.csv"))
-write_csv(ci_contrasts_rounded_overall, fs::path(output_dir, "contrasts_overall.csv"))
+write_csv(contrasts_rounded_daily, fs::path(output_dir, "contrasts_daily.csv"))
+write_csv(contrasts_rounded_cuts, fs::path(output_dir, "contrasts_cuts.csv"))
+write_csv(contrasts_rounded_overall, fs::path(output_dir, "contrasts_overall.csv"))
 
 
 

@@ -94,6 +94,25 @@ contrasts_daily <- metaparams %>%
 write_csv(contrasts_daily, fs::path(output_dir, "contrasts_daily.csv"))
 
 
+contrasts_cuts <- metaparams %>%
+  mutate(
+    data = pmap(list(matchset, outcome, subgroup), function(matchset, outcome, subgroup){
+      subgroup <- as.character(subgroup)
+      dat <- read_csv(here("output", "match", matchset, "ci", subgroup, outcome, "contrasts_cuts.csv"), na="NA", col_types = cols())
+      dat %>%
+        add_column(
+          subgroup_level = as.character(.[[subgroup]]),
+          subgroup_level_descr = fct_recoderelevel(.[[subgroup]], recoder[[subgroup]]),
+          .before=1
+        ) %>%
+        select(-all_of(subgroup))
+    }
+    )
+  ) %>%
+  unnest(data)
+
+write_csv(contrasts_cuts, fs::path(output_dir, "contrasts_cuts.csv"))
+
 
 contrasts_overall <- metaparams %>%
   mutate(
