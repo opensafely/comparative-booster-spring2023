@@ -400,7 +400,10 @@ cicontrast <- function(data, cuts=NULL){
       cml.rate = cml.event / cml.persontime,
 
       kmsurv, kmsurv.se, kmsurv.ll, kmsurv.ul,
-      kmrisk = 1-kmsurv, kmrisk.se = kmsurv.se, kmrisk.ll = 1-kmsurv.ul, kmrisk.ul = 1-kmsurv.ll,
+      kmrisk = 1-kmsurv,
+      kmrisk.se = kmsurv.se,
+      kmrisk.ll = 1-kmsurv.ul,
+      kmrisk.ul = 1-kmsurv.ll,
       kmhaz = -(kmsurv-lag(kmsurv,1,1))/lag(kmsurv,1,1),
 
 
@@ -451,8 +454,8 @@ cicontrast <- function(data, cuts=NULL){
 
       risk = last(risk),
       risk.se = last(risk.se),
-      risk.ll = last(risk.ul),
-      risk.ul = last(risk.ll),
+      risk.ll = last(risk.ll),
+      risk.ul = last(risk.ul),
 
       #cml.haz = last(cml.haz),  # cumulative hazard from time zero to end of time period
 
