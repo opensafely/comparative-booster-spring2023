@@ -18,10 +18,17 @@ source(here("lib", "functions", "utility.R"))
 # Import design elements
 source(here("lib", "design", "design.R"))
 
+# Import redaction functions
+source(here("lib", "functions", "redaction.R"))
 
-## create output directories ----
+
+## create output directories for data ----
 fs::dir_create(here("output", "data"))
 
+## create output directories for tables/summaries ----
+
+output_dir <- here("output", "prematch")
+fs::dir_create(output_dir)
 
 ## Import processed data ----
 
@@ -169,6 +176,83 @@ data_flowchart_rounded <-
       TRUE ~ NA_character_
     )
   ) #
-write_csv(data_flowchart_rounded, here("output", "data", "flowchart.csv"))
+write_csv(data_flowchart_rounded, fs::path(output_dir, "flowchart.csv"))
+
+
+
+
+# table 1 style baseline characteristics amongst those eligible for matching ----
+
+library('gt')
+library('gtsummary')
+
+var_labels <- list(
+  N  ~ "Total N",
+  treatment_descr ~ "Vaccine type",
+  vax12_type_descr ~ "Primary vaccine course",
+  #age ~ "Age",
+  ageband ~ "Age",
+  sex ~ "Sex",
+  ethnicity_combined ~ "Ethnicity",
+  imd_Q5 ~ "IMD",
+  region ~ "Region",
+  cev_cv ~ "JCVI clinical risk group",
+
+  sev_obesity ~ "Body Mass Index > 40 kg/m^2",
+
+  chronic_heart_disease ~ "Chronic heart disease",
+  chronic_kidney_disease ~ "Chronic kidney disease",
+  diabetes ~ "Diabetes",
+  chronic_liver_disease ~ "Chronic liver disease",
+  chronic_resp_disease ~ "Chronic respiratory disease",
+  asthma ~ "Asthma",
+  chronic_neuro_disease ~ "Chronic neurological disease",
+
+  #multimorb ~ "Morbidity count",
+  immunosuppressed ~ "Immunosuppressed",
+  asplenia ~ "Asplenia or poor spleen function",
+  learndis ~ "Learning disabilities",
+  sev_mental ~ "Serious mental illness",
+
+  prior_tests_cat ~ "Number of SARS-CoV-2 tests",
+
+  prior_covid_infection ~ "Prior documented SARS-CoV-2 infection",
+  inhospital_planned ~ "In hospital (planned admission)"
+) %>%
+  set_names(., map_chr(., all.vars))
+
+map_chr(var_labels[-c(1,2)], ~last(as.character(.)))
+
+
+tab_summary_baseline <-
+  data_cohort %>%
+  mutate(
+    N = 1L,
+    treatment_descr = fct_recoderelevel(as.character((vax3_type=="moderna")*1L), recoder$treatment),
+  ) %>%
+  select(
+    treatment_descr,
+    all_of(names(var_labels)),
+  ) %>%
+  tbl_summary(
+    by = treatment_descr,
+    label = unname(var_labels[names(.)]),
+    statistic = list(N = "{N}")
+  ) %>%
+  modify_footnote(starts_with("stat_") ~ NA) %>%
+  modify_header(stat_by = "**{level}**") %>%
+  bold_labels()
+
+tab_summary_baseline_redacted <- redact_tblsummary(tab_summary_baseline, 5, "[REDACTED]")
+
+raw_stats <- tab_summary_baseline_redacted$meta_data %>%
+  select(var_label, df_stats) %>%
+  unnest(df_stats)
+
+
+write_csv(tab_summary_baseline_redacted$table_body, fs::path(output_dir, "table1.csv"))
+write_csv(tab_summary_baseline_redacted$df_by, fs::path(output_dir, "table1by.csv"))
+gtsave(as_gt(tab_summary_baseline_redacted), fs::path(output_dir, "table1.html"))
+
 
 

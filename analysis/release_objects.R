@@ -16,6 +16,12 @@ for(matchset in c("A", "B")){
   fs::dir_create(output_dir)
 
 
+  ## pre-matching ----
+
+
+  fs::file_copy(here("output", "prematch", "table1.csv"), fs::path(output_dir, "prematch_table1.csv"), overwrite = TRUE)
+  fs::file_copy(here("output", "prematch", "table1by.csv"), fs::path(output_dir, "prematch_table1by.csv"), overwrite = TRUE)
+
   ## matching ----
 
   fs::file_copy(here("output", "match", matchset, "report", "table1.csv"), fs::path(output_dir, "match_table1.csv"), overwrite = TRUE)

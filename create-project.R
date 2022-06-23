@@ -329,7 +329,7 @@ actions_list <- splice(
       criteriards = "output/data/data_inclusioncriteria.rds"
     ),
     moderately_sensitive = lst(
-      flow = "output/data/flowchart.csv"
+      flow = "output/prematch/flowchart.csv"
     )
   ),
 
