@@ -80,7 +80,7 @@ recoder <-
     ),
     treatment = c(
       `BNT162b2` = "0",
-      `Moderna mRNA-1273` = "1"
+      `mRNA-1273` = "1"
     ),
     outcome = c(
       "Positive SARS-CoV-2 test"= "postest",
