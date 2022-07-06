@@ -255,6 +255,8 @@ data_processed <- data_extract %>%
       TRUE ~ as.Date(NA_character_)
     ),
 
+    covidcritcare_date = pmin(covidcritcare_date, coviddeath_date, na.rm=TRUE),
+
     noncoviddeath_date = if_else(!is.na(death_date) & is.na(coviddeath_date), death_date, as.Date(NA_character_)),
 
 
