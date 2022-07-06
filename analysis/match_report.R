@@ -249,7 +249,7 @@ var_labels <- list(
   ageband ~ "Age",
   sex ~ "Sex",
   ethnicity_combined ~ "Ethnicity",
-  imd_Q5 ~ "IMD",
+  imd_Q5 ~ "Deprivation",
   region ~ "Region",
   cev_cv ~ "JCVI clinical risk group",
 
