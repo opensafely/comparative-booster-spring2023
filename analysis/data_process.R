@@ -248,11 +248,6 @@ data_processed <- data_extract %>%
     # earliest covid event after study start
     anycovid_date = pmin(postest_date, covidemergency_date, covidadmitted_date, coviddeath_date, na.rm=TRUE),
 
-    #covidadmitted_ccdays = as.integer(as.character(covidadmitted_ccdays)),
-    #FIXME ignores any covid-icu episodes subsequent to the first known covid admission, so we need to extract multiple covid admissions to capture them
-    #covidicu_date = if_else(covidadmitted_ccdays>0, covidadmitted_date, Date(NA)),
-
-
     covidcritcare_date = case_when(
       as.numeric(as.character(potentialcovidcritcare_1_ccdays))>0 & !is.na(potentialcovidcritcare_1_date) ~ potentialcovidcritcare_1_date,
       as.numeric(as.character(potentialcovidcritcare_2_ccdays))>0 & !is.na(potentialcovidcritcare_2_date) ~ potentialcovidcritcare_2_date,
