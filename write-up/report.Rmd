@@ -1,8 +1,7 @@
 ---
-title: "Comparative effectiveness of BNT162b2 versus Moderna booster doses in England: preliminary report"
+title: "Comparative effectiveness of BNT162b2 versus Moderna booster doses in England: a cohort study in OpenSAFELY-TPP"
 output:
-  html_document:
-    self_contained: yes
+  word_document: default
   pdf_document:
     toc: no
   bookdown::html_document2:
@@ -10,7 +9,8 @@ output:
     toc: no
   rtf_document:
     toc: no
-  word_document: default
+  html_document:
+    self_contained: yes
 bibliography: references.bib
 csl: vancouver.csl
 link-citations: yes
@@ -63,8 +63,8 @@ source(here("lib", "design", "design.R"))
       "postest",
       #"covidemergency",
       "covidadmitted",
-      "covidadmittedproxy1",
-      "covidcritcare",
+      #"covidadmittedproxy1",
+      #"covidcritcare",
       "coviddeath",
       "noncoviddeath"
     ) %>% 
@@ -77,9 +77,127 @@ source(here("lib", "design", "design.R"))
 ```
 
 
+
+
+```{r match-A, echo=FALSE, warning=FALSE, message=FALSE}
+
+matchset <- "A"
+
+match_flowchart <-  read_csv(fs::path(output_dir_os, matchset, "match_flowchart.csv"))
+match_coverage <- read_csv(fs::path(output_dir_os, matchset, "match_coverage.csv")) %>%
+   mutate(
+    treatment_descr = fct_recoderelevel(as.character(treatment),  recoder$treatment),
+  )
+
+match_table1 <- read_csv(fs::path(output_dir_os, matchset, "match_table1.csv"))
+match_table1by <- read_csv(fs::path(output_dir_os, matchset, "match_table1by.csv"))
+match_smd <-  read_csv(fs::path(output_dir_os, matchset, "match_smd.csv"))
+
+ci_estimates <- read_csv(fs::path(output_dir_os, matchset, "ci_estimates.csv")) %>% 
+  mutate(
+    outcome_descr = fct_recoderelevel(as.character(outcome),  recoder$outcome),
+    subgroup_descr = fct_recoderelevel(subgroup,  recoder$subgroup),
+    subgroup_level_descr = replace_na(subgroup_level_descr, "")
+  )
+contrasts_daily <- read_csv(fs::path(output_dir_os, matchset, "ci_contrasts_daily.csv")) %>% 
+  mutate(
+    outcome_descr = fct_recoderelevel(as.character(outcome),  recoder$outcome),
+    subgroup_descr = fct_recoderelevel(subgroup,  recoder$subgroup),
+    subgroup_level_descr = replace_na(subgroup_level_descr, "")
+  )
+contrasts_cuts <- read_csv(fs::path(output_dir_os, matchset, "ci_contrasts_cuts.csv")) %>%
+  mutate(
+    outcome_descr = fct_recoderelevel(as.character(outcome),  recoder$outcome),
+    subgroup_descr = fct_recoderelevel(subgroup,  recoder$subgroup),
+    subgroup_level_descr = replace_na(subgroup_level_descr, "")
+  )
+contrasts_overall <- read_csv(fs::path(output_dir_os, matchset, "ci_contrasts_overall.csv")) %>% 
+  mutate(
+    outcome_descr = fct_recoderelevel(as.character(outcome),  recoder$outcome),
+    subgroup_descr = fct_recoderelevel(subgroup,  recoder$subgroup),
+    subgroup_level_descr = replace_na(subgroup_level_descr, ""),
+    
+  )
+
+perN <- 1000
+perN_format <- label_number(1, 1, big.mark=",")(perN)
+
+label_number_n <- label_number(1, 1, big.mark=",")
+label_number_risk <- label_number(0.01, perN, style_negative="minus", big.mark=",")
+label_number_rr <- label_number(0.01, 1, style_negative="minus")
+
+
+
+contrasts_overall_table <-
+  contrasts_overall %>%
+  mutate(
+    outcome,
+    outcome_descr,
+    subgroup,
+    subgroup_descr,
+    subgroup_level_descr,
+    n.event = label_number_n(n.event_0+n.event_1),
+    persontime_weeks = label_number_n((persontime_0 + persontime_1) / 7),
+    n.atrisk = label_number_n(n.atrisk_0),
+    persontime_0=label_number_n(persontime_0/7), 
+    persontime_1=label_number_n(persontime_1/7),
+    n.event_0=label_number_n(n.event_0), 
+    n.event_1=label_number_n(n.event_1),
+    
+    risk.ll_0 = 1-surv.ul_0,
+    risk.ul_0 = 1-surv.ll_0,
+    risk.ll_1 = 1-surv.ul_1,
+    risk.ul_1 = 1-surv.ll_1,
+    riskCI_0 = glue("{label_number_risk(risk_0)} ({label_number_risk(risk.ll_0)} to {label_number_risk(risk.ul_0)})"),
+    riskCI_0_95 = glue("{label_number_risk(risk_0)} (95%CI {label_number_risk(risk.ll_0)} to {label_number_risk(risk.ul_0)})"),
+    riskCI_1 = glue("{label_number_risk(risk_1)} ({label_number_risk(risk.ll_1)} to {label_number_risk(risk.ul_1)})"),
+    cirdCI = glue("{label_number_risk(cird)} ({label_number_risk(cird.ll)} to {label_number_risk(cird.ul)})"),
+    cirdCI_95 = glue("{label_number_risk(cird)} (95%CI {label_number_risk(cird.ll)} to {label_number_risk(cird.ul)})"),
+    #cirrCI = glue("{label_number_rr(cirr)} ({label_number_rr(cirr.ll)}-{label_number_rr(cirr.ul)})"),
+    #kmirrCI =   glue("{label_number_rr(kmirr)} ({label_number_rr(kmirr.ll)}-{label_number_rr(kmirr.ul)})"),
+    coxhrCI =   glue("{label_number_rr(coxhr)} ({label_number_rr(coxhr.ll)} to {label_number_rr(coxhr.ul)})"),
+    coxhrCI_95 =   glue("{label_number_rr(coxhr)} (95%CI {label_number_rr(coxhr.ll)} to {label_number_rr(coxhr.ul)})"),
+  ) 
+
+```
+
+
+William J Hulme^1^, Elsie Horne^3,4^, Ruth Keogh^2^, Edward PK Parker^2^, Venexia Walker^3,5^, Elizabeth J Williamson^2^, Tom Palmer^3,5^, Linda Nab^1^, Helen J Curtis^1^, Ben Goldacre^1^, Miguel A Hernán^8,9^, Jonathan AC Sterne^3,4,7^, and the OpenSAFELY collaborative. 
+
+1\. The Bennett Institute for Applied Data Science, Nuffield Department of Primary Care Health Sciences, University of Oxford, OX26GG, UK
+
+2\. London School of Hygiene and Tropical Medicine, Keppel Street, London, WC1E 7HT, UK
+
+3\. Population Health Sciences, University of Bristol, Oakfield House, Oakfield Grove, Bristol, BS8 2BN, UK
+
+4\. NIHR Bristol Biomedical Research Centre, Bristol, UK
+
+5\. MRC Integrative Epidemiology Unit, Bristol Medical School, University of Bristol, Bristol, UK
+
+6\. TPP, TPP House, 129 Low Lane, Horsforth, Leeds, LS18 5PX
+
+7\. Health Data Research UK South West
+
+8\. CAUSALab, Harvard T.H. Chan School of Public Health, Boston, MA 02115
+
+9\. Departments of Epidemiology and Biostatistics, Harvard T.H. Chan School of Public Health, Boston, MA 02115
+
+
 \newpage
 
-## Overview
+## Abstract
+
+*Introduction* The  BNT162b2 and mRNA-1273 vaccines were both widely used for COVID-19 booster vaccination in England, and are both effectiveness against COVID-19 related outcomes, particularly severe outcomes. Direct comparisons of the effectiveness of these two vaccine types when used for boosting have not been made in trials or observational data.
+
+*Methods* Using the OpenSAFELY-TPP linked electronic health record database, we matched adult recipients of each vaccine type on date of vaccination, primary vaccine course, prior SARS-CoV-2 infection, and other important demographic and clinical characteristics. Recipients were eligible for inclusion if boosted between 29 October 2021 to 31 January 2022, and following up for 12 weeks. Outcomes were positive SARS-CoV-2 test, COVID-19 hospitalisation, and COVID-19 death. We used the Aalen-johansen estimator to obtain the cumulative incidence of each outcome, and compared these using risk differences (RD) and hazard ratios (HRs). 
+
+*Results* `r label_number(1, big.mark=",")(filter(match_flowchart, crit=="c7", vax3_type=="pfizer") %>% pull(n))` people were matched in each group, contributing a total of `r contrasts_overall_table %>% filter(outcome=="coviddeath", subgroup=="all") %>% pull(persontime_weeks)` person-weeks of follow-up. The 12-week risk per `r perN_format` people of positive SARS-CoV-2 test for those receiving BNT162b2 and Moderna mRNA-1273 was `r contrasts_overall_table %>% filter(outcome=="postest", subgroup=="all") %>% pull(riskCI_0_95)` and `r contrasts_overall_table %>% filter(outcome=="postest", subgroup=="all") %>% pull(riskCI_1)` (RD `r contrasts_overall_table %>% filter(outcome=="postest", subgroup=="all") %>% pull(cirdCI_95)`; HR `r contrasts_overall_table %>% filter(outcome=="postest", subgroup=="all") %>% pull(coxhrCI_95)`) respectively. 
+
+*Conclusion* COVID-19-related outcomes after booster vaccination with BNT162b2 or mRNA-1273 were rare, and the risk was slightly lower for mRNA-1273 than for BNT162b2. These finding were broadly consistent across subgroups.
+
+\newpage
+
+## Background
 
 The UK COVID-19 vaccination programme delivered its first "booster" doses in September 2021, initially in groups at high risk of severe disease then across the adult population. The BNT162b2 Pfizer-BioNTech vaccine was used initially, with Moderna mRNA-1273 subsequently also used. The concurrent administration BNT162b2 and Moderna vaccines for boosting in England enables a direct comparison of their effectiveness. We used the OpenSAFELY-TPP database, covering 40% of English primary care practices in England and linked to national coronavirus surveillance, hospital episodes, and death registry data, to compare the effectiveness of BNT162b2 versus Moderna in boosted adults between `r format(as.Date(study_dates$studystart_date), "%e %B")` and `r format(as.Date(study_dates$studyend_date), "%e %B %Y")`, during which time both vaccine brands were being used.
 
@@ -96,17 +214,50 @@ We considered all adults aged $\ge$ 18 years who received a booster dose of BNT1
 
 ## Matching 
 
-BNT162b2 booster recipients were matched with Moderna booster recipients using two different matching strategies. one simpler strategy that will identify more matches but the risk of greater imbalance between treatment groups, and another more complex strategy that will identify fewer matches but with less imbalance. 
+BNT162b2 booster recipients were matched 1:1 with Moderna booster recipients without replacement. Two different matching strategies were used: one simpler strategy resulting in more matches but with greater imbalance between treatment groups, and another more complex strategy resulting in fewer matches but with less imbalance. 
 
-#### Matching strategy A
+#### Matching strategies
 
-Booster recipients were matched on the following characteristics: date of booster dose; primary course vaccine brand; date of second vaccine dose, within 7 days; NHS region (East of England, Midlands, London, North East and Yorkshire, North West, South East, South West); clinical risk groups used for prioritisation (clinically extremely vulnerable, clinically at-risk, neither); age, within 3 years and age groups used by JCVI for prioritisation; English Index of Multiple Deprivation, grouped by quintile.
+```{r, table-jcvi, echo=FALSE, message=FALSE, warning=FALSE}
 
-#### Matching strategy B
+tribble(
+  ~Factor, ~Description, ~A, ~B,
+  
+  "Date of booster dose",  "Matched exactly",  
+    "X", "X",
+  "Primary course vaccine brand", "BNT162b2; ChadOx1-S", 
+    "X", "X",
+  "Date of second vaccine dose", "7 day caliper", 
+    "X", "X",
+  "Age",  "3 year caliper", 
+    "X", "X",
+  "JCVI age group", "18-39; 40-49; 50-54; 55-59; 60-64; 65-69; 70-75; 75-79; 80 and over",
+    "X", "X",
+  "JCVI Clinical risk group", "clinically extremely vulnerable; clinically at-risk; neither",
+    "X", "X",
+  "English Index of Multiple Deprivation", "Grouped by quintile",
+    "X", "X",
+  "NHS region", "East of England; Midlands; London; North East and Yorkshire; North West; South East; South West",
+    "X", "",
+  "Sustainability and Transformation Partnership (STP)", "a geographical grouping of NHS and local authorities",
+    "", "X",
+  "Sex", "Male; Female",
+    "", "X", 
+  "Evidence of prior SARS-CoV-2 infection", 'Any of: positive SARS-CoV-2 test; "probable" infection documented in primary care; COVID-19 hospital admission',
+    "", "X",
+  "Morbidity count", "0, 1, or 2 or more of the following conditions: diabetes; BMI over 40kg/m^2^; chronic heart disease; chronic kidney disease; chronic liver disease; chronic respiratory disease or severe asthma; chronic neurological disease", 
+    "", "X"
+) %>%
+gt() %>%
+tab_spanner(
+  label = "Matching strategy",
+  columns = all_of(c("A", "B"))
+) %>%
+fmt_markdown(columns = TRUE)
 
-Booster recipients were matched on the following characteristics: date of booster dose; primary course vaccine brand; date of second vaccine dose, within 7 days; Sustainability and Transformation Partnership (STP) a geographical grouping of NHS and local authorities; evidence of prior SARS-CoV-2 infection (positive SARS-CoV-2 test, "probable" infection documented in primary care, or COVID-19 hospital admission); clinical risk groups used for prioritisation (clinically extremely vulnerable, clinically at-risk, neither); age, within 3 years; and age groups used by JCVI for prioritisation; English Index of Multiple Deprivation, grouped by quintile; sex; and morbidity count (0, 1, 2 or more).
-
-Morbidity count included the following conditions: diabetes, BMI \> 40kg/m^2^, chronic heart disease, chronic kidney disease, chronic liver disease, chronic respiratory disease or severe asthma, chronic neurological disease.
+cat("  \n\n")
+```
+Morbidity count included the following conditions: diabetes, BMI \> 40kg/m^2^, chronic heart disease, chronic kidney disease, chronic liver disease, chronic respiratory disease or severe asthma, chronic neurological disease"
 
 
 ## Outcomes
@@ -126,22 +277,22 @@ The following outcomes were considered:
 
 ## Follow-up
 
-Each person was followed from the day of boosting (i.e., time zero) until the earliest of outcome, death, practice de-registration, 10 weeks, or `r format(as.Date(study_dates$followupend_date), "%e %B %Y")`.
+Each person was followed from the day of boosting (i.e., time zero) until the earliest of outcome, death, practice de-registration, 12 weeks, or `r format(as.Date(study_dates$followupend_date), "%e %B %Y")`.
 
 ## Statistical Analysis
 
-We estimated Kaplan-Meier (KM) cumulative incidence curves separately by vaccine brand, and compared brands using the 10-week risk differences and risk ratios. The incidence rate ratio (events per person-time-at-risk) in time-period specific intervals will also be reported. This is equivalent to a period-specific hazard ratio if a constant hazard within each time period is assumed. 
+We estimated the cumulative incidence in each treatment group using the Aalen-Johansen estimator, with COVID-19 and non-COVID-19 treated as competing events (when these were not the event of interest). The risk differences (RD) and risk ratios (RRs) of the cumulative incidences were derived. We also estimated hazard ratios (HRs) using period-specific Cox models, in 7-day periods up to 28-days then 14-day periods thereafter.
+
+<!-- 95% confidence limits for the AJ estimates were derived from a Greenwood-type formula. Confidence limits for the risk difference were derived from the sum of squares of the AJ standard errors, derived from Greenwood’s formula. Confidence limits for the survival ratio were based on the standard error of the cumulative hazard. Confidence limits for the risk ratio were derived using the Delta method. -->
 
 <!-- 95% confidence limits for the KM estimates, risk differences, risk ratios, and incidence rate ratios are derived by bootstrapping the matched pairs. 500 bootstrap replicates will be used. -->
-
-95% confidence limits for the KM estimates were derived from the complementary log-log transformation. Confidence limits for the risk difference were derived from the sum of squares of the treatment-specific KM standard errors, derived from Greenwood’s formula. Confidence limits for the survival ratio were based on the standard error of the cumulative hazard. Confidence limits for the risk ratio were derived using the Delta method.
 
 
 <!-- [The primary estimand is the average treatment effect in the recruited population. To estimate this, expected cumulative incidence rates are estimated for each participant assuming treatment was received by everyone in both treatment groups at time zero. These curves are then averaged over all participants to give the marginal cumulative incidence. This is repeated assuming nobody is treated in either group, and their difference taken. Calculating standard errors for these quantities is challenging, whether approached analytically (due to complex variance components) or computationally (via bootstrapping, due to the large sample sizes involved) and are therefore not reported. ] -->
 
 ## Subgroup analyses
 
-We also estimated comparative effectiveness separately in the following subgroups: primary vaccine course; age (18-64 or $\ge$ 65 years); clinically extremely .vulnerable or not; evidence of prior SARS-CoV-2 infection or not; dominant SARS-CoV-2 variant era (Delta or Omicron).
+We estimated comparative effectiveness separately in the following subgroups: primary vaccine course; age (18-64 or $\ge$ 65 years); clinically extremely vulnerable or not; evidence of prior SARS-CoV-2 infection or not.
 
 
 ## Software, code, and reproducibility
@@ -151,48 +302,11 @@ Data management and analyses were conducted in Python version 3.8.10 and R versi
 ## Disclosure control
 Any reported figures based on counts below 6 must be redacted or rounded for disclosure control. To reduce secondary disclosure risk (e.g., by using two unredacted values to derive a redacted value), rounding is preferred.
 
-In this study, we round counts up to the nearest multiple of 7. Kaplan-Meier survival estimates are rounded upwards by deferring event-times until there are at least 7 events, so that each KM “step” is based on at least 7 events. All other quantities will be derived from these rounded KM estimates. 
+To reduce re-identification risk, counts are reported to the nearest $n*6-3$ ($3, 9, 15, 21, ...$). Similarly, event times were deferred until there were at least 6 events, so that each "step" in the Aalen-Johansen cumulative incidence estimates is based on at least 6 events. 
 
 
 
 # Results
-
-
-
-```{r match-A, echo=FALSE, warning=FALSE, message=FALSE}
-
-matchset <- "A"
-
-match_flowchart <-  read_csv(fs::path(output_dir_os, matchset, "match_flowchart.csv"))
-match_coverage <- read_csv(fs::path(output_dir_os, matchset, "match_coverage.csv")) %>%
-   mutate(
-    treatment_descr = fct_recoderelevel(as.character(treatment),  recoder$treatment),
-  )
-
-match_table1 <- read_csv(fs::path(output_dir_os, matchset, "match_table1.csv"))
-match_table1by <- read_csv(fs::path(output_dir_os, matchset, "match_table1by.csv"))
-match_smd <-  read_csv(fs::path(output_dir_os, matchset, "match_smd.csv"))
-
-km_estimates <- read_csv(fs::path(output_dir_os, matchset, "km_estimates.csv")) %>% 
-  mutate(
-    outcome_descr = fct_recoderelevel(as.character(outcome),  recoder$outcome),
-    subgroup_descr = fct_recoderelevel(subgroup,  recoder$subgroup),
-    subgroup_level_descr = replace_na(subgroup_level_descr, "")
-  )
-contrasts_daily <- read_csv(fs::path(output_dir_os, matchset, "contrasts_daily.csv")) %>% 
-  mutate(
-    outcome_descr = fct_recoderelevel(as.character(outcome),  recoder$outcome),
-    subgroup_descr = fct_recoderelevel(subgroup,  recoder$subgroup),
-    subgroup_level_descr = replace_na(subgroup_level_descr, "")
-  )
-contrasts_overall <- read_csv(fs::path(output_dir_os, matchset, "contrasts_overall.csv")) %>% 
-  mutate(
-    outcome_descr = fct_recoderelevel(as.character(outcome),  recoder$outcome),
-    subgroup_descr = fct_recoderelevel(subgroup,  recoder$subgroup),
-    subgroup_level_descr = replace_na(subgroup_level_descr, "")
-  )
-
-```
 
 
 ## Study population and matching
@@ -200,10 +314,56 @@ contrasts_overall <- read_csv(fs::path(output_dir_os, matchset, "contrasts_overa
 `r label_number(1, big.mark=",")(filter(match_flowchart, crit=="c0") %>% pull(n) %>% sum)` adults registered at a TPP practice received a booster vaccination of either BNT162b2 (`r label_number(1, big.mark=",")(filter(match_flowchart, crit=="c0", vax3_type=="pfizer") %>% pull(n))`) or Moderna (`r label_number(1, big.mark=",")(filter(match_flowchart, crit=="c0", vax3_type=="moderna") %>% pull(n))`) during the study period, with `r label_number(1, big.mark=",")(filter(match_flowchart, crit=="c6", vax3_type=="pfizer") %>% pull(n))` (`r label_percent(0.1)(filter(match_flowchart, crit=="c6", vax3_type=="pfizer") %>% pull(pct_all))`) and `r label_number(1, big.mark=",")(filter(match_flowchart, crit=="c6", vax3_type=="pfizer") %>% pull(n))` (`r label_percent(0.1)(filter(match_flowchart, crit=="c6", vax3_type=="moderna") %>% pull(pct_all))`) eligible for matching. 
 
 
-## Matching strategy A
-
 For the simpler matching criteria, `r label_number(1, big.mark=",")(filter(match_flowchart, crit=="c7", vax3_type=="pfizer") %>% pull(n))` were matched in each group, `r label_percent(0.1)(filter(match_flowchart, crit=="c7", vax3_type=="pfizer") %>% pull(pct_step))` and `r label_percent(0.1)(filter(match_flowchart, crit=="c7", vax3_type=="moderna") %>% pull(pct_step))` respectively (Table 1, Figure 1).
 
+The following results are based on matching strategy A, with results for strategy B included in supplementary materials. 
+
+Characteristics were well-balanced between vaccine types at the start of follow up (Table 2), and the proportion of people with prior clinical conditions was generally similar between the groups. The standardised mean difference was consistently below 0.1.
+
+
+## Estimated comparative effectiveness
+
+### Main analysis
+
+12 weeks after booster vaccination by either BNT162b2 or Moderna mRNA-1273 there were `r contrasts_overall_table %>% filter(outcome=="postest", subgroup=="all") %>% pull(n.event)`positive SARS-CoV-2 tests, `r contrasts_overall_table %>% filter(outcome=="covidadmitted", subgroup=="all") %>% pull(n.event)` COVID-19 hospitalisations, and `r contrasts_overall_table %>% filter(outcome=="coviddeath", subgroup=="all") %>% pull(n.event)` COVID-19 deaths across `r contrasts_overall_table %>% filter(outcome=="coviddeath", subgroup=="all") %>% pull(persontime_weeks)` person-weeks of follow-up (Table 2). 
+
+Figure 2a shows the cumulative incidence curves for each outcome and vaccine type. Absolute risks at 12 weeks of positive SARS-CoV-2 test for those receiving BNT162b2 and Moderna mRNA-1273 were `r contrasts_overall_table %>% filter(outcome=="postest", subgroup=="all") %>% pull(riskCI_0_95)` and `r contrasts_overall_table %>% filter(outcome=="postest", subgroup=="all") %>% pull(riskCI_1)` per `r perN_format` people respectively, representing a risk difference of `r contrasts_overall_table %>% filter(outcome=="postest", subgroup=="all") %>% pull(cirdCI_95)` nad a hazard ratio of `r contrasts_overall_table %>% filter(outcome=="postest", subgroup=="all") %>% pull(coxhrCI_95)`. 
+Corresponding 12-week risks for COVID-19 hospitalisation were `r contrasts_overall_table %>% filter(outcome=="covidadmitted", subgroup=="all") %>% pull(riskCI_0)` and `r contrasts_overall_table %>% filter(outcome=="covidadmitted", subgroup=="all") %>% pull(riskCI_1)` per `r perN_format` people (RD `r contrasts_overall_table %>% filter(outcome=="covidadmitted", subgroup=="all") %>% pull(cirdCI)`; HR `r contrasts_overall_table %>% filter(outcome=="covidadmitted", subgroup=="all") %>% pull(coxhrCI)`), 
+and for COVID-19 death were `r contrasts_overall_table %>% filter(outcome=="coviddeath", subgroup=="all") %>% pull(riskCI_0)` and `r contrasts_overall_table %>% filter(outcome=="coviddeath", subgroup=="all") %>% pull(riskCI_1)` per `r perN_format` people (RD `r contrasts_overall_table %>% filter(outcome=="coviddeath", subgroup=="all") %>% pull(cirdCI)`; HR `r contrasts_overall_table %>% filter(outcome=="coviddeath", subgroup=="all") %>% pull(coxhrCI)`).
+
+### Subgroup analyses
+
+Whilst absolute risks differed between subgroups, and therefore so did the risk differences comparing vaccine types, subgroup-specific hazard ratios were broadly similar. 
+
+A notable exception was COVID-19 hospitalisation outcomes stratified by clinical vulnerability: the HR was lower amongst those were were clinically at risk or extremely clinically vulnerable, compared with those who were not clinically at-risk (not clinically at-risk HR `r contrasts_overall_table %>% filter(outcome=="covidadmitted", subgroup=="cev_cv", subgroup_level=="Not clinically at-risk") %>% pull(cirdCI)`; clinically at-risk HR `r contrasts_overall_table %>% filter(outcome=="covidadmitted", subgroup=="cev_cv", subgroup_level=="Clinically at-risk") %>% pull(cirdCI)`; clinically extremely vulnerable `r contrasts_overall_table %>% filter(outcome=="covidadmitted", subgroup=="cev_cv", subgroup_level=="Clinically extremely vulnerable") %>% pull(cirdCI)`).
+
+
+## Discussion
+
+This observational study in over 4 million adults compares the effectiveness of BNT162b2 and Moderna mRNA-1273 vaccines against COVID19-related outcomes in the national booster vaccination programme in England. We estimated that Moderna mRNA-1273 provided slightly more protection than BNT162b2 did against a positive SARS-CoV-2 test (RD = `r contrasts_overall_table %>% filter(outcome=="postest", subgroup=="all") %>% pull(cirdCI_95)` per `r perN_format`) and hospitalisation (RD = `r contrasts_overall_table %>% filter(outcome=="covidadmitted", subgroup=="all") %>% pull(cirdCI_95)`) in the first 12 weeks after boosting. For COVID-19 death, the difference was equivocal (RD = `r contrasts_overall_table %>% filter(outcome=="coviddeath", subgroup=="all") %>% pull(cirdCI_95)`) though there were only `r contrasts_overall_table %>% filter(outcome=="coviddeath", subgroup=="all") %>% pull(n.event)` events across both vaccine types, limiting statistical power.
+
+Around 1 in 10 people had a positive SARS-CoV-2 test in the 12 weeks following booster vaccination, reflecting both the high infection rates in the study period, particularly from December 2021 onward, and the imperfect protection booster vaccination offers against infection. However, rates of severe disease were rare: after 12-weeks, fewer than 1 in 1000 booster recipients were hospitalised with COVID-19, and fewer than 1 in 20,000 died due to COVID-19 disease. 
+
+Comparative effectiveness against these severe outcomes appeared similar regardless of age, whether the primary vaccine course was with ChAdOx1-S or BNT162b2, or whether there was evidence of prior infection or not. However, the relative advantage of mRNA-1273 against severe COVID-19 was even higher in people classified as clinically at-risk or extremely vulnerable, compared with those not clinically at risk.
+
+
+### Strengths and weaknesses
+
+The OpenSAFELY-TPP database covers around 40% of the English population and contains rich clinical information which enabled us to closely match BNT162b2 and mRNA-1273 recipients and study a range of clinical outcomes. 
+
+We excluded certain groups who were unlikely to undergo boosting, such as those with a recent positive test or in palliative care. We also excluded groups where we could not reliably capture high heterogeneity in outcome risk, such as those living in care homes and health and social care workers. This may limit the generalisability of out findings. 
+
+Outcomes may be under-ascertained. Positive SARS-CoV-2 tests only include those reported via the national COVID-19 surveillance system (SGSS), and so many asymptomatic and some symptomatic infections will be missed. Positive SARS-CoV-2 testing is therefore not a reliable surrogate for SARS-CoV-2 infection. Some COVID-19 hospitalisations resulting in longer hospital stays may have been missed as these events are only reported once the patient has been discharged.
+
+### Findings in context
+
+Our findings are consistent with studies identifying a small benefit of mRNA-1273 compared with BNT162b2 for primary vaccination (DOI 10.1056/NEJMoa2115463). 
+
+### Conclusions
+
+COVID-19-related outcomes after booster vaccination with BNT162b2 or mRNA-1273 were rare, though the risk was slightly higher for BNT162b2 and for mRNA-1273. These finding were broadly consistent across subgroups. These are important differences at a population-level and may help inform vaccine procurement decisions for future booster programmes. Individuals should not defer booster vaccination by BNT162b2 in favour of waiting for mRNA-1273 if offered. 
+
+## Figures and tables
 
 #### Table 1: inclusion criteria
 
@@ -239,10 +399,6 @@ match_flowchart %>%
     label = "Moderna mRNA-1273",
     columns = ends_with("moderna")
   ) %>%
-  # tab_spanner(
-  #   label = "mRNA-1273",
-  #   columns = ends_with("moderna")
-  # ) %>%
   fmt_percent(
     columns = starts_with(c("pct_")),
     decimals = 1
@@ -356,7 +512,6 @@ cat("  \n\n")
 ```{r table-table1, echo=FALSE, warning=FALSE, message=FALSE}
 table1 <- 
   match_table1 %>%
-  #filter(outcome %in% outcomes) %>%
   group_by(variable) %>%
   mutate(
     label = if_else(row_number()==1, label, str_c("&nbsp;&nbsp;&nbsp;", label)),
@@ -412,38 +567,37 @@ cat("  \n\n")
 &nbsp; &nbsp; &nbsp;
 
 
-## Estimated comparative effectiveness
+#### Table 3: Kaplan-Meier 12-week risk estimates
 
-### Main analysis
-
-#### Table 3: Kaplan-Meier 10-week risk estimates
-
-Counts and survival estimates are based on values rounded up to the nearest 7, for disclosure control.
+Counts and survival estimates are based on values rounded up to the nearest n*6-3, for disclosure control.
 
 ```{r table-km, echo=FALSE, warning=FALSE, message=FALSE}
 
-label_number_n <- label_number(1, 1, big.mark=",")
-label_number_risk <- label_number(0.1, 10000, style_negative="minus", big.mark=",")
-label_number_rr <- label_number(0.01, 1, style_negative="minus")
 
-contrasts_overall %>%
-  transmute(
+contrasts_overall_table %>%
+  filter(outcome %in% outcomes) %>%
+  group_by(outcome_descr) %>%
+  select(
     outcome_descr,
     subgroup_descr,
     subgroup_level_descr,
-    n.atrisk=label_number_n(n.atrisk_0),
-    persontime_0=label_number_n(persontime_0/7), 
-    persontime_1=label_number_n(persontime_1/7),
-    n.event_0=label_number_n(n.event_0), 
-    n.event_1=label_number_n(n.event_1),
-    riskCI_0 = glue("{label_number_risk(1-surv_0)} ({label_number_risk(1-surv.ul_0)} - {label_number_risk(1-surv.ll_0)})"),
-    riskCI_1 = glue("{label_number_risk(1-surv_1)} ({label_number_risk(1-surv.ul_1)} - {label_number_risk(1-surv.ll_1)})"),
-    kmrdCI = glue("{label_number_risk(kmrd)} ({label_number_risk(kmrd.ll)} - {label_number_risk(kmrd.ul)})"),
-    kmrrCI = glue("{label_number_rr(kmrr)} ({label_number_rr(kmrr.ll)} - {label_number_rr(kmrr.ul)})"),
-    irrCI =   glue("{label_number_rr(irr)} ({label_number_rr(irr.ll)} - {label_number_rr(irr.ul)})"),
-    #coxhrCI =  paste0(label_number(0.01)(kmrr), " (", label_number(0.01)(coxhr.ll), "-", label_number(0.01)(coxhr.ul), ")"),
+    
+    n.atrisk,
+    
+    persontime_0,
+    persontime_1,
+    
+    n.event_0,
+    n.event_1,
+    
+    riskCI_0,
+    riskCI_1,
+    
+    cirdCI,
+    #cirrCI,
+    #kmirrCI,
+    coxhrCI,
   ) %>%
-  group_by(outcome_descr) %>%
   mutate(
     # add indicator for row shading
     shade = cumsum((lag(subgroup_descr, 1, "")!=subgroup_descr)*1L),
@@ -466,13 +620,13 @@ contrasts_overall %>%
     n.event_0 = "Events",
     n.event_1 = "Events",
     
-    riskCI_0 = "10-week Risk per 10,000 people (95% CI)",
-    riskCI_1 = "10-week Risk per 10,000 people (95% CI)",
+    riskCI_0 = glue("12-week risk per {perN_format} people (95% CI)"),
+    riskCI_1 = glue("12-week risk per {perN_format} people (95% CI)"),
     
-    kmrdCI = "Risk difference per 10,000 people (95% CI)",
-    kmrrCI = "Risk ratio (95% CI)",
-    irrCI = "Incidence rate ratio (95% CI)",
-    #coxhrCI = "Hazard ratio (95% CI)"
+    cirdCI = glue("Risk difference per {perN_format} people (95% CI)"),
+    #cirrCI = "Risk ratio (95% CI)",
+    #kmirrCI = "Incidence rate ratio (95% CI)",
+    coxhrCI = "Hazard ratio (95% CI)"
   ) %>%
   tab_spanner(
     label = "BNT162b2",
@@ -488,7 +642,7 @@ contrasts_overall %>%
   ) %>%
   cols_align(
     align = c("right"),
-    columns = ends_with(c("_1", "_0", "CI"))
+    columns = ends_with(c("atrisk", "_1", "_0", "CI"))
   ) %>%
   tab_options(
     table.font.size = 8
@@ -512,9 +666,9 @@ cat("  \n\n")
 
 &nbsp; &nbsp; &nbsp;
 
-```{r, function-km, echo=FALSE, message=FALSE, warning=FALSE, out.width='100%', out.height='50%', results='asis', out.extra=''}
+```{r, function-ci, echo=FALSE, message=FALSE, warning=FALSE, out.width='100%', out.height='50%', results='asis', out.extra=''}
 
-km_theme <- function(...) {
+ci_theme <- function(...) {
   theme(
       legend.position="none",
       axis.text.x.top=element_text(hjust=0),
@@ -525,26 +679,27 @@ km_theme <- function(...) {
       panel.grid.minor.y = element_blank(),
       strip.background = element_blank(),
       strip.text = element_blank(),
-      
+      strip.placement="outside",
       panel.border = element_blank(),
       panel.spacing = unit(0.8, "lines"),
       ...
     )
 }
 
-colourvalues <- RColorBrewer::brewer.pal(10, "Paired")[c(1,2,5,6,3,4,7,8,9,10)]
+#colourvalues <- RColorBrewer::brewer.pal(10, "Paired")[c(1,2,5,6,3,4,7,8,9,10)]
+colourvalues <- c("#D55E00", "#009E73", "#CC79A7", "#56B4E9", "#CC79A7", "#56B4E9", "#0072B2")
 
-plot_km_subgroup <- function(subgroup){
+plot_ci_subgroup <- function(subgroup){
     
   subgroup0 <- subgroup
   
   if(subgroup=="all"){
-    colour_guide <- list(guides(colour="none"))
+    colour_guide <- list(guides(colour="none", fill="none", alpha="none"))
   } else{
-    colour_guide <- NULL
+    colour_guide <- list(guides(fill="none", alpha="none"))
   }
     
-  plot_km <- km_estimates %>%
+  plot_ci <- ci_estimates %>%
     filter(
       subgroup==subgroup0,
       outcome %in% outcomes
@@ -553,32 +708,37 @@ plot_km_subgroup <- function(subgroup){
       colgroup = interaction(treatment_descr, subgroup_level_descr, sep=", "),
       outcome_descr = fct_relabel(outcome_descr, str_wrap, width=10)
     ) %>%
-    ggplot(aes(group=colgroup, colour=subgroup_level_descr, fill=subgroup_level_descr, alpha=treatment_descr)) +
-    geom_step(aes(x=time, y=1-surv))+
-    geom_rect(aes(xmin=lagtime, xmax=time, ymin=1-surv.ll, ymax=1-surv.ul), alpha=0.1, colour="transparent")+
+    #group_by(colgroup, outcome_descr) %>%
+    ggplot(aes(group=colgroup, colour=treatment_descr, fill=treatment_descr, alpha=treatment_descr)) +
+    geom_step(aes(x=lagtime, y=risk, linetype=treatment_descr))+
+    #geom_segment(aes(x=lagtime, xend=time, y=risk, yend=risk))+
+    #geom_segment(aes(x=lagtime, xend=lagtime, y=lag(risk,1,0), yend=risk))+
+    geom_rect(aes(xmin=lagtime, xmax=time, ymin=risk.ll, ymax=risk.ul), alpha=0.1, colour="transparent")+
     geom_hline(aes(yintercept=0), colour="black")+
-    facet_grid(rows=vars(outcome_descr), scales="free_y", switch="y")+
+    facet_grid(rows=vars(outcome_descr), cols=vars(subgroup_level_descr), scales="free_y", switch="y")+
     scale_color_brewer(type="qual", palette="Set1", na.value="grey") +
     scale_fill_brewer(type="qual", palette="Set1", guide="none", na.value="grey") +
     #scale_color_manual(values=colourvalues, na.value="grey") +
     #scale_fill_manual(values=colourvalues, guide="none", na.value="grey") +
     scale_x_continuous(breaks = seq(0,600,14), expand = expansion(mult=c(0,0.01)))+
-    scale_y_continuous(expand = expansion(mult=c(0,0.01)), label=label_number(0.1, 10000))+
+    scale_y_continuous(expand = expansion(mult=c(0,0.01)), label=label_number_risk)+
     scale_alpha_discrete(range=c(0.3,0.9))+
     coord_cartesian(xlim=c(0, NA))+
     labs(
       x="Days",
       y=NULL,
-      title="Risk per 10,000",
+      #title=glue("Cumulative incidence per {perN_format}"),
       colour=NULL,
-      alpha=NULL
+      alpha=NULL,
+      linetype=NULL
     )+
-    colour_guide+
+    guides(linetype="none", fill="none", alpha="none")+
     theme_minimal(base_size = 9)+
       theme(
-        legend.position = c(0.05,0.1),
-        legend.justification = c(0,0),
-        legend.direction = "vertical",
+        # legend.position = c(0.05,0.1),
+        # legend.justification = c(0,0),
+        legend.position = "bottom",
+        #legend.direction = "vertical",
         axis.text.x.top=element_text(hjust=0),
   
         panel.grid.minor.x = element_blank(),
@@ -593,110 +753,156 @@ plot_km_subgroup <- function(subgroup){
       )+
       NULL
   
-  plot_kmrd <- contrasts_daily %>%
-    filter(
-      subgroup==subgroup0,
-      outcome %in% outcomes
-    ) %>%
-    ggplot(aes(group=subgroup_level_descr, colour=subgroup_level_descr, fill=subgroup_level_descr)) +
-    geom_step(aes(x=period_start, y=kmrd))+
-    geom_rect(aes(xmin=period_start, xmax=period_end, ymin=kmrd.ll, ymax=kmrd.ul), alpha=0.1, colour="transparent")+
-    geom_hline(aes(yintercept=0), colour="black")+
-    facet_grid(rows=vars(outcome_descr), scales="free_y")+
-    scale_color_brewer(type="qual", palette="Set1", na.value="grey") +
-    scale_fill_brewer(type="qual", palette="Set1", guide="none", na.value="grey") +
-    scale_x_continuous(breaks = seq(0,600,14), expand = expansion(mult=c(0,0.01)))+
-    scale_y_continuous(expand = expansion(mult=c(0,0.01)), label=label_number(0.1, 10000))+
-    coord_cartesian(xlim=c(0, NA))+
-    labs(
-      x="Days",
-      y=NULL,
-      title="Risk difference",
-      colour=NULL
-    )+
-    theme_minimal(base_size = 9)+
-    km_theme()+
-    NULL
+  # plot_cird <- contrasts_daily %>%
+  #   filter(
+  #     subgroup==subgroup0,
+  #     outcome %in% outcomes
+  #   ) %>%
+  #   ggplot(aes(group=subgroup_level_descr, colour=subgroup_level_descr, fill=subgroup_level_descr)) +
+  #   geom_segment(aes(x=period_start, xend=period_end, y=cird, yend=cird))+
+  #   geom_segment(aes(x=period_start, xend=period_start, y=lag(cird), yend=cird))+
+  #   geom_rect(aes(xmin=period_start, xmax=period_end, ymin=cird.ll, ymax=cird.ul), alpha=0.1, colour="transparent")+
+  #   geom_hline(aes(yintercept=0), colour="black")+
+  #   facet_grid(rows=vars(outcome_descr), scales="free_y")+
+  #   scale_color_brewer(type="qual", palette="Set1", na.value="grey") +
+  #   scale_fill_brewer(type="qual", palette="Set1", guide="none", na.value="grey") +
+  #   scale_x_continuous(breaks = seq(0,600,14), expand = expansion(mult=c(0,0.01)))+
+  #   scale_y_continuous(expand = expansion(mult=c(0,0.01)), label=label_number(0.1, 10000))+
+  #   coord_cartesian(xlim=c(0, NA))+
+  #   labs(
+  #     x="Days",
+  #     y=NULL,
+  #     title="Risk difference",
+  #     colour=NULL
+  #   )+
+  #   theme_minimal(base_size = 9)+
+  #   ci_theme()+
+  #   NULL
   
   
   
-  plot_kmrr <- contrasts_daily %>%
-    filter(
-      subgroup==subgroup0,
-      outcome %in% outcomes
-    ) %>%
-    ggplot(aes(group=subgroup_level_descr, colour=subgroup_level_descr, fill=subgroup_level_descr)) +
-    geom_step(aes(x=period_start, y=kmrr))+
-    geom_rect(aes(xmin=period_start, xmax=period_end, ymin=kmrr.ll, ymax=kmrr.ul), alpha=0.1, colour="transparent")+
-    geom_hline(aes(yintercept=1), colour="black")+
-    facet_grid(rows=vars(outcome_descr), scales="free_y")+
-    scale_color_brewer(type="qual", palette="Set1", na.value="grey") +
-    scale_fill_brewer(type="qual", palette="Set1", guide="none", na.value="grey") +
-    scale_x_continuous(breaks = seq(0,600,14), expand = expansion(mult=c(0,0.01)))+
-    scale_y_log10(expand = expansion(mult=c(0,0.01)))+
-    coord_cartesian(xlim=c(0, NA))+
-    labs(
-      x="Days",
-      y=NULL,
-      title="Risk ratio",
-      colour=NULL
-    )+
-    theme_minimal(base_size = 9)+
-    km_theme()+
-    NULL
+  # plot_cirr <- contrasts_daily %>%
+  #   filter(
+  #     subgroup==subgroup0,
+  #     outcome %in% outcomes
+  #   ) %>%
+  #   ggplot(aes(group=subgroup_level_descr, colour=subgroup_level_descr, fill=subgroup_level_descr)) +
+  #   geom_segment(aes(x=period_start, xend=period_end, y=cirr, yend=cirr))+
+  #   geom_segment(aes(x=period_start, xend=period_start, y=lag(cirr), yend=cirr))+
+  #   geom_rect(aes(xmin=period_start, xmax=period_end, ymin=cirr.ll, ymax=cirr.ul), alpha=0.1, colour="transparent")+
+  #   geom_hline(aes(yintercept=1), colour="black")+
+  #   facet_grid(rows=vars(outcome_descr), scales="free_y")+
+  #   scale_color_brewer(type="qual", palette="Set1", na.value="grey") +
+  #   scale_fill_brewer(type="qual", palette="Set1", guide="none", na.value="grey") +
+  #   scale_x_continuous(breaks = seq(0,600,14), expand = expansion(mult=c(0,0.01)))+
+  #   scale_y_log10(expand = expansion(mult=c(0,0.01)))+
+  #   coord_cartesian(xlim=c(0, NA))+
+  #   labs(
+  #     x="Days",
+  #     y=NULL,
+  #     title="Risk ratio",
+  #     colour=NULL
+  #   )+
+  #   theme_minimal(base_size = 9)+
+  #   ci_theme()+
+  #   NULL
   
   
-  plot_irr <- contrasts_daily %>%
+  # plot_kmirr <- contrasts_daily %>%
+  #   # approximately same as the hazard
+  #   filter(
+  #     subgroup==subgroup0,
+  #     outcome %in% outcomes
+  #   ) %>%
+  #   ggplot(aes(group=subgroup_level_descr, colour=subgroup_level_descr, fill=subgroup_level_descr)) +
+  #   geom_segment(aes(x=period_start, xend=period_end, y=kmirr, yend=kmirr))+
+  #   geom_segment(aes(x=period_start, xend=period_start, y=lag(kmirr), yend=kmirr))+
+  #   geom_rect(aes(xmin=period_start, xmax=period_end, ymin=kmirr.ll, ymax=kmirr.ul), alpha=0.1, colour="transparent")+
+  #   geom_hline(aes(yintercept=0), colour="black")+
+  #   facet_grid(rows=vars(outcome_descr), scales="free_y")+
+  #   scale_color_brewer(type="qual", palette="Set1", na.value="grey") +
+  #   scale_fill_brewer(type="qual", palette="Set1", guide="none", na.value="grey") +
+  #   scale_x_continuous(breaks = seq(0,600,14), expand = expansion(mult=c(0,0.01)))+
+  #   scale_y_log10(expand = expansion(mult=c(0,0.01)))+
+  #   coord_cartesian(xlim=c(0, NA))+
+  #   labs(
+  #     x="Days",
+  #     y=NULL,
+  #     title="IRR",
+  #     colour=NULL
+  #   )+
+  #   theme_minimal(base_size = 9)+
+  #   ci_theme()+
+  #   NULL
+  
+  
+  plot_coxhr <- contrasts_cuts %>%
     # equivalent to the hazard
     filter(
       subgroup==subgroup0,
       outcome %in% outcomes
     ) %>%
+    group_by(outcome_descr, subgroup_level_descr) %>%
     ggplot(aes(group=subgroup_level_descr, colour=subgroup_level_descr, fill=subgroup_level_descr)) +
-    geom_step(aes(x=period_start, y=irr))+
-    geom_rect(aes(xmin=period_start, xmax=period_end, ymin=irr.ll, ymax=irr.ul), alpha=0.1, colour="transparent")+
-    geom_hline(aes(yintercept=0), colour="black")+
+    geom_segment(aes(x=period_start, xend=period_end, y=coxhr, yend=coxhr))+
+    geom_segment(aes(x=period_start, xend=period_start, y=lag(coxhr), yend=coxhr))+
+    geom_rect(aes(xmin=period_start, xmax=period_end, ymin=coxhr.ll, ymax=coxhr.ul), alpha=0.1, colour="transparent")+
+    geom_hline(aes(yintercept=1), colour="black")+
     facet_grid(rows=vars(outcome_descr), scales="free_y")+
-    scale_color_brewer(type="qual", palette="Set1", na.value="grey") +
-    scale_fill_brewer(type="qual", palette="Set1", guide="none", na.value="grey") +
+    # scale_color_brewer(type="qual", palette="Set1", na.value="grey") +
+    # scale_fill_brewer(type="qual", palette="Set1", guide="none", na.value="grey") +
+    scale_color_manual(values=colourvalues, na.value="grey") +
+    scale_fill_manual(values=colourvalues, guide="none", na.value="grey") +
     scale_x_continuous(breaks = seq(0,600,14), expand = expansion(mult=c(0,0.01)))+
     scale_y_log10(expand = expansion(mult=c(0,0.01)))+
     coord_cartesian(xlim=c(0, NA))+
+    colour_guide+
     labs(
       x="Days",
-      y=NULL,
+      y="higher risk\n<- BNT162b2 | mRNA 1273 ->",
       title="Hazard ratio",
       colour=NULL
     )+
     theme_minimal(base_size = 9)+
-    km_theme()+
+    ci_theme()+
     NULL
   
+  
+  n_subgroups <-
+    ci_estimates %>%
+    filter(
+      subgroup==subgroup0
+    ) %>% 
+    `[[`("subgroup_level_descr") %>%
+    n_distinct()
+  
   plot_combined <- patchwork::wrap_plots(
-    plot_km, 
-    plot_kmrd, 
-    plot_kmrr, 
-    #plot_irr,
-    ncol=3
+    plot_ci, 
+    #plot_cird, 
+    #plot_cirr, 
+    #plot_kmirr,
+    plot_coxhr,
+    ncol=2,
+    widths=c(n_subgroups,1)
   )
   
   ggsave(
-    filename=glue("km_{subgroup}.png"),
+    filename=glue("ci_{subgroup}.png"),
     path=output_dir_rmd,
-    plot=plot_combined,
+    plot=plot_ci,
   )
 
-  plot_combined
+  plot_ci
 }
 
 ```
 
 
-#### Figure 3a: Kaplan-Meier cumulative incidence estimates
+#### Figure 2a: Cumulative incidence estimates per `r perN_format` people
 
 
-```{r, figure-km-all, echo=FALSE, message=FALSE, warning=FALSE, out.width='100%', out.height='50%', results='asis', out.extra=''}
-plot_km_subgroup("all")
+```{r, figure-ci-all, echo=FALSE, message=FALSE, warning=FALSE, out.width='100%', out.height='50%', results='asis', out.extra=''}
+plot_ci_subgroup("all")
 ```
 
 &nbsp; &nbsp; &nbsp;
@@ -705,35 +911,10 @@ plot_km_subgroup("all")
 
 &nbsp; &nbsp; &nbsp;
 
-#### Figure 3b: Kaplan-Meier cumulative incidence estimates, by primary course type
+#### Figure 2b: Cumulative incidence estimates per `r perN_format` people by primary course type
 
-```{r, figure-km-vax12_type, echo=FALSE, message=FALSE, warning=FALSE, out.width='100%', out.height='50%', results='asis', out.extra=''}
-plot_km_subgroup("vax12_type")
-```
-
-&nbsp; &nbsp; &nbsp;
-
-&nbsp; &nbsp; &nbsp;
-
-&nbsp; &nbsp; &nbsp;
-
-
-#### Figure 3c: Kaplan-Meier cumulative incidence estimates, by age group
-
-```{r, figure-km-age65plus, echo=FALSE, message=FALSE, warning=FALSE, out.width='100%', out.height='50%', results='asis', out.extra=''}
-plot_km_subgroup("age65plus")
-```
-
-&nbsp; &nbsp; &nbsp;
-
-&nbsp; &nbsp; &nbsp;
-
-&nbsp; &nbsp; &nbsp;
-
-#### Figure 3d Kaplan-Meier cumulative incidence estimates, by prior infection status
-
-```{r, figure-km-prior_covid_infection, echo=FALSE, message=FALSE, warning=FALSE, out.width='100%', out.height='50%', results='asis', out.extra=''}
-plot_km_subgroup("prior_covid_infection")
+```{r, figure-ci-vax12_type, echo=FALSE, message=FALSE, warning=FALSE, out.width='100%', out.height='50%', results='asis', out.extra=''}
+plot_ci_subgroup("vax12_type")
 ```
 
 &nbsp; &nbsp; &nbsp;
@@ -743,10 +924,35 @@ plot_km_subgroup("prior_covid_infection")
 &nbsp; &nbsp; &nbsp;
 
 
-#### Figure 3e Kaplan-Meier cumulative incidence estimates, by clinical vulnerability
+#### Figure 2c: Cumulative incidence estimates per `r perN_format` people by age group
 
-```{r, figure-km-cev_cv, echo=FALSE, message=FALSE, warning=FALSE, out.width='100%', out.height='50%', results='asis', out.extra=''}
-plot_km_subgroup("cev_cv")
+```{r, figure-ci-age65plus, echo=FALSE, message=FALSE, warning=FALSE, out.width='100%', out.height='50%', results='asis', out.extra=''}
+plot_ci_subgroup("age65plus")
+```
+
+&nbsp; &nbsp; &nbsp;
+
+&nbsp; &nbsp; &nbsp;
+
+&nbsp; &nbsp; &nbsp;
+
+#### Figure 2d Cumulative incidence estimates per `r perN_format` people by prior infection status
+
+```{r, figure-ci-prior_covid_infection, echo=FALSE, message=FALSE, warning=FALSE, out.width='100%', out.height='50%', results='asis', out.extra=''}
+plot_ci_subgroup("prior_covid_infection")
+```
+
+&nbsp; &nbsp; &nbsp;
+
+&nbsp; &nbsp; &nbsp;
+
+&nbsp; &nbsp; &nbsp;
+
+
+#### Figure 2e Cumulative incidence estimates per `r perN_format` people by clinical vulnerability
+
+```{r, figure-ci-cev_cv, echo=FALSE, message=FALSE, warning=FALSE, out.width='100%', out.height='50%', results='asis', out.extra=''}
+plot_ci_subgroup("cev_cv")
 ```
 
 &nbsp; &nbsp; &nbsp;
