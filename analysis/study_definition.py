@@ -443,7 +443,7 @@ study = StudyDefinition(
   hscworker = patients.with_healthcare_worker_flag_on_covid_vaccine_record(returning="binary_flag"),
   
   care_home_tpp=patients.satisfying(
-    "care_home=='1'",
+    "care_home='1'",
     
     care_home = patients.care_home_status_as_of(
       "covid_vax_disease_3_date - 1 day",
@@ -829,7 +829,7 @@ study = StudyDefinition(
       between=["covid_vax_disease_3_date - 3 years", "covid_vax_disease_3_date - 1 day"],
       returning="binary_flag",
     ), 
-  )
+  ),
 
   
   
