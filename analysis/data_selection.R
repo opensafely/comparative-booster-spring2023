@@ -65,7 +65,7 @@ data_criteria <- data_processed %>%
     has_knownvax2 = vax2_type %in% c("pfizer", "az"),
     has_expectedvax3type = vax3_type %in% c("pfizer", "moderna"),
     has_norecentcovid = vax3_date - anycovid_0_date >= 90 | is.na(anycovid_0_date),
-    isnot_inhospitalunplanned = !inhospital_unplanned,
+    isnot_inhospital = !inhospital,
 
     jcvi_group_6orhigher = jcvi_group %in% as.character(1:6),
 
@@ -78,7 +78,7 @@ data_criteria <- data_processed %>%
       isnot_hscworker &
       isnot_carehomeresident & isnot_endoflife & isnot_housebound &
       has_norecentcovid &
-      isnot_inhospitalunplanned
+      isnot_inhospital
 
     ),
   )
@@ -102,7 +102,7 @@ data_inclusioncriteria <- data_criteria %>%
     c3 = c2 & (isnot_hscworker ),
     c4 = c3 & (isnot_carehomeresident & isnot_endoflife & isnot_housebound),
     c5 = c4 & (has_norecentcovid),
-    c6 = c5 & (isnot_inhospitalunplanned),
+    c6 = c5 & (isnot_inhospital),
   ) %>%
   filter(c0)
 
@@ -137,7 +137,7 @@ data_flowchart <-
       crit == "c3" ~ "  and not a HSC worker",
       crit == "c4" ~ "  and not a care/nursing home resident, end-of-life or housebound",
       crit == "c5" ~ "  and no COVID-19-related events within 90 days",
-      crit == "c6" ~ "  and not in hospital at time of booster",
+      crit == "c6" ~ "  and not admitted in hospital at time of booster",
       TRUE ~ NA_character_
     )
   ) #
@@ -172,7 +172,7 @@ data_flowchart_rounded <-
       crit == "c3" ~ "  and not a HSC worker",
       crit == "c4" ~ "  and not a care/nursing home resident, end-of-life or housebound",
       crit == "c5" ~ "  and no COVID-19-related events within 90 days",
-      crit == "c6" ~ "  and not in hospital at time of booster",
+      crit == "c6" ~ "  and not admitted in hospital at time of booster",
       TRUE ~ NA_character_
     )
   ) #

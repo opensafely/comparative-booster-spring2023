@@ -898,39 +898,21 @@ study = StudyDefinition(
     restrict_to_earliest_specimen_date=False,
   ),
   
-  # unplanned hospital admission at time of 3rd / booster dose
-  inhospital_unplanned = patients.satisfying(
+  # overnight hospital admission at time of 3rd / booster dose
+  inhospital = patients.satisfying(
   
-    "discharged_unplanned_0_date >= covid_vax_disease_3_date",
+    "discharged_0_date >= covid_vax_disease_3_date",
     
-    discharged_unplanned_0_date=patients.admitted_to_hospital(
+    discharged_0_date=patients.admitted_to_hospital(
       returning="date_discharged",
-      on_or_before="covid_vax_disease_3_date - 1 day", #FIXME -- need to decide whether to include admissions discharged on the same day as booster dose or not
+      on_or_before="covid_vax_disease_3_date", # this is the admission date
       # see https://github.com/opensafely-core/cohort-extractor/pull/497 for codes
       # see https://docs.opensafely.org/study-def-variables/#sus for more info
-      with_admission_method=["21", "22", "23", "24", "25", "2A", "2B", "2C", "2D", "28"],
+      with_admission_method = ['11', '12', '13', '21', '2A', '22', '23', '24', '25', '2D', '28', '2B', '81'],
       with_patient_classification = ["1"], # ordinary admissions only
       date_format="YYYY-MM-DD",
       find_last_match_in_period=True,
     ), 
-  ),
-  
-  # planned hospital admission at time of 3rd / booster dose
-  inhospital_planned = patients.satisfying(
-  
-    "discharged_planned_0_date >= covid_vax_disease_3_date",
-    
-    discharged_planned_0_date=patients.admitted_to_hospital(
-      returning="date_discharged",
-      on_or_before="covid_vax_disease_3_date - 1 day", #FIXME -- need to decide whether to include admissions discharged on the same day as booster dose or not
-      # see https://github.com/opensafely-core/cohort-extractor/pull/497 for codes
-      # see https://docs.opensafely.org/study-def-variables/#sus for more info
-      with_admission_method=["11", "12", "13", "81"],
-      with_patient_classification = ["1"], # ordinary admissions only
-      date_format="YYYY-MM-DD",
-      find_last_match_in_period=True
-    ), 
-  
   ),
   
 

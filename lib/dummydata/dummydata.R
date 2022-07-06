@@ -221,8 +221,7 @@ sim_list = lst(
     missing_rate = ~0
   ),
 
-  inhospital_planned = bn_node( ~rbernoulli(n=..n, p = 0.05)),
-  inhospital_unplanned = bn_node( ~rbernoulli(n=..n, p = 0.01)),
+  inhospital = bn_node( ~rbernoulli(n=..n, p = 0.01)),
 
   ## pre-baseline events where event date is relevant
 
