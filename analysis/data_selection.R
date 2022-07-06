@@ -207,6 +207,7 @@ var_labels <- list(
   chronic_resp_disease ~ "Chronic respiratory disease",
   asthma ~ "Asthma",
   chronic_neuro_disease ~ "Chronic neurological disease",
+  cancer ~ "Cancer, within previous 3 years",
 
   #multimorb ~ "Morbidity count",
   immunosuppressed ~ "Immunosuppressed",

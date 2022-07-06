@@ -173,7 +173,8 @@ data_processed <- data_extract %>%
       (diabetes) +
       (chronic_liver_disease)+
       (chronic_resp_disease | asthma)+
-      (chronic_neuro_disease)#+
+      (chronic_neuro_disease)+
+      (cancer)#+
       #(learndis)+
       #(sev_mental),
     ,

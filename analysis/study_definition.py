@@ -808,7 +808,35 @@ study = StudyDefinition(
   #   on_or_before="covid_vax_disease_3_date - 1 day",
   #   date_format="YYYY-MM-DD",
   # ),
+  
+  cancer = patients.satisfying(
+    
+    "cancer_primary_care",
+    # cancer_hosp=patients.admitted_to_hospital(
+    #   with_these_diagnoses=combine_codelists(
+    #     codelists.cancer_nonhaem_icd10,
+    #     codelists.cancer_haem_icd10,
+    #     codelists.cancer_unspec_icd10,
+    #   ),
+    #   between=["covid_vax_disease_3_date - 3 years", "covid_vax_disease_3_date - 1 day"],
+    #   returning="binary_flag",
+    # ),
+    cancer_primary_care=patients.with_these_clinical_events( 
+      combine_codelists(
+        codelists.cancer_nonhaem_snomed,
+        codelists.cancer_haem_snomed
+      ),
+      between=["covid_vax_disease_3_date - 3 years", "covid_vax_disease_3_date - 1 day"],
+      returning="binary_flag",
+    ), 
+  )
 
+  
+  
+  #####################################
+  # JCVI groups
+  #####################################
+  
   cev_ever = patients.with_these_clinical_events(
     codelists.shield,
     returning="binary_flag",
