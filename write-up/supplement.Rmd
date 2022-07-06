@@ -1,0 +1,862 @@
+---
+title: "Supplementary materials for Comparative effectiveness of BNT162b2 versus mRNA-1273 booster doses in England"
+output:
+  html_document:
+    self_contained: yes
+  pdf_document:
+    toc: no
+  bookdown::html_document2:
+    number_sections: no
+    toc: no
+  rtf_document:
+    toc: no
+  word_document: default
+bibliography: references.bib
+csl: vancouver.csl
+link-citations: yes
+zotero: yes
+header-includes:
+- \usepackage{float} 
+- \floatplacement{figure}{H}
+- \usepackage{caption}
+- \captionsetup[figure]{labelformat=empty}
+- \captionsetup[table]{labelformat=empty}
+---
+
+```{r setup, include=FALSE, message=FALSE}
+
+library('tidyverse')
+library('here')
+library('glue')
+library('lubridate')
+library('gt')
+library('patchwork')
+library('scales')
+
+# remotes::install_github("https://github.com/wjchulme/osutils")
+# library('osutils')
+
+# where are the outputs (ie the inputs for this manuscript!) saved?
+#output_dir_os <- here("output", "release-objects")
+output_dir_os <- here("released-output", "release-objects")
+
+# where should we put the objects created within this rmd script?
+output_dir_rmd <- here("write-up", "figures")
+fs::dir_create(output_dir_rmd)
+
+# only applicable if `self-contained: yes` option is enables in yaml header
+knitr::opts_chunk$set(
+  echo = TRUE,
+  fig.path = paste0(output_dir_rmd, "/"),
+  fig.pos = 'H' #to stop figures floating around when rendering to pdf
+)
+
+## Import custom user functions from lib
+source(here("lib", "functions", "utility.R"))
+
+## Import design elements
+source(here("lib", "design", "design.R"))
+
+
+  outcomes <- 
+    c(
+      "postest",
+      #"covidemergency",
+      "covidadmitted",
+      #"covidadmittedproxy1",
+      #"covidcritcare",
+      "coviddeath",
+      #"noncoviddeath"
+    ) %>% 
+    set_names(., .)
+
+
+
+
+
+```
+
+
+
+
+```{r match-A, echo=FALSE, warning=FALSE, message=FALSE}
+
+
+# 
+# prematch_table1 <- read_csv(fs::path(output_dir_os, "prematch", "match_table1.csv"))
+# prematch_table1by <- read_csv(fs::path(output_dir_os, "prematch", "match_table1by.csv"))
+
+
+## matching A 
+
+matchA_flowchart <-  read_csv(fs::path(output_dir_os, "A", "match_flowchart.csv"))
+matchA_coverage <- read_csv(fs::path(output_dir_os, "A", "match_coverage.csv")) %>%
+   mutate(
+    treatment_descr = fct_recoderelevel(as.character(treatment),  recoder$treatment),
+  )
+
+matchA_table1 <- read_csv(fs::path(output_dir_os, "A", "match_table1.csv"))
+matchA_table1by <- read_csv(fs::path(output_dir_os, "A", "match_table1by.csv"))
+matchA_smd <-  read_csv(fs::path(output_dir_os, "A", "match_smd.csv"))
+
+ciA_estimates <- read_csv(fs::path(output_dir_os, "A", "ci_estimates.csv")) %>% 
+  mutate(
+    outcome_descr = fct_recoderelevel(as.character(outcome),  recoder$outcome),
+    subgroup_descr = fct_recoderelevel(subgroup,  recoder$subgroup),
+    subgroup_level_descr = replace_na(subgroup_level_descr, "")
+  )
+contrastsA_daily <- read_csv(fs::path(output_dir_os, "A", "ci_contrasts_daily.csv")) %>% 
+  mutate(
+    outcome_descr = fct_recoderelevel(as.character(outcome),  recoder$outcome),
+    subgroup_descr = fct_recoderelevel(subgroup,  recoder$subgroup),
+    subgroup_level_descr = replace_na(subgroup_level_descr, "")
+  )
+contrastsA_cuts <- read_csv(fs::path(output_dir_os, "A", "ci_contrasts_cuts.csv")) %>%
+  mutate(
+    outcome_descr = fct_recoderelevel(as.character(outcome),  recoder$outcome),
+    subgroup_descr = fct_recoderelevel(subgroup,  recoder$subgroup),
+    subgroup_level_descr = replace_na(subgroup_level_descr, "")
+  )
+contrastsA_overall <- read_csv(fs::path(output_dir_os, "A", "ci_contrasts_overall.csv")) %>% 
+  mutate(
+    outcome_descr = fct_recoderelevel(as.character(outcome),  recoder$outcome),
+    subgroup_descr = fct_recoderelevel(subgroup,  recoder$subgroup),
+    subgroup_level_descr = replace_na(subgroup_level_descr, ""),
+    
+  )
+
+
+
+## matching B
+
+matchB_flowchart <-  read_csv(fs::path(output_dir_os, "B", "match_flowchart.csv"))
+matchB_coverage <- read_csv(fs::path(output_dir_os, "B", "match_coverage.csv")) %>%
+   mutate(
+    treatment_descr = fct_recoderelevel(as.character(treatment),  recoder$treatment),
+  )
+
+matchB_table1 <- read_csv(fs::path(output_dir_os, "B", "match_table1.csv"))
+matchB_table1by <- read_csv(fs::path(output_dir_os, "B", "match_table1by.csv"))
+matchB_smd <-  read_csv(fs::path(output_dir_os, "B", "match_smd.csv"))
+
+ciB_estimates <- read_csv(fs::path(output_dir_os, "B", "ci_estimates.csv")) %>% 
+  mutate(
+    outcome_descr = fct_recoderelevel(as.character(outcome),  recoder$outcome),
+    subgroup_descr = fct_recoderelevel(subgroup,  recoder$subgroup),
+    subgroup_level_descr = replace_na(subgroup_level_descr, "")
+  )
+contrastsB_daily <- read_csv(fs::path(output_dir_os, "B", "ci_contrasts_daily.csv")) %>% 
+  mutate(
+    outcome_descr = fct_recoderelevel(as.character(outcome),  recoder$outcome),
+    subgroup_descr = fct_recoderelevel(subgroup,  recoder$subgroup),
+    subgroup_level_descr = replace_na(subgroup_level_descr, "")
+  )
+contrastsB_cuts <- read_csv(fs::path(output_dir_os, "B", "ci_contrasts_cuts.csv")) %>%
+  mutate(
+    outcome_descr = fct_recoderelevel(as.character(outcome),  recoder$outcome),
+    subgroup_descr = fct_recoderelevel(subgroup,  recoder$subgroup),
+    subgroup_level_descr = replace_na(subgroup_level_descr, "")
+  )
+contrastsB_overall <- read_csv(fs::path(output_dir_os, "B", "ci_contrasts_overall.csv")) %>% 
+  mutate(
+    outcome_descr = fct_recoderelevel(as.character(outcome),  recoder$outcome),
+    subgroup_descr = fct_recoderelevel(subgroup,  recoder$subgroup),
+    subgroup_level_descr = replace_na(subgroup_level_descr, ""),
+    
+  )
+
+
+perN <- 1000
+perN_format <- label_number(1, 1, big.mark=",")(perN)
+
+label_number_n <- label_number(1, 1, big.mark=",")
+label_number_risk <- label_number(0.01, perN, style_negative="minus", big.mark=",")
+label_number_rr <- label_number(0.01, 1, style_negative="minus")
+
+
+```
+
+
+
+
+&nbsp; &nbsp; &nbsp;
+
+&nbsp; &nbsp; &nbsp;
+
+&nbsp; &nbsp; &nbsp;
+
+
+#### Table S1: baseline characteristics of booster vaccine recipients eligible for matching
+
+```{r table-table1, echo=FALSE, warning=FALSE, message=FALSE}
+# table1 <- 
+#   prematch_table1 %>%
+#   group_by(variable) %>%
+#   mutate(
+#     label = if_else(row_number()==1, label, str_c("&nbsp;&nbsp;&nbsp;", label)),
+#   ) %>%
+#   mutate(
+#     across(
+#       starts_with("stat_"),
+#       ~if_else(is.na(.x) & row_number()==1, "", .x)
+#     )
+#   ) %>%
+#   ungroup() %>%
+#   mutate(
+#     order = cumsum(lag(variable, 1, first(variable))!=variable)
+#   ) %>%
+#   select(
+#     variable, var_label, label, starts_with("stat_"), order
+#   ) %>%
+#   rename(!!!set_names(match_table1by$by_col, match_table1by$by_chr))
+# 
+# 
+# table1 %>%
+#   gt(groupname_col="treatment_descr") %>%
+#   fmt_markdown(columns = "label") %>%
+#   tab_style(
+#     style = list(
+#       cell_fill(color = "gray96")
+#     ),
+#     locations = cells_body(
+#       rows = order%%2 == 0
+#     )
+#   ) %>%
+#   tab_style(
+#     style = list(
+#       cell_text(weight = "bold")
+#     ),
+#     locations = cells_column_labels(everything())
+#   ) %>%
+#   cols_label(
+#      label=md("Characteristic")
+#   ) %>%
+#   cols_hide(c("variable", "var_label", "order")) %>%
+#   tab_options(
+#     table.font.size = 8
+#   )
+# 
+# cat("  \n\n")
+```
+
+&nbsp; &nbsp; &nbsp;
+
+&nbsp; &nbsp; &nbsp;
+
+&nbsp; &nbsp; &nbsp;
+
+
+
+#### Figure S1: Standardised Mean Differences between BNT12b2 and mRNA-1273 groups
+
+<!-- For variables that were matched exactly the SMD is zero, and so are not shown. -->
+
+```{r figure-smd, echo=FALSE, message=FALSE, warning=FALSE, out.extra='', fig.height=7.5, out.width='90%', results='asis'}
+
+match_smd <-
+  bind_rows(
+    matchA_smd %>% mutate(strategy="A"), 
+    matchB_smd %>% mutate(strategy="B"), 
+  )
+
+plot_smd <-
+  match_smd %>%
+  filter(
+    !(var_label %in% c("Primary vaccine course", "Region", "Prior documented SARS-CoV-2 infection", "JCVI clinical risk group", "IMD"))
+  ) %>%
+  mutate(
+    level=fct_rev(fct_inorder(level))
+  ) %>%
+  droplevels() %>%
+  group_by(strategy) %>%
+  mutate(
+    variable = fct_inorder(variable),
+    variable_card = as.numeric(variable)%%2,
+    variable_levels = replace_na(as.character(variable_levels), ""),
+  ) %>%
+  arrange(strategy, variable) %>%
+  mutate(
+    level = fct_rev(fct_inorder(str_replace(paste(variable, variable_levels, sep=": "),  "\\:\\s$", ""))),
+    cardn = row_number()
+  ) %>%
+  ggplot()+
+  geom_point(aes(x=smd, y=level, group=strategy, colour=strategy), position=position_dodge(width=0.3))+
+  geom_linerange(aes(xmax=smd, xmin=0, y=level, group=strategy, colour=strategy), position=position_dodge(width=0.3))+
+  geom_rect(aes(alpha = variable_card, ymin = rev(cardn)-0.5, ymax =rev(cardn+0.5), group=strategy), xmin = -Inf, xmax = Inf, fill='grey', colour="transparent") +
+  scale_alpha_continuous(range=c(0,0.1), guide=FALSE)+
+  scale_colour_brewer(type="qual", palette="Set2")+
+  labs(
+    x="Standardised mean difference\n <- proportion higher in BNT162b2 | proportion higher in mRNA-1273 -> ",
+    y=NULL,
+    alpha=NULL,
+    colour= "Matching strategy"
+  )+
+  theme_minimal(base_size=10) +
+  theme(
+    legend.position = "bottom",
+    strip.placement = "outside",
+    strip.background = element_rect(fill="transparent", colour="transparent"),
+    strip.text.y.left = element_text(angle = 0, hjust=1),
+    panel.grid.major.y = element_blank(),
+    panel.grid.minor.y = element_blank(),
+    panel.spacing = unit(0, "lines")
+  )
+
+plot_smd
+
+
+```
+
+\newpage
+
+## Comparative effectiveness estimates, matching strategy A
+
+
+### Cumulative incidence
+
+
+
+```{r, function-ci, echo=FALSE, message=FALSE, warning=FALSE, out.width='100%', out.height='50%', results='asis', out.extra=''}
+
+ci_theme <- function(...) {
+  theme(
+      legend.position="none",
+      axis.text.x.top=element_text(hjust=0),
+      axis.line.y = element_line(colour = "black"),
+      axis.line.x.top = element_line(colour = "black"),
+      
+      panel.grid.minor.x = element_blank(),
+      panel.grid.minor.y = element_blank(),
+      strip.background = element_blank(),
+      strip.text = element_blank(),
+      strip.placement="outside",
+      panel.border = element_blank(),
+      panel.spacing = unit(0.8, "lines"),
+      ...
+    )
+}
+
+#colourvalues <- RColorBrewer::brewer.pal(10, "Paired")[c(1,2,5,6,3,4,7,8,9,10)]
+colourvalues <- c("#D55E00", "#009E73", "#CC79A7", "#56B4E9", "#CC79A7", "#56B4E9", "#0072B2")
+
+plot_ci_subgroup <- function(subgroup){
+    
+  subgroup0 <- subgroup
+  
+  if(subgroup=="all"){
+    colour_guide <- list(guides(colour="none", fill="none", alpha="none"))
+  } else{
+    colour_guide <- list(guides(fill="none", alpha="none"))
+  }
+    
+  plot_ci <- ciB_estimates %>%
+    filter(
+      subgroup==subgroup0,
+      outcome %in% outcomes
+    ) %>%
+    mutate(
+      colgroup = interaction(treatment_descr, subgroup_level_descr, sep=", "),
+      outcome_descr = fct_relabel(outcome_descr, str_wrap, width=10)
+    ) %>%
+    #group_by(colgroup, outcome_descr) %>%
+    ggplot(aes(group=colgroup, colour=treatment_descr, fill=treatment_descr, alpha=treatment_descr)) +
+    geom_hline(aes(yintercept=0), colour="black")+
+    geom_step(aes(x=lagtime, y=risk, linetype=treatment_descr))+
+    #geom_segment(aes(x=lagtime, xend=time, y=risk, yend=risk))+
+    #geom_segment(aes(x=lagtime, xend=lagtime, y=lag(risk,1,0), yend=risk))+
+    geom_rect(aes(xmin=lagtime, xmax=time, ymin=risk.ll, ymax=risk.ul), alpha=0.1, colour="transparent")+
+    facet_grid(rows=vars(outcome_descr), cols=vars(subgroup_level_descr), scales="free_y", switch="y")+
+    scale_color_brewer(type="qual", palette="Set1", na.value="grey") +
+    scale_fill_brewer(type="qual", palette="Set1", guide="none", na.value="grey") +
+    #scale_color_manual(values=colourvalues, na.value="grey") +
+    #scale_fill_manual(values=colourvalues, guide="none", na.value="grey") +
+    scale_x_continuous(breaks = seq(0,600,14), expand = expansion(mult=c(0,0.01)))+
+    scale_y_continuous(expand = expansion(mult=c(0,0.01)), label=label_number_risk)+
+    scale_alpha_discrete(range=c(0.3,0.9))+
+    coord_cartesian(xlim=c(0, NA))+
+    labs(
+      x="Days",
+      y=NULL,
+      #title=glue("Cumulative incidence per {perN_format}"),
+      colour=NULL,
+      alpha=NULL,
+      linetype=NULL
+    )+
+    guides(linetype="none", fill="none", alpha="none")+
+    theme_minimal(base_size = 9)+
+      theme(
+        # legend.position = c(0.05,0.1),
+        # legend.justification = c(0,0),
+        legend.position = "bottom",
+        #legend.direction = "vertical",
+        axis.text.x.top=element_text(hjust=0),
+  
+        panel.grid.minor.x = element_blank(),
+        panel.grid.minor.y = element_blank(),
+        strip.background = element_blank(),
+        strip.placement="outside",
+        strip.text.y.left = element_text(angle=0),
+  
+        panel.border = element_blank(),
+        panel.spacing = unit(0.8, "lines"),
+  
+      )+
+      NULL
+  
+  plot_coxhr <- contrastsB_cuts %>%
+    # equivalent to the hazard
+    filter(
+      subgroup==subgroup0,
+      outcome %in% outcomes
+    ) %>%
+    group_by(outcome_descr, subgroup_level_descr) %>%
+    ggplot(aes(group=subgroup_level_descr, colour=subgroup_level_descr, fill=subgroup_level_descr)) +
+    geom_hline(aes(yintercept=1), colour="black")+
+    geom_segment(aes(x=period_start, xend=period_end, y=coxhr, yend=coxhr))+
+    geom_segment(aes(x=period_start, xend=period_start, y=lag(coxhr), yend=coxhr))+
+    geom_rect(aes(xmin=period_start, xmax=period_end, ymin=coxhr.ll, ymax=coxhr.ul), alpha=0.1, colour="transparent")+
+    facet_grid(rows=vars(outcome_descr), scales="free_y")+
+    # scale_color_brewer(type="qual", palette="Set1", na.value="grey") +
+    # scale_fill_brewer(type="qual", palette="Set1", guide="none", na.value="grey") +
+    scale_color_manual(values=colourvalues, na.value="grey") +
+    scale_fill_manual(values=colourvalues, guide="none", na.value="grey") +
+    scale_x_continuous(breaks = seq(0,600,14), expand = expansion(mult=c(0,0.01)))+
+    scale_y_log10(expand = expansion(mult=c(0,0.01)))+
+    coord_cartesian(xlim=c(0, NA))+
+    colour_guide+
+    labs(
+      x="Days",
+      y="higher risk\n<- BNT162b2 | mRNA 1273 ->",
+      title="Hazard ratio",
+      colour=NULL
+    )+
+    theme_minimal(base_size = 9)+
+    ci_theme()+
+    NULL
+  
+    
+  n_subgroups <-
+    ciB_estimates %>%
+    filter(
+      subgroup==subgroup0
+    ) %>% 
+    `[[`("subgroup_level_descr") %>%
+    n_distinct()
+  
+  
+  plot_combined <- patchwork::wrap_plots(
+    plot_ci, 
+    #plot_cird, 
+    #plot_cirr, 
+    #plot_kmirr,
+    plot_coxhr,
+    ncol=2,
+    widths=c(n_subgroups,1)
+  )
+  
+  ggsave(
+    filename=glue("ciB_{subgroup}.png"),
+    path=output_dir_rmd,
+    plot=plot_ci,
+  )
+
+  plot_ci
+}
+
+```
+
+
+#### Figure S2a: Cumulative incidence estimates per `r perN_format` people
+
+```{r, figure-ci-A-all, echo=FALSE, message=FALSE, warning=FALSE, out.width='100%', out.height='50%', results='asis', out.extra=''}
+plot_ci_subgroup("all")
+```
+
+     
+
+     
+
+     
+
+#### Figure S2b: Cumulative incidence estimates per `r perN_format` people by primary course type
+
+```{r, figure-ci-A-vax12_type, echo=FALSE, message=FALSE, warning=FALSE, out.width='100%', out.height='50%', results='asis', out.extra=''}
+plot_ci_subgroup("vax12_type")
+```
+
+     
+
+     
+
+     
+
+#### Figure S2c: Cumulative incidence estimates per `r perN_format` people by age group
+
+```{r, figure-ci-A-age65plus, echo=FALSE, message=FALSE, warning=FALSE, out.width='100%', out.height='50%', results='asis', out.extra=''}
+plot_ci_subgroup("age65plus")
+```
+
+     
+
+     
+
+     
+
+#### Figure S2d: Cumulative incidence estimates per `r perN_format` people by prior infection status
+
+```{r, figure-ci-A-prior_covid_infection, echo=FALSE, message=FALSE, warning=FALSE, out.width='100%', out.height='50%', results='asis', out.extra=''}
+plot_ci_subgroup("prior_covid_infection")
+```
+
+     
+
+     
+
+     
+
+#### Figure S2e: Cumulative incidence estimates per `r perN_format` people by clinical vulnerability
+
+```{r, figure-ci-A-cev_cv, echo=FALSE, message=FALSE, warning=FALSE, out.width='100%', out.height='50%', results='asis', out.extra=''}
+plot_ci_subgroup("cev_cv")
+```
+
+     
+
+     
+
+     
+
+
+```{r, function-plot-contrasts, echo=FALSE, message=FALSE, warning=FALSE, out.width='100%', out.height='50%', results='asis', out.extra=''}
+
+
+#colourvalues <- RColorBrewer::brewer.pal(10, "Paired")[c(1,2,5,6,3,4,7,8,9,10)]
+colourvalues <- c("#D55E00", "#009E73", "#CC79A7", "#56B4E9", "#CC79A7", "#56B4E9", "#0072B2")
+
+plot_contrast_subgroup <- function(subgroup, matchset){
+    
+  subgroup0 <- subgroup
+  
+  if(subgroup=="all"){
+    colour_guide <- list(guides(colour="none", fill="none", alpha="none"))
+  } else{
+    colour_guide <- list(guides(fill="none", alpha="none"))
+  }
+
+  plot_data <- get(glue("contrasts{matchset}_daily")) %>%
+    filter(
+      subgroup==subgroup0,
+      outcome %in% outcomes
+    ) %>%
+    group_by(subgroup_level_descr, outcome_descr) %>%
+    mutate(
+      outcome_descr = fct_relabel(outcome_descr, str_wrap, width=10),
+      lagcird=lag(cird,1,0),
+      lagcirr=lag(cirr,1,1)
+    )
+  
+  plot_cird <- 
+    plot_data %>%
+    ggplot(aes(group=subgroup_level_descr, colour=subgroup_level_descr, fill=subgroup_level_descr)) +
+    geom_hline(aes(yintercept=0), colour="black")+
+    geom_segment(aes(x=period_start, xend=period_end, y=cird, yend=cird))+
+    geom_segment(aes(x=period_start, xend=period_start, y=lagcird, yend=cird))+
+    geom_rect(aes(xmin=period_start, xmax=period_end, ymin=cird.ll, ymax=cird.ul), alpha=0.1, colour="transparent")+
+    facet_grid(rows=vars(outcome_descr), scales="free_y", switch="y")+
+    scale_color_brewer(type="qual", palette="Set1", na.value="grey") +
+    scale_fill_brewer(type="qual", palette="Set1", guide="none", na.value="grey") +
+    scale_x_continuous(breaks = seq(0,600,14), expand = expansion(mult=c(0,0.01)))+
+    scale_y_continuous(expand = expansion(mult=c(0,0.01)), label=label_number(0.1, 10000))+
+    coord_cartesian(xlim=c(0, NA))+
+    labs(
+      x="Days",
+      y=NULL,
+      title="Risk difference",
+      colour=NULL
+    )+
+    colour_guide+
+    theme_minimal(base_size = 9)+
+    theme(
+      # legend.position = c(0.05,0.1),
+      # legend.justification = c(0,0),
+      legend.position = "bottom",
+      #legend.direction = "vertical",
+      axis.text.x.top=element_text(hjust=0),
+      axis.line.y = element_line(colour = "black"),
+      
+      panel.grid.minor.x = element_blank(),
+      panel.grid.minor.y = element_blank(),
+      strip.background = element_blank(),
+      strip.placement="outside",
+      strip.text.y.left = element_text(angle=0),
+  
+      panel.border = element_blank(),
+      panel.spacing = unit(0.8, "lines"),
+    )+
+    NULL
+  
+  
+  plot_cirr <- 
+    plot_data %>%
+    group_by(subgroup_level_descr, outcome_descr) %>%
+    ggplot(aes(group=subgroup_level_descr, colour=subgroup_level_descr, fill=subgroup_level_descr)) +
+    geom_hline(aes(yintercept=1), colour="black")+
+    geom_segment(aes(x=period_start, xend=period_end, y=cirr, yend=cirr))+
+    geom_segment(aes(x=period_start, xend=period_start, y=lagcirr, yend=cirr))+
+    geom_rect(aes(xmin=period_start, xmax=period_end, ymin=cirr.ll, ymax=cirr.ul), alpha=0.1, colour="transparent")+
+    facet_grid(rows=vars(outcome_descr), scales="free_y", switch="y")+
+    scale_color_brewer(type="qual", palette="Set1", na.value="grey") +
+    scale_fill_brewer(type="qual", palette="Set1", guide="none", na.value="grey") +
+    scale_x_continuous(breaks = seq(0,600,14), expand = expansion(mult=c(0,0.01)))+
+    scale_y_log10(expand = expansion(mult=c(0,0.01)))+
+    coord_cartesian(xlim=c(0, NA))+
+    labs(
+      x="Days",
+      y=NULL,
+      title="Risk ratio",
+      colour=NULL
+    )+
+    colour_guide+
+    theme_minimal(base_size = 9)+
+    theme(
+      legend.position="none",
+      axis.text.x.top=element_text(hjust=0),
+      axis.line.y = element_line(colour = "black"),
+      axis.line.x.top = element_line(colour = "black"),
+      
+      panel.grid.minor.x = element_blank(),
+      panel.grid.minor.y = element_blank(),
+      strip.background = element_blank(),
+      strip.text = element_blank(),
+      strip.placement="outside",
+      panel.border = element_blank(),
+      panel.spacing = unit(0.8, "lines")
+    )+
+    NULL
+  
+  
+  plot_combined <- patchwork::wrap_plots(
+    plot_cird, 
+    plot_cirr, 
+    ncol=2
+  )
+  
+  ggsave(
+    filename=glue("contrasts{matchset}_{subgroup}.png"),
+    path=output_dir_rmd,
+    plot=plot_combined,
+  )
+
+  plot_combined
+}
+
+```
+
+### Cumulative contrasts
+
+
+#### Figure S3a: Cumulative risk difference and risk ratio for matching strategy A
+
+
+```{r, figure-contrasts-A-all, echo=FALSE, message=FALSE, warning=FALSE, out.width='100%', out.height='50%', results='asis', out.extra=''}
+plot_contrast_subgroup("all","A")
+```
+
+&nbsp; &nbsp; &nbsp;
+
+&nbsp; &nbsp; &nbsp;
+
+&nbsp; &nbsp; &nbsp;
+
+#### Figure S3b: Cumulative risk difference and risk ratio for matching strategy A by primary course type
+
+```{r, figure-contrasts-A-vax12_type, echo=FALSE, message=FALSE, warning=FALSE, out.width='100%', out.height='50%', results='asis', out.extra=''}
+plot_contrast_subgroup("vax12_type","A")
+```
+
+&nbsp; &nbsp; &nbsp;
+
+&nbsp; &nbsp; &nbsp;
+
+&nbsp; &nbsp; &nbsp;
+
+
+#### Figure S3c: Cumulative risk difference and risk ratio for matching strategy A by age group
+
+```{r, figure-contrasts-A-age65plus, echo=FALSE, message=FALSE, warning=FALSE, out.width='100%', out.height='50%', results='asis', out.extra=''}
+plot_contrast_subgroup("age65plus","A")
+```
+
+&nbsp; &nbsp; &nbsp;
+
+&nbsp; &nbsp; &nbsp;
+
+&nbsp; &nbsp; &nbsp;
+
+#### Figure S2d: Cumulative risk difference and risk ratio for matching strategy A by prior infection status
+
+```{r, figure-contrasts-A-prior_covid_infection, echo=FALSE, message=FALSE, warning=FALSE, out.width='100%', out.height='50%', results='asis', out.extra=''}
+plot_contrast_subgroup("prior_covid_infection","A")
+```
+
+&nbsp; &nbsp; &nbsp;
+
+&nbsp; &nbsp; &nbsp;
+
+&nbsp; &nbsp; &nbsp;
+
+
+#### Figure S3e: Cumulative risk difference and risk ratio for matching strategy A by clinical vulnerability
+
+```{r, figure-contrasts-A-cev_cv, echo=FALSE, message=FALSE, warning=FALSE, out.width='100%', out.height='50%', results='asis', out.extra=''}
+plot_contrast_subgroup("cev_cv","A")
+```
+
+&nbsp; &nbsp; &nbsp;
+
+&nbsp; &nbsp; &nbsp;
+
+&nbsp; &nbsp; &nbsp;
+
+\newpage 
+
+
+
+## Comparative effectiveness estimates, matching strategy B
+
+### Cumulative incidence
+
+
+
+#### Figure S4a: Cumulative incidence estimates per `r perN_format` people for matching strategy B
+
+
+```{r, figure-ci-B-all, echo=FALSE, message=FALSE, warning=FALSE, out.width='100%', out.height='50%', results='asis', out.extra=''}
+plot_ci_subgroup("all")
+```
+
+&nbsp; &nbsp; &nbsp;
+
+&nbsp; &nbsp; &nbsp;
+
+&nbsp; &nbsp; &nbsp;
+
+#### Figure S4b: Cumulative incidence estimates per `r perN_format` people for matching strategy B by primary course type
+
+```{r, figure-ci-B-vax12_type, echo=FALSE, message=FALSE, warning=FALSE, out.width='100%', out.height='50%', results='asis', out.extra=''}
+plot_ci_subgroup("vax12_type")
+```
+
+&nbsp; &nbsp; &nbsp;
+
+&nbsp; &nbsp; &nbsp;
+
+&nbsp; &nbsp; &nbsp;
+
+
+#### Figure S4c: Cumulative incidence estimates per `r perN_format` people for matching strategy B by age group
+
+```{r, figure-ci-B-age65plus, echo=FALSE, message=FALSE, warning=FALSE, out.width='100%', out.height='50%', results='asis', out.extra=''}
+plot_ci_subgroup("age65plus")
+```
+
+&nbsp; &nbsp; &nbsp;
+
+&nbsp; &nbsp; &nbsp;
+
+&nbsp; &nbsp; &nbsp;
+
+#### Figure S4d: Cumulative incidence estimates per `r perN_format` people for matching strategy B by prior infection status
+
+```{r, figure-ci-B-prior_covid_infection, echo=FALSE, message=FALSE, warning=FALSE, out.width='100%', out.height='50%', results='asis', out.extra=''}
+plot_ci_subgroup("prior_covid_infection")
+```
+
+&nbsp; &nbsp; &nbsp;
+
+&nbsp; &nbsp; &nbsp;
+
+&nbsp; &nbsp; &nbsp;
+
+
+#### Figure S4e: Cumulative incidence estimates per `r perN_format` people for matching strategy B by clinical vulnerability
+
+```{r, figure-ci-B-cev_cv, echo=FALSE, message=FALSE, warning=FALSE, out.width='100%', out.height='50%', results='asis', out.extra=''}
+plot_ci_subgroup("cev_cv")
+```
+
+&nbsp; &nbsp; &nbsp;
+
+&nbsp; &nbsp; &nbsp;
+
+&nbsp; &nbsp; &nbsp;
+
+\newpage 
+
+### Cumulative contrasts
+
+
+#### Figure S5a: Cumulative risk difference and risk ratio for matching strategy B
+
+
+```{r, figure-contrasts-B-all, echo=FALSE, message=FALSE, warning=FALSE, out.width='100%', out.height='50%', results='asis', out.extra=''}
+plot_contrast_subgroup("all","A")
+```
+
+&nbsp; &nbsp; &nbsp;
+
+&nbsp; &nbsp; &nbsp;
+
+&nbsp; &nbsp; &nbsp;
+
+#### Figure S5b: Cumulative risk difference and risk ratio for matching strategy B by primary course type
+
+```{r, figure-contrasts-B-vax12_type, echo=FALSE, message=FALSE, warning=FALSE, out.width='100%', out.height='50%', results='asis', out.extra=''}
+plot_contrast_subgroup("vax12_type","A")
+```
+
+&nbsp; &nbsp; &nbsp;
+
+&nbsp; &nbsp; &nbsp;
+
+&nbsp; &nbsp; &nbsp;
+
+
+#### Figure S5c: Cumulative risk difference and risk ratio for matching strategy B by age group
+
+```{r, figure-contrasts-B-age65plus, echo=FALSE, message=FALSE, warning=FALSE, out.width='100%', out.height='50%', results='asis', out.extra=''}
+plot_contrast_subgroup("age65plus","A")
+```
+
+&nbsp; &nbsp; &nbsp;
+
+&nbsp; &nbsp; &nbsp;
+
+&nbsp; &nbsp; &nbsp;
+
+#### Figure S5d: Cumulative risk difference and risk ratio for matching strategy B by prior infection status
+
+```{r, figure-contrasts-B-prior_covid_infection, echo=FALSE, message=FALSE, warning=FALSE, out.width='100%', out.height='50%', results='asis', out.extra=''}
+plot_contrast_subgroup("prior_covid_infection","A")
+```
+
+&nbsp; &nbsp; &nbsp;
+
+&nbsp; &nbsp; &nbsp;
+
+&nbsp; &nbsp; &nbsp;
+
+
+#### Figure S5e: Cumulative risk difference and risk ratio for matching strategy B by clinical vulnerability
+
+```{r, figure-contrasts-B-cev_cv, echo=FALSE, message=FALSE, warning=FALSE, out.width='100%', out.height='50%', results='asis', out.extra=''}
+plot_contrast_subgroup("cev_cv","A")
+```
+
+&nbsp; &nbsp; &nbsp;
+
+&nbsp; &nbsp; &nbsp;
+
+&nbsp; &nbsp; &nbsp;
+
+\newpage 
