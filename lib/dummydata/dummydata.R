@@ -119,12 +119,8 @@ sim_list = lst(
     missing_rate = ~ 0.1
   ),
 
-  care_home_type = bn_node(
-    ~rfactor(n=..n, levels=c("Carehome", "Nursinghome", "Mixed", ""), p = c(0.01, 0.01, 0.01, 0.97))
-  ),
-
   care_home_tpp = bn_node(
-    ~care_home_type!=""
+    ~rbernoulli(n=..n, p = 0.01)
   ),
 
   care_home_code = bn_node(

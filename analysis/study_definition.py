@@ -442,33 +442,17 @@ study = StudyDefinition(
   # health or social care worker  
   hscworker = patients.with_healthcare_worker_flag_on_covid_vaccine_record(returning="binary_flag"),
   
-  care_home_type=patients.care_home_status_as_of(
+  care_home_tpp=patients.satisfying(
+    "care_home=='1'",
+    
+    care_home = patients.care_home_status_as_of(
       "covid_vax_disease_3_date - 1 day",
       categorised_as={
-          "Carehome": """
-            IsPotentialCareHome
-            AND LocationDoesNotRequireNursing='Y'
-            AND LocationRequiresNursing='N'
-          """,
-          "Nursinghome": """
-            IsPotentialCareHome
-            AND LocationDoesNotRequireNursing='N'
-            AND LocationRequiresNursing='Y'
-          """,
-          "Mixed": "IsPotentialCareHome",
+          "1": "IsPotentialCareHome",
           "": "DEFAULT",  # use empty string
-      },
-      return_expectations={
-          "category": {"ratios": {"Carehome": 0.05, "Nursinghome": 0.05, "Mixed": 0.05, "": 0.85, }, },
-          "incidence": 1,
       },
   ),
   
-  # simple care home flag
-  care_home_tpp=patients.satisfying(
-      """care_home_type""",
-      return_expectations={"incidence": 0.01},
-  ),
   
   # Patients in long-stay nursing and residential care
   care_home_code=patients.with_these_clinical_events(
@@ -477,7 +461,6 @@ study = StudyDefinition(
       returning="binary_flag",
       return_expectations={"incidence": 0.01},
   ),
-  
   
   
 
