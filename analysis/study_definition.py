@@ -237,7 +237,7 @@ study = StudyDefinition(
     name = "covid_vax_az",
     index_date = "1900-01-01",
     n = 4,
-    product_name_matches="COVID-19 Vac AstraZeneca (ChAdOx1 S recomb) 5x10000000000 viral particles/0.5ml dose sol for inj MDV"
+    product_name_matches="COVID-19 Vaccine Vaxzevria 0.5ml inj multidose vials (AstraZeneca)"
   ),
   
   # moderna
