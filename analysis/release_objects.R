@@ -18,7 +18,6 @@ for(matchset in c("A", "B")){
 
   ## pre-matching ----
 
-
   fs::file_copy(here("output", "prematch", "table1.csv"), fs::path(output_dir, "prematch_table1.csv"), overwrite = TRUE)
   fs::file_copy(here("output", "prematch", "table1by.csv"), fs::path(output_dir, "prematch_table1by.csv"), overwrite = TRUE)
 
