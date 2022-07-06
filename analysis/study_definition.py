@@ -451,6 +451,7 @@ study = StudyDefinition(
           "1": "IsPotentialCareHome",
           "": "DEFAULT",  # use empty string
       },
+    ),
   ),
   
   
