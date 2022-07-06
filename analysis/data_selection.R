@@ -65,7 +65,7 @@ data_criteria <- data_processed %>%
     has_knownvax2 = vax2_type %in% c("pfizer", "az"),
     has_expectedvax3type = vax3_type %in% c("pfizer", "moderna"),
     has_norecentcovid = vax3_date - anycovid_0_date >= 90 | is.na(anycovid_0_date),
-    isnot_inhospitalunplanned = !inhospital_unplanned,
+    isnot_inhospital = !inhospital,
 
     jcvi_group_6orhigher = jcvi_group %in% as.character(1:6),
 
@@ -78,7 +78,7 @@ data_criteria <- data_processed %>%
       isnot_hscworker &
       isnot_carehomeresident & isnot_endoflife & isnot_housebound &
       has_norecentcovid &
-      isnot_inhospitalunplanned
+      isnot_inhospital
 
     ),
   )
@@ -102,7 +102,7 @@ data_inclusioncriteria <- data_criteria %>%
     c3 = c2 & (isnot_hscworker ),
     c4 = c3 & (isnot_carehomeresident & isnot_endoflife & isnot_housebound),
     c5 = c4 & (has_norecentcovid),
-    c6 = c5 & (isnot_inhospitalunplanned),
+    c6 = c5 & (isnot_inhospital),
   ) %>%
   filter(c0)
 
@@ -131,13 +131,13 @@ data_flowchart <-
     pct_step = n / lag(n),
     crit = str_extract(criteria, "^c\\d+"),
     criteria = fct_case_when(
-      crit == "c0" ~ "Aged 18+ and recieved booster dose of BNT162b2 or Moderna between 29 October 2021 and 31 January 2022", # paste0("Aged 18+\n with 2 doses on or before ", format(study_dates$lastvax2_date, "%d %b %Y")),
+      crit == "c0" ~ "Aged 18+ and recieved booster dose of BNT162b2 or mRNA-1273 between 29 October 2021 and 31 January 2022", # paste0("Aged 18+\n with 2 doses on or before ", format(study_dates$lastvax2_date, "%d %b %Y")),
       crit == "c1" ~ "  with no missing demographic information",
-      crit == "c2" ~ "  with homologous primary vaccination course of pfizer or AZ",
-      crit == "c3" ~ "  and not a HSC worker",
+      crit == "c2" ~ "  with homologous primary vaccination course of BNT162b2 or ChAdOx1",
+      crit == "c3" ~ "  and not a health and social care worker",
       crit == "c4" ~ "  and not a care/nursing home resident, end-of-life or housebound",
       crit == "c5" ~ "  and no COVID-19-related events within 90 days",
-      crit == "c6" ~ "  and not in hospital at time of booster",
+      crit == "c6" ~ "  and not admitted in hospital at time of booster",
       TRUE ~ NA_character_
     )
   ) #
@@ -166,13 +166,13 @@ data_flowchart_rounded <-
     pct_step = n / lag(n),
     crit = str_extract(criteria, "^c\\d+"),
     criteria = fct_case_when(
-      crit == "c0" ~ "Aged 18+ and recieved booster dose of BNT162b2 or Moderna between 29 October 2021 and 31 January 2022", # paste0("Aged 18+\n with 2 doses on or before ", format(study_dates$lastvax2_date, "%d %b %Y")),
+      crit == "c0" ~ "Aged 18+ and recieved booster dose of BNT162b2 or mRNA-1273 between 29 October 2021 and 31 January 2022", # paste0("Aged 18+\n with 2 doses on or before ", format(study_dates$lastvax2_date, "%d %b %Y")),
       crit == "c1" ~ "  with no missing demographic information",
-      crit == "c2" ~ "  with homologous primary vaccination course of pfizer or AZ",
-      crit == "c3" ~ "  and not a HSC worker",
+      crit == "c2" ~ "  with homologous primary vaccination course of BNT162b2 or ChAdOx1",
+      crit == "c3" ~ "  and not a health and social care worker",
       crit == "c4" ~ "  and not a care/nursing home resident, end-of-life or housebound",
       crit == "c5" ~ "  and no COVID-19-related events within 90 days",
-      crit == "c6" ~ "  and not in hospital at time of booster",
+      crit == "c6" ~ "  and not admitted in hospital at time of booster",
       TRUE ~ NA_character_
     )
   ) #
@@ -194,7 +194,7 @@ var_labels <- list(
   ageband ~ "Age",
   sex ~ "Sex",
   ethnicity_combined ~ "Ethnicity",
-  imd_Q5 ~ "IMD",
+  imd_Q5 ~ "Deprivation",
   region ~ "Region",
   cev_cv ~ "JCVI clinical risk group",
 
@@ -207,6 +207,7 @@ var_labels <- list(
   chronic_resp_disease ~ "Chronic respiratory disease",
   asthma ~ "Asthma",
   chronic_neuro_disease ~ "Chronic neurological disease",
+  cancer ~ "Cancer, within previous 3 years",
 
   #multimorb ~ "Morbidity count",
   immunosuppressed ~ "Immunosuppressed",
@@ -216,8 +217,7 @@ var_labels <- list(
 
   prior_tests_cat ~ "Number of SARS-CoV-2 tests",
 
-  prior_covid_infection ~ "Prior documented SARS-CoV-2 infection",
-  inhospital_planned ~ "In hospital (planned admission)"
+  prior_covid_infection ~ "Prior documented SARS-CoV-2 infection"
 ) %>%
   set_names(., map_chr(., all.vars))
 

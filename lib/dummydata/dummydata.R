@@ -119,12 +119,8 @@ sim_list = lst(
     missing_rate = ~ 0.1
   ),
 
-  care_home_type = bn_node(
-    ~rfactor(n=..n, levels=c("Carehome", "Nursinghome", "Mixed", ""), p = c(0.01, 0.01, 0.01, 0.97))
-  ),
-
   care_home_tpp = bn_node(
-    ~care_home_type!=""
+    ~rbernoulli(n=..n, p = 0.01)
   ),
 
   care_home_code = bn_node(
@@ -210,6 +206,7 @@ sim_list = lst(
   chronic_heart_disease = bn_node( ~rbernoulli(n=..n, p = 0.02)),
   chronic_kidney_disease = bn_node( ~rbernoulli(n=..n, p = 0.02)),
   chronic_liver_disease = bn_node( ~rbernoulli(n=..n, p = 0.02)),
+  cancer = bn_node( ~rbernoulli(n=..n, p = 0.02)),
   immunosuppressed = bn_node( ~rbernoulli(n=..n, p = 0.02)),
   asplenia = bn_node( ~rbernoulli(n=..n, p = 0.02)),
   learndis = bn_node( ~rbernoulli(n=..n, p = 0.02)),
@@ -225,8 +222,7 @@ sim_list = lst(
     missing_rate = ~0
   ),
 
-  inhospital_planned = bn_node( ~rbernoulli(n=..n, p = 0.05)),
-  inhospital_unplanned = bn_node( ~rbernoulli(n=..n, p = 0.01)),
+  inhospital = bn_node( ~rbernoulli(n=..n, p = 0.01)),
 
   ## pre-baseline events where event date is relevant
 

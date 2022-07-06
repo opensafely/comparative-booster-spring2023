@@ -237,7 +237,7 @@ study = StudyDefinition(
     name = "covid_vax_az",
     index_date = "1900-01-01",
     n = 4,
-    product_name_matches="COVID-19 Vac AstraZeneca (ChAdOx1 S recomb) 5x10000000000 viral particles/0.5ml dose sol for inj MDV"
+    product_name_matches="COVID-19 Vaccine Vaxzevria 0.5ml inj multidose vials (AstraZeneca)"
   ),
   
   # moderna
@@ -442,33 +442,18 @@ study = StudyDefinition(
   # health or social care worker  
   hscworker = patients.with_healthcare_worker_flag_on_covid_vaccine_record(returning="binary_flag"),
   
-  care_home_type=patients.care_home_status_as_of(
+  care_home_tpp=patients.satisfying(
+    "care_home='1'",
+    
+    care_home = patients.care_home_status_as_of(
       "covid_vax_disease_3_date - 1 day",
       categorised_as={
-          "Carehome": """
-            IsPotentialCareHome
-            AND LocationDoesNotRequireNursing='Y'
-            AND LocationRequiresNursing='N'
-          """,
-          "Nursinghome": """
-            IsPotentialCareHome
-            AND LocationDoesNotRequireNursing='N'
-            AND LocationRequiresNursing='Y'
-          """,
-          "Mixed": "IsPotentialCareHome",
+          "1": "IsPotentialCareHome",
           "": "DEFAULT",  # use empty string
       },
-      return_expectations={
-          "category": {"ratios": {"Carehome": 0.05, "Nursinghome": 0.05, "Mixed": 0.05, "": 0.85, }, },
-          "incidence": 1,
-      },
+    ),
   ),
   
-  # simple care home flag
-  care_home_tpp=patients.satisfying(
-      """care_home_type""",
-      return_expectations={"incidence": 0.01},
-  ),
   
   # Patients in long-stay nursing and residential care
   care_home_code=patients.with_these_clinical_events(
@@ -477,7 +462,6 @@ study = StudyDefinition(
       returning="binary_flag",
       return_expectations={"incidence": 0.01},
   ),
-  
   
   
 
@@ -824,7 +808,35 @@ study = StudyDefinition(
   #   on_or_before="covid_vax_disease_3_date - 1 day",
   #   date_format="YYYY-MM-DD",
   # ),
+  
+  cancer = patients.satisfying(
+    
+    "cancer_primary_care",
+    # cancer_hosp=patients.admitted_to_hospital(
+    #   with_these_diagnoses=combine_codelists(
+    #     codelists.cancer_nonhaem_icd10,
+    #     codelists.cancer_haem_icd10,
+    #     codelists.cancer_unspec_icd10,
+    #   ),
+    #   between=["covid_vax_disease_3_date - 3 years", "covid_vax_disease_3_date - 1 day"],
+    #   returning="binary_flag",
+    # ),
+    cancer_primary_care=patients.with_these_clinical_events( 
+      combine_codelists(
+        codelists.cancer_nonhaem_snomed,
+        codelists.cancer_haem_snomed
+      ),
+      between=["covid_vax_disease_3_date - 3 years", "covid_vax_disease_3_date - 1 day"],
+      returning="binary_flag",
+    ), 
+  ),
 
+  
+  
+  #####################################
+  # JCVI groups
+  #####################################
+  
   cev_ever = patients.with_these_clinical_events(
     codelists.shield,
     returning="binary_flag",
@@ -914,39 +926,21 @@ study = StudyDefinition(
     restrict_to_earliest_specimen_date=False,
   ),
   
-  # unplanned hospital admission at time of 3rd / booster dose
-  inhospital_unplanned = patients.satisfying(
+  # overnight hospital admission at time of 3rd / booster dose
+  inhospital = patients.satisfying(
   
-    "discharged_unplanned_0_date >= covid_vax_disease_3_date",
+    "discharged_0_date >= covid_vax_disease_3_date",
     
-    discharged_unplanned_0_date=patients.admitted_to_hospital(
+    discharged_0_date=patients.admitted_to_hospital(
       returning="date_discharged",
-      on_or_before="covid_vax_disease_3_date - 1 day", #FIXME -- need to decide whether to include admissions discharged on the same day as booster dose or not
+      on_or_before="covid_vax_disease_3_date", # this is the admission date
       # see https://github.com/opensafely-core/cohort-extractor/pull/497 for codes
       # see https://docs.opensafely.org/study-def-variables/#sus for more info
-      with_admission_method=["21", "22", "23", "24", "25", "2A", "2B", "2C", "2D", "28"],
+      with_admission_method = ['11', '12', '13', '21', '2A', '22', '23', '24', '25', '2D', '28', '2B', '81'],
       with_patient_classification = ["1"], # ordinary admissions only
       date_format="YYYY-MM-DD",
       find_last_match_in_period=True,
     ), 
-  ),
-  
-  # planned hospital admission at time of 3rd / booster dose
-  inhospital_planned = patients.satisfying(
-  
-    "discharged_planned_0_date >= covid_vax_disease_3_date",
-    
-    discharged_planned_0_date=patients.admitted_to_hospital(
-      returning="date_discharged",
-      on_or_before="covid_vax_disease_3_date - 1 day", #FIXME -- need to decide whether to include admissions discharged on the same day as booster dose or not
-      # see https://github.com/opensafely-core/cohort-extractor/pull/497 for codes
-      # see https://docs.opensafely.org/study-def-variables/#sus for more info
-      with_admission_method=["11", "12", "13", "81"],
-      with_patient_classification = ["1"], # ordinary admissions only
-      date_format="YYYY-MM-DD",
-      find_last_match_in_period=True
-    ), 
-  
   ),
   
 

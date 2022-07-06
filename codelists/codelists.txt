@@ -49,3 +49,6 @@ nhsd-primary-care-domain-refsets/palcare_cod/5fce98cf
 opensafely/midazolam-end-of-life/4c1b3c89
 opensafely/housebound/5bc77310
 opensafely/no-longer-housebound/29a88ca6
+opensafely/cancer-excluding-lung-and-haematological-snomed/2020-04-15
+opensafely/haematological-cancer-snomed/2020-04-15
+opensafely/lung-cancer-snomed/2020-04-15

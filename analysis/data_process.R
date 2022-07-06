@@ -137,7 +137,7 @@ data_processed <- data_extract %>%
     ),
 
     imd = as.integer(as.character(imd)), # imd is a factor, so convert to character then integer to get underlying values
-    imd = if_else(imd<0, NA_integer_, imd),
+    imd = if_else(imd<0 | msoa=="", NA_integer_, imd),
     imd_Q5 = fct_case_when(
       (imd >=0) & (imd < 32844*1/5) ~ "1 most deprived",
       (imd >= 32844*1/5) & (imd < 32844*2/5) ~ "2",
@@ -173,7 +173,8 @@ data_processed <- data_extract %>%
       (diabetes) +
       (chronic_liver_disease)+
       (chronic_resp_disease | asthma)+
-      (chronic_neuro_disease)#+
+      (chronic_neuro_disease)+
+      (cancer)#+
       #(learndis)+
       #(sev_mental),
     ,
@@ -247,17 +248,14 @@ data_processed <- data_extract %>%
     # earliest covid event after study start
     anycovid_date = pmin(postest_date, covidemergency_date, covidadmitted_date, coviddeath_date, na.rm=TRUE),
 
-    #covidadmitted_ccdays = as.integer(as.character(covidadmitted_ccdays)),
-    #FIXME ignores any covid-icu episodes subsequent to the first known covid admission, so we need to extract multiple covid admissions to capture them
-    #covidicu_date = if_else(covidadmitted_ccdays>0, covidadmitted_date, Date(NA)),
-
-
     covidcritcare_date = case_when(
       as.numeric(as.character(potentialcovidcritcare_1_ccdays))>0 & !is.na(potentialcovidcritcare_1_date) ~ potentialcovidcritcare_1_date,
       as.numeric(as.character(potentialcovidcritcare_2_ccdays))>0 & !is.na(potentialcovidcritcare_2_date) ~ potentialcovidcritcare_2_date,
       as.numeric(as.character(potentialcovidcritcare_3_ccdays))>0 & !is.na(potentialcovidcritcare_3_date) ~ potentialcovidcritcare_3_date,
       TRUE ~ as.Date(NA_character_)
     ),
+
+    covidcritcare_date = pmin(covidcritcare_date, coviddeath_date, na.rm=TRUE),
 
     noncoviddeath_date = if_else(!is.na(death_date) & is.na(coviddeath_date), death_date, as.Date(NA_character_)),
 
