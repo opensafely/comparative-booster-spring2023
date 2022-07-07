@@ -151,3 +151,57 @@ metaparams %>%
   ) %>%
   {walk2(.$ciplotdir, .$ciplotnewdir, ~fs::file_copy(.x, .y, overwrite = TRUE))}
 
+
+## plot overall estimates for inspection ----
+
+
+plot_estimates <- function(estimate, estimate.ll, estimate.ul, name){
+
+  plot_temp <-
+    contrasts_overall %>%
+    group_by(outcome_descr) %>%
+    mutate(
+      outcome_descr = fct_relabel(outcome_descr, str_wrap, width=10),
+      subgroup_level_descr = fct_rev(subgroup_level_descr),
+
+    ) %>%
+    ggplot(aes(y=subgroup_level_descr)) +
+    geom_vline(aes(xintercept=0), linetype="dotted", colour="darkgrey")+
+    geom_point(aes(x={{estimate}}), position=position_dodge(width=-0.3))+
+    geom_linerange(aes(xmin={{estimate.ll}}, xmax={{estimate.ul}}), position=position_dodge(width=-0.3))+
+    facet_grid(rows=vars(subgroup_descr), cols=vars(outcome_descr), scales="free", space="free_y", switch="y")+
+    scale_x_continuous(expand = expansion(mult=c(0,0.01)))+
+    labs(y=NULL)+
+    theme_minimal()+
+    theme(
+      legend.position="bottom",
+      axis.text.x.top=element_text(hjust=0),
+
+      panel.grid.minor.x = element_blank(),
+      panel.grid.minor.y = element_blank(),
+      strip.background = element_blank(),
+      strip.placement="outside",
+      #strip.text.y.left = element_text(angle=0),
+      strip.text.y.left = element_blank(),
+
+      panel.border = element_blank(),
+      panel.spacing = unit(0.3, "lines"),
+    )
+
+
+  ggsave(
+    filename=fs::path(
+      here("output", "match", matchset, "ci", "combined", "plots", glue("overall_plot_rounded_{name}.png"))
+    ),
+    plot_temp,
+    width=20, height=15, units="cm"
+  )
+
+  plot_temp
+}
+
+plot_estimates(cird, cird.ll, cird.ul, "cird")
+plot_estimates(cirr, cirr.ll, cirr.ul, "cirr")
+plot_estimates(coxhr, coxhr.ll, coxhr.ul, "coxhr")
+plot_estimates(kmirr, kmirr.ll, kmirr.ul, "kmirr")
+
