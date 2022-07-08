@@ -43,7 +43,7 @@ data_criteria <- data_processed %>%
     has_age = !is.na(age),
     has_sex = !is.na(sex) & !(sex %in% c("I", "U")),
     has_imd = !is.na(imd),
-    has_ethnicity = !is.na(ethnicity_combined),
+    #has_ethnicity = !is.na(ethnicity_combined),
     has_region = !is.na(region),
     #has_msoa = !is.na(msoa),
     isnot_hscworker = !hscworker,
@@ -70,10 +70,9 @@ data_criteria <- data_processed %>%
     jcvi_group_6orhigher = jcvi_group %in% as.character(1:6),
 
     include = (
-      #jcvi_group_6orhigher & # temporary until more data available
       vax1_afterfirstvaxdate &
       vax3_afterstartdate & vax3_beforeenddate & has_expectedvax3type &
-      has_age & has_sex & has_imd & has_ethnicity & has_region &
+      has_age & has_sex & has_imd & has_region & #has_ethnicity &
       has_vaxgap12 & has_vaxgap23 & has_knownvax1 & has_knownvax2 & vax12_homologous &
       isnot_hscworker &
       isnot_carehomeresident & isnot_endoflife & isnot_housebound &
@@ -97,9 +96,9 @@ data_inclusioncriteria <- data_criteria %>%
     patient_id,
     vax3_type,
     c0 = vax1_afterfirstvaxdate & vax3_afterstartdate & vax3_beforeenddate & has_expectedvax3type,
-    c1 = c0 & (has_age & has_sex & has_imd & has_ethnicity & has_region),
+    c1 = c0 & (has_age & has_sex & has_imd & has_region),
     c2 = c1 & (has_vaxgap12 & has_vaxgap23 & has_knownvax1 & has_knownvax2 & vax12_homologous),
-    c3 = c2 & (isnot_hscworker ),
+    c3 = c2 & (isnot_hscworker),
     c4 = c3 & (isnot_carehomeresident & isnot_endoflife & isnot_housebound),
     c5 = c4 & (has_norecentcovid),
     c6 = c5 & (isnot_inhospital),

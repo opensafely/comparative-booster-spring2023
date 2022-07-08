@@ -120,9 +120,7 @@ data_processed <- data_extract %>%
       ethnicity_combined == "3" ~ "South Asian",
       ethnicity_combined == "2" ~ "Mixed",
       ethnicity_combined == "5" ~ "Other",
-      #TRUE ~ "Unknown",
-      TRUE ~ NA_character_
-
+      TRUE ~ "Unknown"
     ),
 
     region = fct_collapse(
