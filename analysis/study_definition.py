@@ -431,6 +431,10 @@ study = StudyDefinition(
       "4": "imd >= 32844*3/5 AND imd < 32844*4/5",
       "5 (least deprived)": "imd >= 32844*4/5 AND imd <= 32844",
     },
+    return_expectations={
+      "rate": "universal",
+      "category": {"ratios": {"Unknown": 0.02, "1 (most deprived)": 0.18, "2": 0.2, "3": 0.2, "4": 0.2, "5 (least deprived)": 0.2}},
+    },
   ),
   
   #rurality
