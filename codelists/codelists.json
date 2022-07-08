@@ -7,10 +7,10 @@
       "sha": "124db6929439379b7dacd55ba26ae4f2ed9370bc"
     },
     "opensafely-covid-identification-in-primary-care-probable-covid-positive-test.csv": {
-      "id": "opensafely/covid-identification-in-primary-care-probable-covid-positive-test/2020-07-16",
-      "url": "https://codelists.opensafely.org/codelist/opensafely/covid-identification-in-primary-care-probable-covid-positive-test/2020-07-16/",
-      "downloaded_at": "2022-04-13 08:55:18.385854Z",
-      "sha": "563b536aaf850da011233653e91e10030a5bc15f"
+      "id": "opensafely/covid-identification-in-primary-care-probable-covid-positive-test/508192f8",
+      "url": "https://codelists.opensafely.org/codelist/opensafely/covid-identification-in-primary-care-probable-covid-positive-test/508192f8/",
+      "downloaded_at": "2022-07-08 07:00:52.484885Z",
+      "sha": "510e103970c4131e6e276fd3b5094b68d2e7905c"
     },
     "opensafely-covid-identification-in-primary-care-probable-covid-clinical-code.csv": {
       "id": "opensafely/covid-identification-in-primary-care-probable-covid-clinical-code/2020-07-16",
