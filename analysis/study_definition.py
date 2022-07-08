@@ -422,6 +422,21 @@ study = StudyDefinition(
     }
   ),
   
+  imd_Q5=patients.categorised_as(
+    {
+      "Unknown": "DEFAULT",
+      "1 (most deprived)": "imd >= 0 AND imd < 32844*1/5",
+      "2": "imd >= 32844*1/5 AND imd < 32844*2/5",
+      "3": "imd >= 32844*2/5 AND imd < 32844*3/5",
+      "4": "imd >= 32844*3/5 AND imd < 32844*4/5",
+      "5 (least deprived)": "imd >= 32844*4/5 AND imd <= 32844",
+    },
+    return_expectations={
+      "rate": "universal",
+      "category": {"ratios": {"Unknown": 0.02, "1 (most deprived)": 0.18, "2": 0.2, "3": 0.2, "4": 0.2, "5 (least deprived)": 0.2}},
+    },
+  ),
+  
   #rurality
   rural_urban=patients.address_as_of(
     "covid_vax_disease_3_date - 1 day",

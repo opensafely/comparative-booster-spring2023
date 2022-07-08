@@ -114,6 +114,26 @@ sim_list = lst(
     missing_rate = ~0.02
   ),
 
+  imd_integer = bn_node(
+    ~as.integer(as.character(imd)),
+    keep=FALSE
+  ),
+
+  imd_Q5 = bn_node(
+    ~factor(
+      case_when(
+        (imd_integer >= 0) & (imd_integer < 32844*1/5) ~ "1 (most deprived)",
+        (imd_integer >= 32844*1/5) & (imd_integer < 32844*2/5) ~ "2",
+        (imd_integer >= 32844*2/5) & (imd_integer < 32844*3/5) ~ "3",
+        (imd_integer >= 32844*3/5) & (imd_integer < 32844*4/5) ~ "4",
+        (imd_integer >= 32844*4/5) & (imd_integer <= 32844*5/5) ~ "5 (least deprived)",
+        TRUE ~ "Unknown"
+      ),
+      levels= c("1 (most deprived)", "2", "3", "4", "5 (least deprived)", "Unknown")
+    ),
+    missing_rate = ~0
+  ),
+
   rural_urban = bn_node(
     ~rfactor(n=..n, levels = 1:9, p = rep(1/9, 9)),
     missing_rate = ~ 0.1

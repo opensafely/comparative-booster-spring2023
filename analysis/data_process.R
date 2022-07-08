@@ -134,16 +134,18 @@ data_processed <- data_extract %>%
       `South West` = "South West"
     ),
 
-    imd = as.integer(as.character(imd)), # imd is a factor, so convert to character then integer to get underlying values
-    imd = if_else((imd < -0.1) | (!is.na(imd)) | (msoa==""), NA_integer_, imd),
-    imd_Q5 = fct_case_when(
-      (imd >= -0.1) & (imd < 32844*1/5) ~ "1 most deprived",
-      (imd >= 32844*1/5) & (imd < 32844*2/5) ~ "2",
-      (imd >= 32844*2/5) & (imd < 32844*3/5) ~ "3",
-      (imd >= 32844*3/5) & (imd < 32844*4/5) ~ "4",
-      (imd >= 32844*4/5) ~ "5 least deprived",
-      TRUE ~ NA_character_
-    ),
+    imd_Q5 = factor(imd_Q5, levels = c("1 (most deprived)", "2", "3", "4", "5 (least deprived)", "Unknown")),
+
+    # imd = as.integer(as.character(imd)), # imd is a factor, so convert to character then integer to get underlying values
+    # imd = if_else((imd < -0.1) | (msoa==""), NA_integer_, imd),
+    # imd_Q5 = fct_case_when(
+    #   (imd >= -0.1) & (imd < 32844*1/5) ~ "1 most deprived",
+    #   (imd >= 32844*1/5) & (imd < 32844*2/5) ~ "2",
+    #   (imd >= 32844*2/5) & (imd < 32844*3/5) ~ "3",
+    #   (imd >= 32844*3/5) & (imd < 32844*4/5) ~ "4",
+    #   (imd >= 32844*4/5) ~ "5 least deprived",
+    #   TRUE ~ NA_character_
+    # ),
 
     rural_urban_group = fct_case_when(
       rural_urban %in% c(1,2) ~ "Urban conurbation",
