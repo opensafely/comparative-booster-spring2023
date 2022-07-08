@@ -42,7 +42,7 @@ data_criteria <- data_processed %>%
     vax3_type,
     has_age = !is.na(age),
     has_sex = !is.na(sex) & !(sex %in% c("I", "U")),
-    has_imd = !is.na(imd),
+    has_imd = imd_Q5 != "Unknown",
     #has_ethnicity = !is.na(ethnicity_combined),
     has_region = !is.na(region),
     #has_msoa = !is.na(msoa),
