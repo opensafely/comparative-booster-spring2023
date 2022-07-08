@@ -53,7 +53,7 @@ actions:
         cohortrds: output/data/data_cohort.rds
         criteriards: output/data/data_inclusioncriteria.rds
       moderately_sensitive:
-        flow: output/data/flowchart.csv
+        flow: output/prematch/flowchart.csv
 
   skim_selection:
     run: r:latest analysis/data_skim.R output/data/data_cohort.rds output/data_properties
