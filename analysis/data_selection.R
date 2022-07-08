@@ -165,7 +165,7 @@ data_flowchart_rounded <-
     pct_step = n / lag(n),
     crit = str_extract(criteria, "^c\\d+"),
     criteria = fct_case_when(
-      crit == "c0" ~ "Aged 18+ and recieved booster dose of BNT162b2 or mRNA-1273 between 29 October 2021 and 31 January 2022", # paste0("Aged 18+\n with 2 doses on or before ", format(study_dates$lastvax2_date, "%d %b %Y")),
+      crit == "c0" ~ "Aged 18+ and received booster dose of BNT162b2 or mRNA-1273 between 29 October 2021 and 31 January 2022", # paste0("Aged 18+\n with 2 doses on or before ", format(study_dates$lastvax2_date, "%d %b %Y")),
       crit == "c1" ~ "  with no missing demographic information",
       crit == "c2" ~ "  with homologous primary vaccination course of BNT162b2 or ChAdOx1",
       crit == "c3" ~ "  and not a health and social care worker",
