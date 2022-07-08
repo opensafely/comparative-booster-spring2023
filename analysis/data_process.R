@@ -135,9 +135,9 @@ data_processed <- data_extract %>%
     ),
 
     imd = as.integer(as.character(imd)), # imd is a factor, so convert to character then integer to get underlying values
-    imd = if_else(imd<0 | msoa=="", NA_integer_, imd),
+    imd = if_else((imd < -0.1) | (!is.na(imd)) | (msoa==""), NA_integer_, imd),
     imd_Q5 = fct_case_when(
-      (imd >=0) & (imd < 32844*1/5) ~ "1 most deprived",
+      (imd >= -0.1) & (imd < 32844*1/5) ~ "1 most deprived",
       (imd >= 32844*1/5) & (imd < 32844*2/5) ~ "2",
       (imd >= 32844*2/5) & (imd < 32844*3/5) ~ "3",
       (imd >= 32844*3/5) & (imd < 32844*4/5) ~ "4",
