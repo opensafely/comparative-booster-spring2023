@@ -132,11 +132,16 @@ if(exists("matchset")){
     exact <- c(
 
       "vax3_date",
-      "vax12_type",
       "jcvi_ageband",
-      "region",
       "cev_cv",
+      "sex",
+      "vax12_type",
+      "region",
       "imd_Q5",
+
+
+      "multimorb",
+      "prior_covid_infection",
       NULL
     )
 
@@ -160,7 +165,6 @@ if(exists("matchset")){
       "cev_cv",
       "sex",
       "vax12_type",
-      #"vax2_week",
       "stp",
       "imd_Q5",
 
@@ -168,7 +172,6 @@ if(exists("matchset")){
       "multimorb",
       "prior_covid_infection",
       #"immunosuppressed",
-      #"status_hospplanned"
       NULL
     )
 
