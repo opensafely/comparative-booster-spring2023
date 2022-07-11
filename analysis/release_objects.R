@@ -10,16 +10,21 @@ library('glue')
 library('survival')
 
 
+## pre-matching ----
+
+fs::dir_create(here("output", "prematch"))
+
+fs::file_copy(here("output", "prematch", "table1.csv"), fs::path(here("output", "release-objects", "prematch", "prematch_table1.csv")), overwrite = TRUE)
+fs::file_copy(here("output", "prematch", "table1by.csv"), fs::path(here("output", "release-objects", "prematch", "prematch_table1by.csv")), overwrite = TRUE)
+
+
+## post-matching ----
+
 for(matchset in c("A", "B")){
 
   output_dir <- here("output", "release-objects", matchset)
   fs::dir_create(output_dir)
 
-
-  ## pre-matching ----
-
-  fs::file_copy(here("output", "prematch", "table1.csv"), fs::path(output_dir, "prematch_table1.csv"), overwrite = TRUE)
-  fs::file_copy(here("output", "prematch", "table1by.csv"), fs::path(output_dir, "prematch_table1by.csv"), overwrite = TRUE)
 
   ## matching ----
 
