@@ -55,6 +55,7 @@ actions:
       moderately_sensitive:
         flow: output/prematch/flowchart.csv
         table: output/prematch/table*.csv
+        smd: output/prematch/smd.csv
 
   skim_selection:
     run: r:latest analysis/data_skim.R output/data/data_cohort.rds output/data_properties

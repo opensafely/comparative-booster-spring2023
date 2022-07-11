@@ -331,6 +331,7 @@ actions_list <- splice(
     moderately_sensitive = lst(
       flow = "output/prematch/flowchart.csv",
       table = "output/prematch/table*.csv",
+      smd = "output/prematch/smd.csv",
     )
   ),
 

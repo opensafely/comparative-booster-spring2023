@@ -255,3 +255,32 @@ gtsave(as_gt(tab_summary_baseline_redacted), fs::path(output_dir, "table1.html")
 
 
 
+# love / smd plot ----
+
+data_smd <- tab_summary_baseline$meta_data %>%
+  select(var_label, df_stats) %>%
+  unnest(df_stats) %>%
+  filter(
+    variable != "N"
+  ) %>%
+  group_by(var_label, variable_levels) %>%
+  summarise(
+    diff = diff(p),
+    sd = sqrt(sum(p*(1-p))),
+    smd = diff/sd
+  ) %>%
+  ungroup() %>%
+  mutate(
+    variable = factor(var_label, levels=map_chr(var_labels[-c(1,2)], ~last(as.character(.)))),
+    variable_card = as.numeric(variable)%%2,
+    variable_levels = replace_na(as.character(variable_levels), ""),
+  ) %>%
+  arrange(variable) %>%
+  mutate(
+    level = fct_rev(fct_inorder(str_replace(paste(variable, variable_levels, sep=": "),  "\\:\\s$", ""))),
+    cardn = row_number()
+  )
+
+write_csv(data_smd, fs::path(output_dir, "smd.csv"))
+
+
