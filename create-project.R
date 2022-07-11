@@ -548,7 +548,8 @@ actions_list <- splice(
       "ci_combine_B"
     ),
     moderately_sensitive = lst(
-      txt = "output/files-for-release.txt",
+      releaselist = "output/files-for-release.txt",
+      command = "output/osrelease-command.txt",
       csv = "output/release-objects/*/*.csv",
     )
   ),

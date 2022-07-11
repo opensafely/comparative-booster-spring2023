@@ -55,3 +55,13 @@ fs::dir_ls(here("output", "release-objects"), type="file", recurse=TRUE) %>%
   map_chr(~paste0("- [ ] ", str_remove(.,fixed("/")))) %>%
   paste(collapse="\n") %>%
   writeLines(here("output", "files-for-release.txt"))
+
+
+## create command for releasing using osrelease ----
+fs::dir_ls(here("output", "release-objects"), type="file", recurse=TRUE) %>%
+  map_chr(~str_remove(., fixed(here()))) %>%
+  #map_chr(~paste0("'",. ,"'")) %>%
+  paste(., collapse=" ") %>%
+  paste("osrelease", .) %>%
+  writeLines(here("output", "osrelease-command.txt"))
+

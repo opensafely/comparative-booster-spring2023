@@ -1177,7 +1177,8 @@ actions:
     - ci_combine_B
     outputs:
       moderately_sensitive:
-        txt: output/files-for-release.txt
+        releaselist: output/files-for-release.txt
+        command: output/osrelease-command.txt
         csv: output/release-objects/*/*.csv
 
   ## # # # # # # # # # # # # # # # # # # # 
