@@ -16,6 +16,7 @@ fs::dir_create(here("output", "release-objects", "prematch"))
 
 fs::file_copy(here("output", "prematch", "table1.csv"), fs::path(here("output", "release-objects", "prematch", "prematch_table1.csv")), overwrite = TRUE)
 fs::file_copy(here("output", "prematch", "table1by.csv"), fs::path(here("output", "release-objects", "prematch", "prematch_table1by.csv")), overwrite = TRUE)
+fs::file_copy(here("output", "prematch", "smd.csv"), fs::path(here("output", "release-objects", "prematch", "prematch_smd.csv")), overwrite = TRUE)
 
 
 ## post-matching ----
