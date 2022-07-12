@@ -25,7 +25,7 @@ if(length(args)==0){
   matchset <- "A"
   subgroup <- "all"
   #subgroup <- "vax12_type"
-  outcome <- "coviddeath"
+  outcome <- "postest"
 
 } else {
   removeobjects <- TRUE
@@ -196,7 +196,7 @@ data_surv <-
           x %>% filter(state==outcome) %>% select(-time, -n.censor, -n.risk, -state),
         ) %>%
         transmute(
-          time, lagtime=lag(time,1,0), leadtime=lead(time), interval=time-lagtime,
+          time,
           n.risk, n.allevents, n.event, n.censor,
 
           kmsummand = (1/(n.risk-n.event)) - (1/n.risk), # = n.event / ((n.risk - n.event) * n.risk) but re-written to prevent integer overflow
@@ -219,7 +219,13 @@ data_surv <-
           time = seq_len(max(xx$time)),
           fill = list(n.event = 0, n.allevents = 0, n.censor = 0)
         ) %>%
-        fill(n.risk, .direction = c("up"))
+        fill(n.risk, .direction = c("up")) %>%
+        mutate(
+          lagtime=lag(time,1,0L),
+          leadtime=lead(time),
+          interval=time-lagtime,
+        )
+
 
       xxcomplete
     })
