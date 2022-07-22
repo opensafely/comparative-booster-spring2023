@@ -1,6 +1,6 @@
 # Comparative effectiveness of BNT162b2 versus Moderna COVID-19 booster doses
 
-This study estimates the comparative effectiveness of the two major booster doses administered in England; BNT162b2 (Pfizer-BioNTech) and Moderna mRNA-1273.
+This study estimates the comparative effectiveness of the two major vaccines used for boosting in England; BNT162b2 (Pfizer-BioNTech) and mRNA-1273 (Moderna).
 
 Recipients of each brand are matched on date of receipt, region, first and second dose type, and other key characteristics likely to influence the type of booster dose received. 
 
