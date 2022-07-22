@@ -36,26 +36,29 @@ These scripts use data extracted from the OpenSAFELY-TPP server, after [`analysi
 -   [`match.R`](./analysis/match.R) runs the matching algorithm to pair BNT162b2 with Moderna booster recipients. It outputs a dataset given the matching status (TRUE/FALSE) of each candidate, and a matching ID.  and other matching diagnostics. The script takes one argument:
     -   `matchset`, the set of matching variables used to match, as defined in the [`design.R`](analysis/R/design.R) script.
 -   [`match_report.R`](./analysis/match_report.R) describes baseline information for the matched cohort, eg Table 1 type cohort characteristics, and an inclusion criteria flowchart. The script also uses the `matchset` argument to pick up the matching data from the previous script.
--   [`km.R`](./analysis/km.R) derives Kaplan-Meier survival estimates for the treatment groups and calculates relative risk and risk differences. The script takes three arguments:
+-   [`ci.R`](./analysis/ci.R) derives Kaplan-Meier survival estimates for the treatment groups and calculates relative risk and risk differences. The script takes three arguments:
     -  `matchset`, as before.
     -   `subgroup` to choose which subgroup to run the analysis within. Choose _all_ for no subgroups (i.e., the main analysis). Choose _<variable>_ to select a specific variable to stratify on -- this variable must be exactly matched in the matching run. 
     -   `outcome` to choose the outcome of interest, for example _postest_ or _covidadmitted_.
--   [`km_combine`](./analysis/km_combine.R) collects data from the [`km.R`](./analysis/km.R) script and combines into one dataset.
+-   [`ci_combine`](./analysis/ci_combine.R) collects data from the [`ci.R`](./analysis/ci.R) script and combines into one dataset.
 -   [`release_objects`](./analysis/release_objects.R) collects files that are intended for release and puts them in a single directory to make releasing files easier. 
 
 #### Post-release scripts
 These scripts create html/pdf reports and other files that use file released from the server.
 
--   [`report.Rmd`](./write-up/report.Rmd) reports key results from the study.
+Currently offline only.
 
 ## Licences
+
 As standard, research projects have a MIT license. 
 
 ## Protocol
 
-## Manuscript
+https://docs.google.com/document/d/1u2DpmuF2ND7N3pGsh86NBtTD5BlTpr_4jgNKfLnd2UU/edit?usp=sharing
 
-Not yet drafted.
+## Pre-print
+
+To follow
 
 # About the OpenSAFELY framework
 
