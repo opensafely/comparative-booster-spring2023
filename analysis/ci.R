@@ -260,8 +260,8 @@ data_surv_rounded <-
     kmsurv = cumprod(1 - n.event / n.risk),
     kmsurv.se = kmsurv * sqrt(cumsum(kmsummand)), #greenwood's formula
     kmsurv.ln.se = kmsurv.se/kmsurv,
-    kmsurv.ll = exp(log(risk) + qnorm(0.025)*kmsurv.ln.se),
-    kmsurv.ul = exp(log(risk) + qnorm(0.975)*kmsurv.ln.se),
+    kmsurv.ll = exp(log(kmsurv) + qnorm(0.025)*kmsurv.ln.se),
+    kmsurv.ul = exp(log(kmsurv) + qnorm(0.975)*kmsurv.ln.se),
 
     # CI estimate, treating comepting events as competing events
     allsummand = (1/(n.risk-n.allevents)) - (1/n.risk), # n.allevents / ((n.risk - n.allevents) * n.risk) but re-written to prevent integer overflow
@@ -443,12 +443,12 @@ cicontrast <- function(data, cuts=NULL){
       # these should be the same as the daily values as at the end of the time period
 
 
-      kmsurv = last(surv),
+      kmsurv = last(kmsurv),
       kmsurv.se = last(kmsurv.se),
       kmsurv.ll = last(kmsurv.ll),
       kmsurv.ul = last(kmsurv.ul),
 
-      kmrisk = last(risk),
+      kmrisk = last(kmrisk),
       kmrisk.se = last(kmrisk.se),
       kmrisk.ll = last(kmrisk.ll),
       kmrisk.ul = last(kmrisk.ul),
