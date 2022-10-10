@@ -10,12 +10,17 @@ remotes::install_github("https://github.com/wjchulme/dd4d")
 library('dd4d')
 
 
-population_size <- 200000
+population_size <- 20000
 
 # get nth largest value from list
 nthmax <- function(x, n=1){
   dplyr::nth(sort(x, decreasing=TRUE), n)
 }
+
+nthmin <- function(x, n=1){
+  dplyr::nth(sort(x, decreasing=FALSE), n)
+}
+
 
 source(here("lib", "design", "design.R"))
 
@@ -149,7 +154,8 @@ sim_list = lst(
 
   ## vaccination variables
 
-  first_vax_type = bn_node(~rcat(n=..n, c("pfizer","az","moderna"), c(0.50,0.4,0.1)), keep=FALSE),
+  first_vax_type = bn_node(~rcat(n=..n, c("pfizer","az"), c(0.5,0.5)), keep=FALSE),
+  third_vax_type = bn_node(~rcat(n=..n, c("pfizer","moderna"), c(0.5,0.5)), keep=FALSE),
   covid_vax_pfizer_1_day = bn_node(
     ~as.integer(runif(n=..n, firstpfizer_day, firstpfizer_day+60)),
     missing_rate = ~1-(first_vax_type=="pfizer")
@@ -159,11 +165,13 @@ sim_list = lst(
     needs = c("covid_vax_pfizer_1_day"),
   ),
   covid_vax_pfizer_3_day = bn_node(
-    ~as.integer(runif(n=..n, max(covid_vax_pfizer_2_day+15, studystart_day), max(covid_vax_pfizer_2_day, studystart_day)+100)),
-    needs = c("covid_vax_pfizer_2_day"),
+    ~as.integer(runif(n=..n, pmax(pmin(covid_vax_pfizer_2_day+15, covid_vax_az_2_day+15), studystart_day), pmax(pmin(covid_vax_pfizer_2_day+15, covid_vax_az_2_day+15), studystart_day)+100)),
+    needs = c("covid_vax_pfizer_1_day", "covid_vax_pfizer_2_day"),
+    missing_rate = ~1-(third_vax_type=="pfizer")
   ),
   covid_vax_pfizer_4_day = bn_node(
     ~as.integer(runif(n=..n, covid_vax_pfizer_3_day+120, covid_vax_pfizer_3_day+200)),
+    needs = c("covid_vax_pfizer_1_day", "covid_vax_pfizer_2_day", "covid_vax_pfizer_3_day"),
     missing_rate = ~0.99
   ),
   covid_vax_az_1_day = bn_node(
@@ -175,39 +183,42 @@ sim_list = lst(
     needs = c("covid_vax_az_1_day"),
   ),
   covid_vax_az_3_day = bn_node(
-    ~as.integer(runif(n=..n, max(covid_vax_az_2_day+15, studystart_day), max(covid_vax_az_2_day, studystart_day)+100)),
-    needs = c("covid_vax_az_2_day"),
+    ~as.integer(runif(n=..n, pmax(pmin(covid_vax_pfizer_2_day+15, covid_vax_az_2_day+15), studystart_day), pmax(pmin(covid_vax_pfizer_2_day+15, covid_vax_az_2_day+15), studystart_day)+100)),
+    needs = c("covid_vax_az_1_day", "covid_vax_az_2_day")
   ),
   covid_vax_az_4_day = bn_node(
     ~as.integer(runif(n=..n, covid_vax_az_3_day+120, covid_vax_az_3_day+200)),
+    needs = c("covid_vax_az_1_day", "covid_vax_az_2_day", "covid_vax_az_3_day"),
     missing_rate = ~0.99
   ),
   covid_vax_moderna_1_day = bn_node(
-    ~as.integer(runif(n=..n, firstmoderna_day, firstmoderna_day+60)),
-    missing_rate = ~1-(first_vax_type=="moderna")
+    ~as.integer(runif(n=..n, studystart_day, studystart_day+60)),
+    missing_rate = ~1-(third_vax_type=="moderna")
   ),
   covid_vax_moderna_2_day = bn_node(
     ~as.integer(runif(n=..n, covid_vax_moderna_1_day+30, covid_vax_moderna_1_day+60)),
-    needs = c("covid_vax_moderna_1_day"),
+    needs = c("covid_vax_moderna_1_day")
   ),
   covid_vax_moderna_3_day = bn_node(
-    ~as.integer(runif(n=..n, max(covid_vax_moderna_2_day+15, studystart_day), max(covid_vax_moderna_2_day, studystart_day)+100)),
-    needs = c("covid_vax_moderna_2_day"),
+    ~as.integer(runif(n=..n, pmax(covid_vax_moderna_2_day+15, studystart_day), pmax(covid_vax_moderna_2_day, studystart_day)+100)),
+    needs = c("covid_vax_moderna_1_day", "covid_vax_moderna_2_day")
   ),
   covid_vax_moderna_4_day = bn_node(
     ~as.integer(runif(n=..n, covid_vax_moderna_3_day+120, covid_vax_moderna_3_day+200)),
+    needs = c("covid_vax_moderna_1_day", "covid_vax_moderna_2_day", "covid_vax_moderna_3_day"),
     missing_rate = ~0.99
+
   ),
 
   # covid vax any
   covid_vax_disease_1_day = bn_node(
-    ~pmin(covid_vax_pfizer_1_day, covid_vax_az_1_day, covid_vax_moderna_1_day, na.rm=TRUE),
+    ~pmin(covid_vax_pfizer_1_day, covid_vax_az_1_day, na.rm=TRUE),
   ),
   covid_vax_disease_2_day = bn_node(
-    ~pmin(covid_vax_pfizer_2_day, covid_vax_az_2_day, covid_vax_moderna_2_day, na.rm=TRUE),
+    ~pmin(covid_vax_pfizer_2_day, covid_vax_az_2_day, na.rm=TRUE),
   ),
   covid_vax_disease_3_day = bn_node(
-    ~pmin(covid_vax_pfizer_3_day, covid_vax_az_3_day, covid_vax_moderna_3_day, na.rm=TRUE),
+    ~pmin(covid_vax_pfizer_3_day, covid_vax_az_3_day, covid_vax_moderna_1_day, covid_vax_moderna_3_day, na.rm=TRUE),
   ),
   covid_vax_disease_4_day = bn_node(
     ~pmin(covid_vax_pfizer_4_day, covid_vax_az_4_day, covid_vax_moderna_4_day, na.rm=TRUE),
@@ -324,40 +335,10 @@ sim_list = lst(
     missing_rate = ~0.7
   ),
 
-  #placeholder for single criticalcare variable ---
-  # covidcritcare_day = bn_node(
-  #   ~as.integer(runif(n=..n, covid_vax_disease_3_day, covid_vax_disease_3_day+100)),
-  #   missing_rate = ~0.8
-  # ),
-
-  potentialcovidcritcare_1_day = bn_node(
-    ~as.integer(runif(n=..n, covid_vax_disease_3_day, covid_vax_disease_3_day+70)),
-    missing_rate = ~0.8
-  ),
-
-  potentialcovidcritcare_2_day = bn_node(
-    ~as.integer(runif(n=..n, potentialcovidcritcare_1_day, potentialcovidcritcare_1_day+70)),
-    missing_rate = ~0.8
-  ),
-
-  potentialcovidcritcare_3_day = bn_node(
-    ~as.integer(runif(n=..n, potentialcovidcritcare_2_day, potentialcovidcritcare_2_day+70)),
-    missing_rate = ~0.8
-  ),
-
-  potentialcovidcritcare_1_ccdays = bn_node(
-    ~as.factor(as.integer(rexp(n=..n, 1))),
-    needs = "potentialcovidcritcare_1_day"
-  ),
-
-  potentialcovidcritcare_2_ccdays = bn_node(
-    ~as.factor(as.integer(rexp(n=..n, 1))),
-    needs = "potentialcovidcritcare_2_day"
-  ),
-
-  potentialcovidcritcare_3_ccdays = bn_node(
-    ~as.factor(as.integer(rexp(n=..n, 1))),
-    needs = "potentialcovidcritcare_3_day"
+  covidcritcare_day = bn_node(
+    ~covidadmitted_day,
+    needs = "covidadmitted_day",
+    missing_rate = ~0.7
   ),
 
 
