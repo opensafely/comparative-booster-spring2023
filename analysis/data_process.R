@@ -84,9 +84,7 @@ if(Sys.getenv("OPENSAFELY_BACKEND") %in% c("", "expectations")){
     apply(unmatched_types, 1, function(row) paste(paste(row, collapse=" : "), "\n"))
   )
 
-  data_extract <- data_custom_dummy %>%
-    # because dummy data for days in critical care is factor, so that we can do zero-inflation
-    mutate(across(starts_with("covidadmitted_ccdays"), ~ as.numeric(as.character(.))))
+  data_extract <- data_custom_dummy
 } else {
   data_extract <- read_feather(here("output", "input.feather")) %>%
     #because date types are not returned consistently by cohort extractor
@@ -247,13 +245,6 @@ data_processed <- data_extract %>%
 
     # earliest covid event after study start
     anycovid_date = pmin(postest_date, covidemergency_date, covidadmitted_date, coviddeath_date, na.rm=TRUE),
-
-    covidcritcare_date = case_when(
-      as.numeric(as.character(potentialcovidcritcare_1_ccdays))>0 & !is.na(potentialcovidcritcare_1_date) ~ potentialcovidcritcare_1_date,
-      as.numeric(as.character(potentialcovidcritcare_2_ccdays))>0 & !is.na(potentialcovidcritcare_2_date) ~ potentialcovidcritcare_2_date,
-      as.numeric(as.character(potentialcovidcritcare_3_ccdays))>0 & !is.na(potentialcovidcritcare_3_date) ~ potentialcovidcritcare_3_date,
-      TRUE ~ as.Date(NA_character_)
-    ),
 
     covidcritcare_date = pmin(covidcritcare_date, coviddeath_date, na.rm=TRUE),
 
