@@ -63,23 +63,6 @@ subgroup_sym <- sym(subgroup)
 output_dir <- here("output", "match", matchset, "km", subgroup, outcome)
 fs::dir_create(output_dir)
 
-## create special log file ----
-cat(glue("## script info for {outcome} ##"), "  \n", file = fs::path(output_dir, glue("log.txt")), append = FALSE)
-
-## functions to pass additional log info to seperate file
-logoutput <- function(...){
-  cat(..., file = fs::path(output_dir, glue("log.txt")), sep = "\n  ", append = TRUE)
-  cat("\n", file = fs::path(output_dir, glue("log.txt")), sep = "\n  ", append = TRUE)
-}
-
-logoutput_datasize <- function(x){
-  nm <- deparse(substitute(x))
-  logoutput(
-    glue(nm, " data size = ", nrow(x)),
-    glue(nm, " memory usage = ", format(object.size(x), units="GB", standard="SI", digits=3L))
-  )
-}
-
 ## import match data
 data_matchstatus <- read_rds(here("output", "match", matchset, "data_matchstatus.rds"))
 

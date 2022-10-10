@@ -53,8 +53,8 @@ logoutput <- function(...){
 logoutput_datasize <- function(x){
   nm <- deparse(substitute(x))
   logoutput(
-    glue(nm, " data size = ", nrow(x)),
-    glue(nm, " memory usage = ", format(object.size(x), units="GB", standard="SI", digits=3L))
+    glue(" data size = ", nrow(x)),
+    glue(" memory usage = ", format(object.size(x), units="GB", standard="SI", digits=3L))
   )
 }
 
@@ -63,7 +63,13 @@ logoutput_datasize <- function(x){
 ## one pow per patient ----
 data_cohort <- read_rds(here("output", "data", "data_cohort.rds"))
 
-logoutput_datasize(data_cohort)
+print(
+  cat(
+    glue(nm, " data size = ", nrow(data_cohort)),
+    glue(nm, " memory usage = ", format(object.size(data_cohort), units="GB", standard="SI", digits=3L)),
+    sep = "\n  "
+  )
+)
 
 ## select all matching candidates and variables necessary for matching
 data_matchingcandidates <-

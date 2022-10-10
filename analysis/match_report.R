@@ -40,26 +40,9 @@ if(length(args)==0){
 output_dir <- here("output", "match", matchset, "report")
 fs::dir_create(output_dir)
 
-## create special log file ----
-cat(glue("## script info for match report ##"), "  \n", file = fs::path(output_dir, glue("log.txt")), append = FALSE)
-
-## functions to pass additional log info to separate file
-logoutput <- function(...){
-  cat(..., file = fs::path(output_dir, glue("log.txt")), sep = "\n  ", append = TRUE)
-  cat("\n", file = fs::path(output_dir, glue("log.txt")), sep = "\n  ", append = TRUE)
-}
-
-logoutput_datasize <- function(x){
-  nm <- deparse(substitute(x))
-  logoutput(
-    glue(nm, " data size = ", nrow(x)),
-    glue(nm, " memory usage = ", format(object.size(x), units="GB", standard="SI", digits=3L))
-  )
-}
 
 ## import matching info ----
 data_matchstatus <- read_rds(fs::path(here("output", "match", matchset), "data_matchstatus.rds"))
-
 
 # matching coverage on each day of recruitment period ----
 
