@@ -63,7 +63,7 @@ maxfup <- max(postbaselinecuts)
 
 
 # redaction threshold
-threshold <- 7
+threshold <- 6
 
 ## lookups to convert coded variables to full, descriptive variables ----
 

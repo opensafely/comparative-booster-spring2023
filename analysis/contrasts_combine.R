@@ -38,13 +38,15 @@ source(here("lib", "functions", "utility.R"))
 source(here("lib", "design", "design.R"))
 
 
-output_dir <- here("output", "match", matchset, "ci", "combined")
+output_dir <- here("output", "match", matchset, "combined")
 fs::dir_create(output_dir)
 
 metaparams <-
   expand_grid(
-    outcome = factor(c("postest", "covidemergency", "covidadmittedproxy1", "covidadmitted", "covidcritcare", "coviddeath", "noncoviddeath")),
-    subgroup = factor(recoder$subgroups),
+    #outcome = factor(c("postest", "covidemergency", "covidadmittedproxy1", "covidadmitted", "covidcritcare", "coviddeath", "noncoviddeath")),
+    #subgroup = factor(recoder$subgroups),
+    outcome = factor("covidadmitted"),
+    subgroup = factor("all"),
   ) %>%
   mutate(
     outcome_descr = fct_recoderelevel(outcome,  recoder$outcome),
@@ -55,11 +57,11 @@ metaparams <-
   )
 
 
-ci_estimates <- metaparams %>%
+km_estimates <- metaparams %>%
   mutate(
     data = pmap(list(matchset, subgroup, outcome), function(matchset, subgroup, outcome) {
       subgroup <- as.character(subgroup)
-      dat <- read_csv(here("output", "match", matchset, "ci", subgroup, outcome, "ci_estimates.csv"), na="NA", col_types = cols())
+      dat <- read_rds(here("output", "match", matchset, "km", subgroup, outcome, "km_estimates_rounded.rds"))
       dat %>%
       add_column(
         subgroup_level = as.character(.[[subgroup]]),
@@ -71,14 +73,14 @@ ci_estimates <- metaparams %>%
   ) %>%
   unnest(data)
 
-write_csv(ci_estimates, fs::path(output_dir, "ci_estimates.csv"))
+write_rds(km_estimates, fs::path(output_dir, "km_estimates_rounded.csv"))
 
 
 contrasts_daily <- metaparams %>%
   mutate(
     data = pmap(list(matchset, outcome, subgroup), function(matchset, outcome, subgroup){
       subgroup <- as.character(subgroup)
-      dat <- read_csv(here("output", "match", matchset, "ci", subgroup, outcome, "contrasts_daily.csv"), na="NA", col_types = cols())
+      dat <- read_rds(here("output", "match", matchset, "km", subgroup, outcome, "contrasts_daily_rounded.rds"))
       dat %>%
         add_column(
           subgroup_level = as.character(.[[subgroup]]),
@@ -91,14 +93,14 @@ contrasts_daily <- metaparams %>%
   ) %>%
   unnest(data)
 
-write_csv(contrasts_daily, fs::path(output_dir, "contrasts_daily.csv"))
+write_csv(contrasts_daily, fs::path(output_dir, "contrasts_daily_rounded.csv"))
 
 
 contrasts_cuts <- metaparams %>%
   mutate(
     data = pmap(list(matchset, outcome, subgroup), function(matchset, outcome, subgroup){
       subgroup <- as.character(subgroup)
-      dat <- read_csv(here("output", "match", matchset, "ci", subgroup, outcome, "contrasts_cuts.csv"), na="NA", col_types = cols())
+      dat <- read_rds(here("output", "match", matchset, "km", subgroup, outcome, "contrasts_cuts_rounded.rds"))
       dat %>%
         add_column(
           subgroup_level = as.character(.[[subgroup]]),
@@ -111,14 +113,14 @@ contrasts_cuts <- metaparams %>%
   ) %>%
   unnest(data)
 
-write_csv(contrasts_cuts, fs::path(output_dir, "contrasts_cuts.csv"))
+write_csv(contrasts_cuts, fs::path(output_dir, "contrasts_cuts_rounded.csv"))
 
 
 contrasts_overall <- metaparams %>%
   mutate(
     data = pmap(list(matchset, outcome, subgroup), function(matchset, outcome, subgroup) {
       subgroup <- as.character(subgroup)
-      dat <- read_csv(here("output", "match", matchset, "ci", subgroup, outcome, "contrasts_overall.csv"), na="NA", col_types = cols())
+      dat <- read_rds(here("output", "match", matchset, "km", subgroup, outcome, "contrasts_overall_rounded.rds"))
       dat %>%
         add_column(
           subgroup_level = as.character(.[[subgroup]]),
@@ -131,25 +133,25 @@ contrasts_overall <- metaparams %>%
   ) %>%
   unnest(data)
 
-write_csv(contrasts_overall, fs::path(output_dir, "contrasts_overall.csv"))
+write_csv(contrasts_overall, fs::path(output_dir, "contrasts_overall_rounded.csv"))
 
 
-## move ci plots to single folder ----
-fs::dir_create(here("output", "match", matchset, "ci", "combined", "plots"))
-
-metaparams %>%
-  mutate(
-    ciplotdir = here("output", "match", matchset, "ci", subgroup, outcome, "ci_plot.png"),
-    ciplotnewdir = here("output", "match", matchset, "ci", "combined", "plots", glue("ci_plot_{subgroup}_{outcome}.png")),
-  ) %>%
-  {walk2(.$ciplotdir, .$ciplotnewdir, ~fs::file_copy(.x, .y, overwrite = TRUE))}
+## move km plots to single folder ----
+fs::dir_create(here("output", "match", matchset, "combined", "plots"))
 
 metaparams %>%
   mutate(
-    ciplotdir = here("output", "match", matchset, "ci", subgroup, outcome, "ci_plot_rounded.png"),
-    ciplotnewdir = here("output", "match", matchset, "ci", "combined", "plots", glue("ci_plot_rounded_{subgroup}_{outcome}.png")),
+    kmplotdir = here("output", "match", matchset, "km", subgroup, outcome, "km_plot_unrounded.png"),
+    kmplotnewdir = here("output", "match", matchset, "km", "combined", "plots", glue("km_plot_unrounded_{subgroup}_{outcome}.png")),
   ) %>%
-  {walk2(.$ciplotdir, .$ciplotnewdir, ~fs::file_copy(.x, .y, overwrite = TRUE))}
+  {walk2(.$kmplotdir, .$kmplotnewdir, ~fs::file_copy(.x, .y, overwrite = TRUE))}
+
+metaparams %>%
+  mutate(
+    kmplotdir = here("output", "match", matchset, "km", subgroup, outcome, "km_plot_rounded.png"),
+    kmplotnewdir = here("output", "match", matchset, "km", "combined", "plots", glue("km_plot_rounded_{subgroup}_{outcome}.png")),
+  ) %>%
+  {walk2(.$kmplotdir, .$kmplotnewdir, ~fs::file_copy(.x, .y, overwrite = TRUE))}
 
 
 ## plot overall estimates for inspection ----
@@ -191,7 +193,7 @@ plot_estimates <- function(estimate, estimate.ll, estimate.ul, name){
 
   ggsave(
     filename=fs::path(
-      here("output", "match", matchset, "ci", "combined", "plots", glue("overall_plot_rounded_{name}.png"))
+      here("output", "match", matchset, "combined", "plots", glue("overall_plot_rounded_{name}.png"))
     ),
     plot_temp,
     width=20, height=15, units="cm"
@@ -200,8 +202,8 @@ plot_estimates <- function(estimate, estimate.ll, estimate.ul, name){
   plot_temp
 }
 
-plot_estimates(cird, cird.ll, cird.ul, "cird")
-plot_estimates(cirr, cirr.ll, cirr.ul, "cirr")
+plot_estimates(rd, rd.ll, rd.ul, "rd")
+plot_estimates(rr, rr.ll, rr.ul, "rr")
 plot_estimates(coxhr, coxhr.ll, coxhr.ul, "coxhr")
-plot_estimates(kmirr, kmirr.ll, kmirr.ul, "kmirr")
+plot_estimates(irr, irr.ll, irr.ul, "irr")
 

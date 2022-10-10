@@ -530,7 +530,7 @@ coxcontrast <- function(data, cuts=NULL){
       !!subgroup_sym,
       period_start,
       period_end,
-      coxhazr = exp(estimate),
+      coxhr = exp(estimate),
       coxhr.se = robust.se,
       coxhr.ll = exp(estimate + qnorm(0.025)*robust.se),
       coxhr.ul = exp(estimate + qnorm(0.975)*robust.se),
@@ -548,6 +548,6 @@ contrasts_rounded_cuts <-  left_join(km_contrasts_rounded_cuts, cox_contrasts_cu
 contrasts_rounded_overall <-  left_join(km_contrasts_rounded_overall, cox_contrasts_overall, by=c(subgroup, "period_start", "period_end"))
 
 
-write_csv(contrasts_rounded_daily, fs::path(output_dir, "contrasts_daily.csv"))
-write_csv(contrasts_rounded_cuts, fs::path(output_dir, "contrasts_cuts.csv"))
-write_csv(contrasts_rounded_overall, fs::path(output_dir, "contrasts_overall.csv"))
+write_rds(contrasts_rounded_daily, fs::path(output_dir, "contrasts_daily_rounded.rds"))
+write_rds(contrasts_rounded_cuts, fs::path(output_dir, "contrasts_cuts_rounded.rds"))
+write_rds(contrasts_rounded_overall, fs::path(output_dir, "contrasts_overall_rounded.rds"))

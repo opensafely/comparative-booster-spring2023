@@ -35,18 +35,12 @@ for(matchset in c("A", "B")){
   fs::file_copy(here("output", "match", matchset, "report", "data_smd.csv"), fs::path(output_dir, "match_smd.csv"), overwrite = TRUE)
   fs::file_copy(here("output", "match", matchset, "report", "flowchart.csv"), fs::path(output_dir, "match_flowchart.csv"), overwrite = TRUE)
 
-  ## KM ----
+  ## Contrasts ----
 
-  #fs::file_copy(here("output", "match", matchset, "km", "combined", "km_estimates.csv"), fs::path(output_dir, "km_estimates.csv"), overwrite = TRUE)
-  #fs::file_copy(here("output", "match", matchset, "km", "combined", "contrasts_daily.csv"), fs::path(output_dir, "km_contrasts_daily.csv"), overwrite = TRUE)
-  #fs::file_copy(here("output", "match", matchset, "km", "combined", "contrasts_overall.csv"), fs::path(output_dir, "km_contrasts_overall.csv"), overwrite = TRUE)
-
-  ## CI ----
-
-  fs::file_copy(here("output", "match", matchset, "ci", "combined", "ci_estimates.csv"), fs::path(output_dir, "ci_estimates.csv"), overwrite = TRUE)
-  fs::file_copy(here("output", "match", matchset, "ci", "combined", "contrasts_daily.csv"), fs::path(output_dir, "ci_contrasts_daily.csv"), overwrite = TRUE)
-  fs::file_copy(here("output", "match", matchset, "ci", "combined", "contrasts_cuts.csv"), fs::path(output_dir, "ci_contrasts_cuts.csv"), overwrite = TRUE)
-  fs::file_copy(here("output", "match", matchset, "ci", "combined", "contrasts_overall.csv"), fs::path(output_dir, "ci_contrasts_overall.csv"), overwrite = TRUE)
+  fs::file_copy(here("output", "match", matchset, "combined", "km_estimates_rounded.csv"), fs::path(output_dir, "km_estimates_rounded.csv"), overwrite = TRUE)
+  fs::file_copy(here("output", "match", matchset, "combined", "contrasts_daily_rounded.csv"), fs::path(output_dir, "contrasts_daily_rounded.csv"), overwrite = TRUE)
+  fs::file_copy(here("output", "match", matchset, "combined", "contrasts_cuts_rounded.csv"), fs::path(output_dir, "contrasts_cuts_rounded.csv"), overwrite = TRUE)
+  fs::file_copy(here("output", "match", matchset, "combined", "contrasts_overall_rounded.csv"), fs::path(output_dir, "contrasts_overall_rounded.csv"), overwrite = TRUE)
 
 }
 
