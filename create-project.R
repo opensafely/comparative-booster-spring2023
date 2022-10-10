@@ -109,8 +109,8 @@ action_contrasts <- function(
         "data_selection"
       ),
       moderately_sensitive = lst(
-        txt = glue("output/match/{matchset}/km/{subgroup}/{outcome}/*.txt"),
-        csv = glue("output/match/{matchset}/km/{subgroup}/{outcome}/*.csv"),
+        #txt = glue("output/match/{matchset}/km/{subgroup}/{outcome}/*.txt"),
+        rds = glue("output/match/{matchset}/km/{subgroup}/{outcome}/*.rds"),
         png = glue("output/match/{matchset}/km/{subgroup}/{outcome}/*.png"),
       )
     )
@@ -175,7 +175,7 @@ action_contrasts_combine <- function(
               subgroup=subgroups,
               outcome=outcomes
             ),
-            "ci_{matchset}_{subgroup}_{outcome}"
+            "km_{matchset}_{subgroup}_{outcome}"
           )
         )
       ),

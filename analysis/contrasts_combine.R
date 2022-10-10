@@ -43,10 +43,10 @@ fs::dir_create(output_dir)
 
 metaparams <-
   expand_grid(
-    #outcome = factor(c("postest", "covidemergency", "covidadmittedproxy1", "covidadmitted", "covidcritcare", "coviddeath", "noncoviddeath")),
-    #subgroup = factor(recoder$subgroups),
-    outcome = factor("covidadmitted"),
-    subgroup = factor("all"),
+    outcome = factor(c("postest", "covidemergency", "covidadmittedproxy1", "covidadmitted", "covidcritcare", "coviddeath", "noncoviddeath")),
+    subgroup = factor(recoder$subgroups),
+    #outcome = factor("covidadmitted"),
+    #subgroup = factor("all"),
   ) %>%
   mutate(
     outcome_descr = fct_recoderelevel(outcome,  recoder$outcome),
@@ -142,14 +142,14 @@ fs::dir_create(here("output", "match", matchset, "combined", "plots"))
 metaparams %>%
   mutate(
     kmplotdir = here("output", "match", matchset, "km", subgroup, outcome, "km_plot_unrounded.png"),
-    kmplotnewdir = here("output", "match", matchset, "km", "combined", "plots", glue("km_plot_unrounded_{subgroup}_{outcome}.png")),
+    kmplotnewdir = here("output", "match", matchset, "combined", "plots", glue("km_plot_unrounded_{subgroup}_{outcome}.png")),
   ) %>%
   {walk2(.$kmplotdir, .$kmplotnewdir, ~fs::file_copy(.x, .y, overwrite = TRUE))}
 
 metaparams %>%
   mutate(
     kmplotdir = here("output", "match", matchset, "km", subgroup, outcome, "km_plot_rounded.png"),
-    kmplotnewdir = here("output", "match", matchset, "km", "combined", "plots", glue("km_plot_rounded_{subgroup}_{outcome}.png")),
+    kmplotnewdir = here("output", "match", matchset, "combined", "plots", glue("km_plot_rounded_{subgroup}_{outcome}.png")),
   ) %>%
   {walk2(.$kmplotdir, .$kmplotnewdir, ~fs::file_copy(.x, .y, overwrite = TRUE))}
 
