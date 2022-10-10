@@ -384,14 +384,9 @@ data_processed <- data_processed %>%
     vax2_date = covid_vax_2_date,
     vax3_date = covid_vax_3_date,
     vax4_date = covid_vax_4_date,
-    vax1_day = as.integer(floor((vax1_date - study_dates$studystart_date))+1), # day 0 is the day before "start_date"
-    vax2_day = as.integer(floor((vax2_date - study_dates$studystart_date))+1), # day 0 is the day before "start_date"
-    vax3_day = as.integer(floor((vax3_date - study_dates$studystart_date))+1), # day 0 is the day before "start_date"
-    vax4_day = as.integer(floor((vax4_date - study_dates$studystart_date))+1), # day 0 is the day before "start_date"
-    vax1_week = as.integer(floor((vax1_date - study_dates$studystart_date)/7)+1), # week 1 is days 1-7.
-    vax2_week = as.integer(floor((vax2_date - study_dates$studystart_date)/7)+1), # week 1 is days 1-7.
-    vax3_week = as.integer(floor((vax3_date - study_dates$studystart_date)/7)+1), # week 1 is days 1-7.
-    vax4_week = as.integer(floor((vax4_date - study_dates$studystart_date)/7)+1), # week 1 is days 1-7.
+
+    vax23_interval = as.integer(vax3_date - vax2_date)
+
 ) %>%
 select(
   -starts_with("covid_vax_"),

@@ -147,7 +147,7 @@ if(exists("matchset")){
 
     caliper <- c(
       age = 3,
-      vax2_day = 7,
+      vax23_interval = 7,
       #imd = 1000,
       NULL
     )
@@ -177,7 +177,7 @@ if(exists("matchset")){
 
     caliper <- c(
       age = 3,
-      vax2_day = 7,
+      vax23_interval = 7,
       NULL
     )
 

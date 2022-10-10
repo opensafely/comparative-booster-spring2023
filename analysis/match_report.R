@@ -245,6 +245,7 @@ var_labels <- list(
   N  ~ "Total N",
   treatment_descr ~ "Vaccine type",
   vax12_type_descr ~ "Primary vaccine course",
+  vax23_interval ~ "Dose 2/3 interval",
   #age ~ "Age",
   ageband ~ "Age",
   sex ~ "Sex",
