@@ -493,8 +493,8 @@ coxcontrast <- function(data, cuts=NULL){
       period_id = tdc(fup_time, period_id)
     ) %>%
     mutate(
-      period_start = postbaselinecuts[period_id],
-      period_end = postbaselinecuts[period_id+1],
+      period_start = cuts[period_id],
+      period_end = cuts[period_id+1],
     )
 
   data_cox <-
