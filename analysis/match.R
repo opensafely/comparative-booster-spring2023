@@ -47,8 +47,8 @@ data_cohort <- read_rds(here("output", "data", "data_cohort.rds"))
 
 print(
   cat(
-    glue(nm, " data size = ", nrow(data_cohort)),
-    glue(nm, " memory usage = ", format(object.size(data_cohort), units="GB", standard="SI", digits=3L)),
+    glue("data_cohort", " data size = ", nrow(data_cohort)),
+    glue("data_cohort", " memory usage = ", format(object.size(data_cohort), units="GB", standard="SI", digits=3L)),
     sep = "\n  "
   )
 )
