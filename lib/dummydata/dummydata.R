@@ -50,7 +50,7 @@ known_variables <- c(
 sim_list = lst(
 
   dereg_day = bn_node(
-    ~as.integer(runif(n=..n, covid_vax_disease_3_day, covid_vax_disease_3_day+120)),
+    ~as.integer(runif(n=..n, anycovidvax_3_day, anycovidvax_3_day+120)),
     missing_rate = ~0.99
   ),
 
@@ -211,16 +211,16 @@ sim_list = lst(
   ),
 
   # covid vax any
-  covid_vax_disease_1_day = bn_node(
+  anycovidvax_1_day = bn_node(
     ~pmin(covid_vax_pfizer_1_day, covid_vax_az_1_day, na.rm=TRUE),
   ),
-  covid_vax_disease_2_day = bn_node(
+  anycovidvax_2_day = bn_node(
     ~pmin(covid_vax_pfizer_2_day, covid_vax_az_2_day, na.rm=TRUE),
   ),
-  covid_vax_disease_3_day = bn_node(
+  anycovidvax_3_day = bn_node(
     ~pmin(covid_vax_pfizer_3_day, covid_vax_az_3_day, covid_vax_moderna_1_day, covid_vax_moderna_3_day, na.rm=TRUE),
   ),
-  covid_vax_disease_4_day = bn_node(
+  anycovidvax_4_day = bn_node(
     ~pmin(covid_vax_pfizer_4_day, covid_vax_az_4_day, covid_vax_moderna_4_day, na.rm=TRUE),
   ),
 
@@ -258,80 +258,80 @@ sim_list = lst(
   ## pre-baseline events where event date is relevant
 
   primary_care_covid_case_0_day = bn_node(
-    ~as.integer(runif(n=..n, covid_vax_disease_3_day-100, covid_vax_disease_3_day-1)),
+    ~as.integer(runif(n=..n, anycovidvax_3_day-100, anycovidvax_3_day-1)),
     missing_rate = ~0.7
   ),
 
   covid_test_0_day = bn_node(
-    ~as.integer(runif(n=..n, covid_vax_disease_3_day-100, covid_vax_disease_3_day-1)),
+    ~as.integer(runif(n=..n, anycovidvax_3_day-100, anycovidvax_3_day-1)),
     missing_rate = ~0.7
   ),
 
   postest_0_day = bn_node(
-    ~as.integer(runif(n=..n, covid_vax_disease_3_day-100, covid_vax_disease_3_day-1)),
+    ~as.integer(runif(n=..n, anycovidvax_3_day-100, anycovidvax_3_day-1)),
     missing_rate = ~0.9
   ),
 
   covidemergency_0_day = bn_node(
-    ~as.integer(runif(n=..n, covid_vax_disease_3_day-100, covid_vax_disease_3_day-1)),
+    ~as.integer(runif(n=..n, anycovidvax_3_day-100, anycovidvax_3_day-1)),
     missing_rate = ~0.99
   ),
 
 
   covidadmitted_0_day = bn_node(
-    ~as.integer(runif(n=..n, covid_vax_disease_3_day-100, covid_vax_disease_3_day-1)),
+    ~as.integer(runif(n=..n, anycovidvax_3_day-100, anycovidvax_3_day-1)),
     missing_rate = ~0.99
   ),
 
   ## post-baseline events (outcomes)
 
   primary_care_covid_case_day = bn_node(
-    ~as.integer(runif(n=..n, covid_vax_disease_3_day, covid_vax_disease_3_day+100)),
+    ~as.integer(runif(n=..n, anycovidvax_3_day, anycovidvax_3_day+100)),
     missing_rate = ~0.7
   ),
 
   covid_test_day = bn_node(
-    ~as.integer(runif(n=..n, covid_vax_disease_3_day, covid_vax_disease_3_day+100)),
+    ~as.integer(runif(n=..n, anycovidvax_3_day, anycovidvax_3_day+100)),
     missing_rate = ~0.7
   ),
 
   postest_day = bn_node(
-    ~as.integer(runif(n=..n, covid_vax_disease_3_day, covid_vax_disease_3_day+100)),
+    ~as.integer(runif(n=..n, anycovidvax_3_day, anycovidvax_3_day+100)),
     missing_rate = ~0.7
   ),
 
   emergency_day = bn_node(
-    ~as.integer(runif(n=..n, covid_vax_disease_3_day, covid_vax_disease_3_day+100)),
+    ~as.integer(runif(n=..n, anycovidvax_3_day, anycovidvax_3_day+100)),
     missing_rate = ~0.8
   ),
   emergencyhosp_day = bn_node(
-    ~as.integer(runif(n=..n, covid_vax_disease_3_day, covid_vax_disease_3_day+100)),
+    ~as.integer(runif(n=..n, anycovidvax_3_day, anycovidvax_3_day+100)),
     missing_rate = ~0.85
   ),
 
 
   covidemergency_day = bn_node(
-    ~as.integer(runif(n=..n, covid_vax_disease_3_day, covid_vax_disease_3_day+100)),
+    ~as.integer(runif(n=..n, anycovidvax_3_day, anycovidvax_3_day+100)),
     missing_rate = ~0.8
   ),
 
   covidemergencyhosp_day = bn_node(
-    ~as.integer(runif(n=..n, covid_vax_disease_3_day, covid_vax_disease_3_day+100)),
+    ~as.integer(runif(n=..n, anycovidvax_3_day, anycovidvax_3_day+100)),
     missing_rate = ~0.85
   ),
 
   # respemergency_day = bn_node(
-  #   ~as.integer(runif(n=..n, covid_vax_disease_3_day, covid_vax_disease_3_day+100)),
+  #   ~as.integer(runif(n=..n, anycovidvax_3_day, anycovidvax_3_day+100)),
   #   missing_rate = ~0.95
   # ),
   #
   # respemergencyhosp_day = bn_node(
-  #   ~as.integer(runif(n=..n, covid_vax_disease_3_day, covid_vax_disease_3_day+100)),
+  #   ~as.integer(runif(n=..n, anycovidvax_3_day, anycovidvax_3_day+100)),
   #   missing_rate = ~0.95
   # ),
 
   covidadmitted_day = bn_node(
-    ~as.integer(runif(n=..n, covid_vax_disease_3_day, covid_vax_disease_3_day+100)),
+    ~as.integer(runif(n=..n, anycovidvax_3_day, anycovidvax_3_day+100)),
     missing_rate = ~0.7
   ),
 
@@ -343,11 +343,11 @@ sim_list = lst(
 
 
   admitted_unplanned_day = bn_node(
-    ~as.integer(runif(n=..n, covid_vax_disease_3_day, covid_vax_disease_3_day+100)),
+    ~as.integer(runif(n=..n, anycovidvax_3_day, anycovidvax_3_day+100)),
     missing_rate = ~0.7
   ),
   admitted_planned_day = bn_node(
-    ~as.integer(runif(n=..n, covid_vax_disease_3_day, covid_vax_disease_3_day+100)),
+    ~as.integer(runif(n=..n, anycovidvax_3_day, anycovidvax_3_day+100)),
     missing_rate = ~0.7
   ),
 
@@ -358,7 +358,7 @@ sim_list = lst(
   ),
 
   death_day = bn_node(
-    ~as.integer(runif(n=..n, covid_vax_disease_3_day, covid_vax_disease_3_day+100)),
+    ~as.integer(runif(n=..n, anycovidvax_3_day, anycovidvax_3_day+100)),
     missing_rate = ~0.90
   ),
 
