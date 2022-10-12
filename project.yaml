@@ -49,13 +49,10 @@ actions:
     - data_process
     outputs:
       highly_sensitive:
-        feather: output/data/data_cohort.feather
-        cohortrds: output/data/data_cohort.rds
-        criteriards: output/data/data_inclusioncriteria.rds
+        feather: output/data/*.feather
+        rds: output/data/*.rds
       moderately_sensitive:
-        flow: output/prematch/flowchart.csv
-        table: output/prematch/table*.csv
-        smd: output/prematch/smd.csv
+        csv: output/prematch/*.csv
 
   skim_selection:
     run: r:latest analysis/data_skim.R output/data/data_cohort.rds output/data_properties
@@ -85,8 +82,6 @@ actions:
     outputs:
       highly_sensitive:
         rds: output/match/A/*.rds
-      moderately_sensitive:
-        txt: output/match/A/*.txt
 
   match_report_A:
     run: r:latest analysis/match_report.R A
@@ -98,7 +93,6 @@ actions:
         txt: output/match/A/report/*.txt
         csv: output/match/A/report/*.csv
         png: output/match/A/report/*.png
-        html: output/match/A/report/*.html
 
   ## ### Overall models (''all'') 
 
@@ -171,6 +165,76 @@ actions:
       moderately_sensitive:
         rds: output/match/A/km/all/noncoviddeath/*.rds
         png: output/match/A/km/all/noncoviddeath/*.png
+
+  delayedentry_A_all_postest:
+    run: r:latest analysis/delayedentry.R A all postest
+    needs:
+    - match_A
+    - data_selection
+    outputs:
+      moderately_sensitive:
+        rds: output/match/A/delayedentry/all/postest/*.rds
+        png: output/match/A/delayedentry/all/postest/*.png
+
+  delayedentry_A_all_covidemergency:
+    run: r:latest analysis/delayedentry.R A all covidemergency
+    needs:
+    - match_A
+    - data_selection
+    outputs:
+      moderately_sensitive:
+        rds: output/match/A/delayedentry/all/covidemergency/*.rds
+        png: output/match/A/delayedentry/all/covidemergency/*.png
+
+  delayedentry_A_all_covidadmittedproxy1:
+    run: r:latest analysis/delayedentry.R A all covidadmittedproxy1
+    needs:
+    - match_A
+    - data_selection
+    outputs:
+      moderately_sensitive:
+        rds: output/match/A/delayedentry/all/covidadmittedproxy1/*.rds
+        png: output/match/A/delayedentry/all/covidadmittedproxy1/*.png
+
+  delayedentry_A_all_covidadmitted:
+    run: r:latest analysis/delayedentry.R A all covidadmitted
+    needs:
+    - match_A
+    - data_selection
+    outputs:
+      moderately_sensitive:
+        rds: output/match/A/delayedentry/all/covidadmitted/*.rds
+        png: output/match/A/delayedentry/all/covidadmitted/*.png
+
+  delayedentry_A_all_covidcritcare:
+    run: r:latest analysis/delayedentry.R A all covidcritcare
+    needs:
+    - match_A
+    - data_selection
+    outputs:
+      moderately_sensitive:
+        rds: output/match/A/delayedentry/all/covidcritcare/*.rds
+        png: output/match/A/delayedentry/all/covidcritcare/*.png
+
+  delayedentry_A_all_coviddeath:
+    run: r:latest analysis/delayedentry.R A all coviddeath
+    needs:
+    - match_A
+    - data_selection
+    outputs:
+      moderately_sensitive:
+        rds: output/match/A/delayedentry/all/coviddeath/*.rds
+        png: output/match/A/delayedentry/all/coviddeath/*.png
+
+  delayedentry_A_all_noncoviddeath:
+    run: r:latest analysis/delayedentry.R A all noncoviddeath
+    needs:
+    - match_A
+    - data_selection
+    outputs:
+      moderately_sensitive:
+        rds: output/match/A/delayedentry/all/noncoviddeath/*.rds
+        png: output/match/A/delayedentry/all/noncoviddeath/*.png
 
   ## ### Models by primary course (''vax12_type'') 
 
@@ -543,8 +607,6 @@ actions:
     outputs:
       highly_sensitive:
         rds: output/match/B/*.rds
-      moderately_sensitive:
-        txt: output/match/B/*.txt
 
   match_report_B:
     run: r:latest analysis/match_report.R B
@@ -556,7 +618,6 @@ actions:
         txt: output/match/B/report/*.txt
         csv: output/match/B/report/*.csv
         png: output/match/B/report/*.png
-        html: output/match/B/report/*.html
 
   ## ### Overall models (''all'') 
 
@@ -629,6 +690,76 @@ actions:
       moderately_sensitive:
         rds: output/match/B/km/all/noncoviddeath/*.rds
         png: output/match/B/km/all/noncoviddeath/*.png
+
+  delayedentry_B_all_postest:
+    run: r:latest analysis/delayedentry.R B all postest
+    needs:
+    - match_B
+    - data_selection
+    outputs:
+      moderately_sensitive:
+        rds: output/match/B/delayedentry/all/postest/*.rds
+        png: output/match/B/delayedentry/all/postest/*.png
+
+  delayedentry_B_all_covidemergency:
+    run: r:latest analysis/delayedentry.R B all covidemergency
+    needs:
+    - match_B
+    - data_selection
+    outputs:
+      moderately_sensitive:
+        rds: output/match/B/delayedentry/all/covidemergency/*.rds
+        png: output/match/B/delayedentry/all/covidemergency/*.png
+
+  delayedentry_B_all_covidadmittedproxy1:
+    run: r:latest analysis/delayedentry.R B all covidadmittedproxy1
+    needs:
+    - match_B
+    - data_selection
+    outputs:
+      moderately_sensitive:
+        rds: output/match/B/delayedentry/all/covidadmittedproxy1/*.rds
+        png: output/match/B/delayedentry/all/covidadmittedproxy1/*.png
+
+  delayedentry_B_all_covidadmitted:
+    run: r:latest analysis/delayedentry.R B all covidadmitted
+    needs:
+    - match_B
+    - data_selection
+    outputs:
+      moderately_sensitive:
+        rds: output/match/B/delayedentry/all/covidadmitted/*.rds
+        png: output/match/B/delayedentry/all/covidadmitted/*.png
+
+  delayedentry_B_all_covidcritcare:
+    run: r:latest analysis/delayedentry.R B all covidcritcare
+    needs:
+    - match_B
+    - data_selection
+    outputs:
+      moderately_sensitive:
+        rds: output/match/B/delayedentry/all/covidcritcare/*.rds
+        png: output/match/B/delayedentry/all/covidcritcare/*.png
+
+  delayedentry_B_all_coviddeath:
+    run: r:latest analysis/delayedentry.R B all coviddeath
+    needs:
+    - match_B
+    - data_selection
+    outputs:
+      moderately_sensitive:
+        rds: output/match/B/delayedentry/all/coviddeath/*.rds
+        png: output/match/B/delayedentry/all/coviddeath/*.png
+
+  delayedentry_B_all_noncoviddeath:
+    run: r:latest analysis/delayedentry.R B all noncoviddeath
+    needs:
+    - match_B
+    - data_selection
+    outputs:
+      moderately_sensitive:
+        rds: output/match/B/delayedentry/all/noncoviddeath/*.rds
+        png: output/match/B/delayedentry/all/noncoviddeath/*.png
 
   ## ### Models by primary course (''vax12_type'') 
 
