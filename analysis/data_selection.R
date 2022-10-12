@@ -56,6 +56,7 @@ data_criteria <- data_processed %>%
       (vax1_type=="moderna") & (vax1_date >= study_dates$firstmoderna_date) ~ TRUE,
       TRUE ~ FALSE
     ),
+    consistentvax3date = vax3_date == anycovidvax_3_date,
     vax3_afterstartdate = vax3_date >= study_dates$studystart_date,
     vax3_beforeenddate = vax3_date <= study_dates$studyend_date,
     vax12_homologous = vax1_type==vax2_type,
@@ -70,6 +71,7 @@ data_criteria <- data_processed %>%
     jcvi_group_6orhigher = jcvi_group %in% as.character(1:6),
 
     include = (
+      consistentvax3date &
       vax1_afterfirstvaxdate &
       vax3_afterstartdate & vax3_beforeenddate & has_expectedvax3type &
       has_age & has_sex & has_imd & has_region & #has_ethnicity &
@@ -95,7 +97,7 @@ data_inclusioncriteria <- data_criteria %>%
   transmute(
     patient_id,
     vax3_type,
-    c0 = vax1_afterfirstvaxdate & vax3_afterstartdate & vax3_beforeenddate & has_expectedvax3type,
+    c0 = consistentvax3date & vax1_afterfirstvaxdate & vax3_afterstartdate & vax3_beforeenddate & has_expectedvax3type,
     c1 = c0 & (has_age & has_sex & has_imd & has_region),
     c2 = c1 & (has_vaxgap12 & has_vaxgap23 & has_knownvax1 & has_knownvax2 & vax12_homologous),
     c3 = c2 & (isnot_hscworker),
