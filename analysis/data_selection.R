@@ -11,6 +11,9 @@
 library('tidyverse')
 library('here')
 library('glue')
+library('gt')
+library('gtsummary')
+
 
 # Import custom user functions from lib
 source(here("lib", "functions", "utility.R"))
@@ -184,14 +187,14 @@ write_csv(data_flowchart_rounded, fs::path(output_dir, "flowchart.csv"))
 
 # table 1 style baseline characteristics amongst those eligible for matching ----
 
-library('gt')
-library('gtsummary')
+
 
 var_labels <- list(
   N  ~ "Total N",
   treatment_descr ~ "Vaccine type",
   vax12_type_descr ~ "Primary vaccine course",
-  #age ~ "Age",
+  vax23_interval ~ "Dose 2/3 interval",
+  age ~ "Age",
   ageband ~ "Age",
   sex ~ "Sex",
   ethnicity_combined ~ "Ethnicity",
@@ -225,11 +228,20 @@ var_labels <- list(
 map_chr(var_labels[-c(1,2)], ~last(as.character(.)))
 
 
-tab_summary_baseline <-
+data_matched_baseline <- read_rds(here("output", "data", "data_cohort.rds")) %>%
+  filter(patient_id %in% data_matchstatus$patient_id) %>%
+  select(patient_id, all_of(names(var_labels[-c(1,2)]))) %>%
+  left_join(
+    data_matchstatus %>% filter(matched),
+    .,
+    by="patient_id"
+  )
+
+tab_summary_prematch <-
   data_cohort %>%
   mutate(
     N = 1L,
-    treatment_descr = fct_recoderelevel(as.character((vax3_type=="moderna")*1L), recoder$treatment),
+    treatment_descr = fct_recoderelevel(as.character(treatment), recoder$treatment),
   ) %>%
   select(
     treatment_descr,
@@ -239,21 +251,28 @@ tab_summary_baseline <-
     by = treatment_descr,
     label = unname(var_labels[names(.)]),
     statistic = list(N = "{N}")
-  ) %>%
-  modify_footnote(starts_with("stat_") ~ NA) %>%
-  modify_header(stat_by = "**{level}**") %>%
-  bold_labels()
+  )
 
-tab_summary_baseline_redacted <- redact_tblsummary(tab_summary_baseline, 5, "[REDACTED]")
 
-raw_stats <- tab_summary_baseline_redacted$meta_data %>%
+raw_stats <- tab_summary_prematch$meta_data %>%
   select(var_label, df_stats) %>%
   unnest(df_stats)
 
+raw_stats_redacted <- raw_stats %>%
+  mutate(
+    n = roundmid_any(n, threshold),
+    N = roundmid_any(N, threshold),
+    p = n / N,
+    N_miss = roundmid_any(N_miss, threshold),
+    N_obs = roundmid_any(N_obs, threshold),
+    p_miss = N_miss / N_obs,
+    N_nonmiss = roundmid_any(N_nonmiss, threshold),
+    p_nonmiss = N_nonmiss / N_obs,
+    var_label = factor(var_label, levels = map_chr(var_labels[-c(1, 2)], ~ last(as.character(.)))),
+    variable_levels = replace_na(as.character(variable_levels), "")
+  )
 
-write_csv(tab_summary_baseline_redacted$table_body, fs::path(output_dir, "table1.csv"))
-write_csv(tab_summary_baseline_redacted$df_by, fs::path(output_dir, "table1by.csv"))
-gtsave(as_gt(tab_summary_baseline_redacted), fs::path(output_dir, "table1.html"))
+write_csv(raw_stats_redacted, fs::path(output_dir, "table1.csv"))
 
 
 
