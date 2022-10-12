@@ -195,7 +195,7 @@ var_labels <- list(
   vax12_type_descr ~ "Primary vaccine course",
   vax23_interval ~ "Dose 2/3 interval",
   age ~ "Age",
-  ageband ~ "Age",
+  ageband ~ "Age band",
   sex ~ "Sex",
   ethnicity_combined ~ "Ethnicity",
   imd_Q5 ~ "Deprivation",
@@ -225,23 +225,13 @@ var_labels <- list(
 ) %>%
   set_names(., map_chr(., all.vars))
 
-map_chr(var_labels[-c(1,2)], ~last(as.character(.)))
 
-
-data_matched_baseline <- read_rds(here("output", "data", "data_cohort.rds")) %>%
-  filter(patient_id %in% data_matchstatus$patient_id) %>%
-  select(patient_id, all_of(names(var_labels[-c(1,2)]))) %>%
-  left_join(
-    data_matchstatus %>% filter(matched),
-    .,
-    by="patient_id"
-  )
 
 tab_summary_prematch <-
   data_cohort %>%
   mutate(
-    N = 1L,
-    treatment_descr = fct_recoderelevel(as.character(treatment), recoder$treatment),
+    N=1L,
+    treatment_descr = fct_recoderelevel(as.character((vax3_type=="moderna")*1L), recoder$treatment),
   ) %>%
   select(
     treatment_descr,
@@ -275,33 +265,33 @@ raw_stats_redacted <- raw_stats %>%
 write_csv(raw_stats_redacted, fs::path(output_dir, "table1.csv"))
 
 
-
-# love / smd plot ----
-
-data_smd <- tab_summary_baseline$meta_data %>%
-  select(var_label, df_stats) %>%
-  unnest(df_stats) %>%
-  filter(
-    variable != "N"
-  ) %>%
-  group_by(var_label, variable_levels) %>%
-  summarise(
-    diff = diff(p),
-    sd = sqrt(sum(p*(1-p))),
-    smd = diff/sd
-  ) %>%
-  ungroup() %>%
-  mutate(
-    variable = factor(var_label, levels=map_chr(var_labels[-c(1,2)], ~last(as.character(.)))),
-    variable_card = as.numeric(variable)%%2,
-    variable_levels = replace_na(as.character(variable_levels), ""),
-  ) %>%
-  arrange(variable) %>%
-  mutate(
-    level = fct_rev(fct_inorder(str_replace(paste(variable, variable_levels, sep=": "),  "\\:\\s$", ""))),
-    cardn = row_number()
-  )
-
-write_csv(data_smd, fs::path(output_dir, "smd.csv"))
-
-
+#
+# # love / smd plot ----
+#
+# data_smd <- tab_summary_baseline$meta_data %>%
+#   select(var_label, df_stats) %>%
+#   unnest(df_stats) %>%
+#   filter(
+#     variable != "N"
+#   ) %>%
+#   group_by(var_label, variable_levels) %>%
+#   summarise(
+#     diff = diff(p),
+#     sd = sqrt(sum(p*(1-p))),
+#     smd = diff/sd
+#   ) %>%
+#   ungroup() %>%
+#   mutate(
+#     variable = factor(var_label, levels=map_chr(var_labels[-c(1,2)], ~last(as.character(.)))),
+#     variable_card = as.numeric(variable)%%2,
+#     variable_levels = replace_na(as.character(variable_levels), ""),
+#   ) %>%
+#   arrange(variable) %>%
+#   mutate(
+#     level = fct_rev(fct_inorder(str_replace(paste(variable, variable_levels, sep=": "),  "\\:\\s$", ""))),
+#     cardn = row_number()
+#   )
+#
+# write_csv(data_smd, fs::path(output_dir, "smd.csv"))
+#
+#
