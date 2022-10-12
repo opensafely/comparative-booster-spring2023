@@ -227,7 +227,7 @@ var_labels <- list(
   vax12_type_descr ~ "Primary vaccine course",
   vax23_interval ~ "Dose 2/3 interval",
   age ~ "Age",
-  ageband ~ "Age",
+  ageband ~ "Age band",
   sex ~ "Sex",
   ethnicity_combined ~ "Ethnicity",
   imd_Q5 ~ "Deprivation",
@@ -245,7 +245,7 @@ var_labels <- list(
   chronic_neuro_disease ~ "Chronic neurological disease",
   cancer ~ "Cancer, within previous 3 years",
 
-  #multimorb ~ "Morbidity count",
+  multimorb ~ "Morbidity count",
   immunosuppressed ~ "Immunosuppressed",
   asplenia ~ "Asplenia or poor spleen function",
   learndis ~ "Learning disabilities",
@@ -260,6 +260,7 @@ var_labels <- list(
 map_chr(var_labels[-c(1,2)], ~last(as.character(.)))
 
 
+# append all reported characteristics to matchstatus data
 data_matched_baseline <- read_rds(here("output", "data", "data_cohort.rds")) %>%
   filter(patient_id %in% data_matchstatus$patient_id) %>%
   select(patient_id, all_of(names(var_labels[-c(1,2)]))) %>%
@@ -290,13 +291,6 @@ raw_stats <- tab_summary_baseline$meta_data %>%
   select(var_label, df_stats) %>%
   unnest(df_stats)
 
-tab_summary_baseline_redacted <- redact_tblsummary(tab_summary_baseline, 5, "[REDACTED]")
-
-raw_stats <- tab_summary_baseline_redacted$meta_data %>%
-  select(var_label, df_stats) %>%
-  unnest(df_stats)
-
-
 raw_stats_redacted <- raw_stats %>%
   mutate(
     n = roundmid_any(n, threshold),
@@ -313,55 +307,55 @@ raw_stats_redacted <- raw_stats %>%
 
 write_csv(raw_stats_redacted, fs::path(output_dir, "table1.csv"))
 
-
-# love / smd plot ----
-
-data_smd <- tab_summary_baseline$meta_data %>%
-  select(var_label, df_stats) %>%
-  unnest(df_stats) %>%
-  filter(
-    variable != "N"
-  ) %>%
-  group_by(var_label, variable_levels) %>%
-  summarise(
-    diff = diff(p),
-    sd = sqrt(sum(p*(1-p))),
-    smd = diff/sd
-  ) %>%
-  ungroup() %>%
-  mutate(
-    variable = factor(var_label, levels=map_chr(var_labels[-c(1,2)], ~last(as.character(.)))),
-    variable_card = as.numeric(variable)%%2,
-    variable_levels = replace_na(as.character(variable_levels), ""),
-  ) %>%
-  arrange(variable) %>%
-  mutate(
-    level = fct_rev(fct_inorder(str_replace(paste(variable, variable_levels, sep=": "),  "\\:\\s$", ""))),
-    cardn = row_number()
-  )
-
-plot_smd <-
-  ggplot(data_smd)+
-  geom_point(aes(x=smd, y=level))+
-  geom_rect(aes(alpha = variable_card, ymin = rev(cardn)-0.5, ymax =rev(cardn+0.5)), xmin = -Inf, xmax = Inf, fill='grey', colour="transparent") +
-  scale_alpha_continuous(range=c(0,0.3), guide=FALSE)+
-  labs(
-    x="Standardised mean difference",
-    y=NULL,
-    alpha=NULL
-  )+
-  theme_minimal() +
-  theme(
-    strip.placement = "outside",
-    strip.background = element_rect(fill="transparent", colour="transparent"),
-    strip.text.y.left = element_text(angle = 0, hjust=1),
-    panel.grid.major.y = element_blank(),
-    panel.grid.minor.y = element_blank(),
-    panel.spacing = unit(0, "lines")
-  )
-
-write_csv(data_smd, fs::path(output_dir, "data_smd.csv"))
-ggsave(plot_smd, filename="plot_smd.png", path=output_dir)
+#
+# # love / smd plot ----
+#
+# data_smd <- tab_summary_baseline$meta_data %>%
+#   select(var_label, df_stats) %>%
+#   unnest(df_stats) %>%
+#   filter(
+#     variable != "N"
+#   ) %>%
+#   group_by(var_label, variable_levels) %>%
+#   summarise(
+#     diff = diff(p),
+#     sd = sqrt(sum(p*(1-p))),
+#     smd = diff/sd
+#   ) %>%
+#   ungroup() %>%
+#   mutate(
+#     variable = factor(var_label, levels=map_chr(var_labels[-c(1,2)], ~last(as.character(.)))),
+#     variable_card = as.numeric(variable)%%2,
+#     variable_levels = replace_na(as.character(variable_levels), ""),
+#   ) %>%
+#   arrange(variable) %>%
+#   mutate(
+#     level = fct_rev(fct_inorder(str_replace(paste(variable, variable_levels, sep=": "),  "\\:\\s$", ""))),
+#     cardn = row_number()
+#   )
+#
+# plot_smd <-
+#   ggplot(data_smd)+
+#   geom_point(aes(x=smd, y=level))+
+#   geom_rect(aes(alpha = variable_card, ymin = rev(cardn)-0.5, ymax =rev(cardn+0.5)), xmin = -Inf, xmax = Inf, fill='grey', colour="transparent") +
+#   scale_alpha_continuous(range=c(0,0.3), guide=FALSE)+
+#   labs(
+#     x="Standardised mean difference",
+#     y=NULL,
+#     alpha=NULL
+#   )+
+#   theme_minimal() +
+#   theme(
+#     strip.placement = "outside",
+#     strip.background = element_rect(fill="transparent", colour="transparent"),
+#     strip.text.y.left = element_text(angle = 0, hjust=1),
+#     panel.grid.major.y = element_blank(),
+#     panel.grid.minor.y = element_blank(),
+#     panel.spacing = unit(0, "lines")
+#   )
+#
+# write_csv(data_smd, fs::path(output_dir, "data_smd.csv"))
+# ggsave(plot_smd, filename="plot_smd.png", path=output_dir)
 
 
 
