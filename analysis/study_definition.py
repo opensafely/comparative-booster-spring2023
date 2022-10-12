@@ -19,7 +19,6 @@ with open("./lib/design/study-dates.json") as f:
   study_dates = json.load(f)
 
 # change these in design.R if necessary
-firstpossiblevax_date = study_dates["firstpossiblevax_date"]
 studystart_date = study_dates["studystart_date"] 
 studyend_date = study_dates["studyend_date"]
 followupend_date = study_dates["followupend_date"]
