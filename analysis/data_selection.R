@@ -213,7 +213,7 @@ var_labels <- list(
   chronic_neuro_disease ~ "Chronic neurological disease",
   cancer ~ "Cancer, within previous 3 years",
 
-  #multimorb ~ "Morbidity count",
+  multimorb ~ "Morbidity count",
   immunosuppressed ~ "Immunosuppressed",
   asplenia ~ "Asplenia or poor spleen function",
   learndis ~ "Learning disabilities",
