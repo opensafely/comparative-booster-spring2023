@@ -555,6 +555,27 @@ actions_list <- splice(
     )
   ),
 
+  comment("# # # # # # # # # # # # # # # # # # #", "ICD10 check", "# # # # # # # # # # # # # # # # # # #"),
+
+
+  action(
+    name = "extract_ICD10check",
+    run = "cohortextractor:latest generate_cohort --study-definition study_definition_ICD10check --output-format feather",
+    needs = list(),
+    highly_sensitive = lst(
+      cohort = "output/input_ICD10check.feather"
+    )
+  ),
+
+  action(
+    name = "report_ICD10check",
+    run = "r:latest analysis/report_ICD10check",
+    needs = list("extract_ICD10check"),
+    moderately_sensitive = lst(
+      png = "output/ICD10check/*.png"
+    )
+  ),
+
 
 comment("# # # # # # # # # # # # # # # # # # #", "End", "# # # # # # # # # # # # # # # # # # #")
 
