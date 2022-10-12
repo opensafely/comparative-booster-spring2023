@@ -318,12 +318,12 @@ kmcontrasts <- function(data, cuts = NULL) {
       !!subgroup_sym,
       treatment,
       time, lagtime, interval,
-      period_start = as.integer(as.character(cut(time, cuts, right = TRUE, label = cuts[-length(cuts)]))),
-      period_end = as.integer(as.character(cut(time, cuts, right = TRUE, label = cuts[-1]))),
-      period = cut(time, cuts, right = TRUE, label = paste0(cuts[-length(cuts)] + 1, " - ", cuts[-1])),
-      n.atrisk = n.risk,
+      fup_start = as.integer(as.character(cut(time, cuts, right = TRUE, label = cuts[-length(cuts)]))),
+      fup_end = as.integer(as.character(cut(time, cuts, right = TRUE, label = cuts[-1]))),
+      fup_period = cut(time, cuts, right = TRUE, label = paste0(cuts[-length(cuts)] + 1, " - ", cuts[-1])),
+      n.atrisk = replace_na(n.risk,0),
       n.event, n.censor,
-      cml.persontime = cumsum(n.atrisk * interval),
+      cml.persontime = cumsum( n.atrisk * interval),
       cml.event = cumsum(replace_na(n.event, 0)),
       cml.censor = cumsum(replace_na(n.censor, 0)),
       rate = n.event / n.atrisk,
@@ -333,7 +333,7 @@ kmcontrasts <- function(data, cuts = NULL) {
       inc = -(surv - lag(surv, 1, 1)) / lag(surv, 1, 1),
       inc2 = diff(c(0, -log(surv)))
     ) %>%
-    group_by(!!subgroup_sym, treatment, period_start, period_end, period) %>%
+    group_by(!!subgroup_sym, treatment, fup_start, fup_end, fup_period) %>%
     summarise(
 
       ## time-period-specific quantities
@@ -377,7 +377,7 @@ kmcontrasts <- function(data, cuts = NULL) {
     ) %>%
     ungroup() %>%
     pivot_wider(
-      id_cols = all_of(c(subgroup, "period_start", "period_end", "period", "interval")),
+      id_cols = all_of(c(subgroup, "fup_start", "fup_end", "fup_period", "interval")),
       names_from = treatment,
       names_glue = "{.value}_{treatment}",
       values_from = c(
@@ -493,13 +493,13 @@ coxcontrast <- function(data, cuts=NULL){
       period_id = tdc(fup_time, period_id)
     ) %>%
     mutate(
-      period_start = cuts[period_id],
-      period_end = cuts[period_id+1],
+      fup_start = cuts[period_id],
+      fup_end = cuts[period_id+1],
     )
 
   data_cox <-
     data_split %>%
-    group_by(!!subgroup_sym, period_start, period_end) %>%
+    group_by(!!subgroup_sym, fup_start, fup_end) %>%
     nest() %>%
     mutate(
       cox_obj = map(data, ~{
@@ -507,12 +507,11 @@ coxcontrast <- function(data, cuts=NULL){
       }),
       cox_obj_tidy = map(cox_obj, ~broom::tidy(.x)),
     ) %>%
-    select(!!subgroup_sym, period_start, period_end, cox_obj_tidy) %>%
+    select(!!subgroup_sym, fup_start, fup_end, cox_obj_tidy) %>%
     unnest(cox_obj_tidy) %>%
     transmute(
       !!subgroup_sym,
-      period_start,
-      period_end,
+      fup_start, fup_end,
       coxhr = exp(estimate),
       coxhr.se = robust.se,
       coxhr.ll = exp(estimate + qnorm(0.025)*robust.se),
@@ -527,8 +526,8 @@ cox_contrasts_overall <- coxcontrast(data_matched, c(0,maxfup))
 
 # cox HR is a safe statistic so no need to redact/round
 contrasts_rounded_daily <-  km_contrasts_rounded_daily # don't bother with cox as HR within daily intervals will be imprecisely estimated
-contrasts_rounded_cuts <-  left_join(km_contrasts_rounded_cuts, cox_contrasts_cuts, by=c(subgroup, "period_start", "period_end"))
-contrasts_rounded_overall <-  left_join(km_contrasts_rounded_overall, cox_contrasts_overall, by=c(subgroup, "period_start", "period_end"))
+contrasts_rounded_cuts <-  left_join(km_contrasts_rounded_cuts, cox_contrasts_cuts, by=c(subgroup, "fup_start", "fup_end"))
+contrasts_rounded_overall <-  left_join(km_contrasts_rounded_overall, cox_contrasts_overall, by=c(subgroup, "fup_start", "fup_end"))
 
 
 write_rds(contrasts_rounded_daily, fs::path(output_dir, "contrasts_daily_rounded.rds"))
