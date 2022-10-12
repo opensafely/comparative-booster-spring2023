@@ -14,8 +14,6 @@ library('gtsummary')
 
 ## Import custom user functions from lib
 source(here("lib", "functions", "utility.R"))
-#source(here("lib", "functions", "survival.R"))
-source(here("lib", "functions", "redaction.R"))
 
 ## Import design elements
 source(here("lib", "design", "design.R"))
