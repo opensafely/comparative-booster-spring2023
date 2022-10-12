@@ -7,6 +7,10 @@ covid_icd10 = codelist_from_csv(
     column="icd10_code",
 )
 
+# overwrite imported codelist to add additional "Multisystem inflammatory syndrome associated with COVID-19, unspecified" code
+# see "Note on coding of the coronavirus (COVID-19)" here: https://www.ons.gov.uk/peoplepopulationandcommunity/birthsdeathsandmarriages/deaths/methodologies/userguidetomortalitystatisticsjuly2017
+covid_icd10 = codelist(["U071", "U072", "U109"], system="icd10")
+
 covid_emergency = codelist(
     ["1240751000000100"],
     system="snomed",
