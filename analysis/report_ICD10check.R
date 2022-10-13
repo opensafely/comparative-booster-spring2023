@@ -273,3 +273,29 @@ ggsave(filename = fs::path(output_dir, "km_plot_unrounded.png"), km_plot_unround
 ggsave(filename = fs::path(output_dir, "km_plot_rounded.png"), km_plot_rounded, width = 20, height = 15, units = "cm")
 
 
+# the following function summarises the code combinations (any position) for a given event
+count_codes <- function(event) {
+
+  cat(glue("Number and percent of \"{event}\" events with given code combinations:"), "\n")
+  data_processed %>%
+    mutate(across(matches(glue("{event}_any_\\w+_date")), ~if_else(.x != !!sym(glue("{event}_any_all_date")), as.Date(NA_character_), .x))) %>%
+    select(patient_id, matches(glue("{event}_any_\\w+_date")), -sym(glue("{event}_any_all_date"))) %>%
+    pivot_longer(
+      cols = -patient_id,
+      values_drop_na = TRUE,
+      names_pattern = glue("{event}_any_(.*)_date"),
+    ) %>%
+    group_by(patient_id) %>%
+    arrange(name) %>%
+    mutate(codes = str_c(name, collapse = ", ")) %>%
+    ungroup() %>%
+    group_by(codes) %>%
+    count() %>%
+    ungroup() %>%
+    mutate(percent = 100*n/sum(n))
+
+}
+
+count_codes("admitted")
+count_codes("death")
+
