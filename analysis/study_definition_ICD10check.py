@@ -128,6 +128,12 @@ study = StudyDefinition(
     on_or_after="anycovidvax_3_date",
     date_format="YYYY-MM-DD",
   ),
+  
+  death_date=patients.died_from_any_cause(
+    on_or_after="anycovidvax_3_date",
+    returning="date_of_death",
+    date_format="YYYY-MM-DD",
+  ),
 
   
   age=patients.age_as_of( 
