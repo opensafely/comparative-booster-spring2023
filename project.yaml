@@ -1195,7 +1195,7 @@ actions:
         cohort: output/input_ICD10check.feather
 
   report_ICD10check:
-    run: r:latest analysis/report_ICD10check
+    run: r:latest analysis/report_ICD10check.R
     needs:
     - extract_ICD10check
     outputs:

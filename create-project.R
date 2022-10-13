@@ -569,7 +569,7 @@ actions_list <- splice(
 
   action(
     name = "report_ICD10check",
-    run = "r:latest analysis/report_ICD10check",
+    run = "r:latest analysis/report_ICD10check.R",
     needs = list("extract_ICD10check"),
     moderately_sensitive = lst(
       png = "output/ICD10check/*.png"
