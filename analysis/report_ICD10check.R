@@ -106,33 +106,33 @@ data_processed <- data_extract %>%
 
     # censoring indicator
 
-    admitted_primary_U071_ind = censor_indicator(admitted_primary_U071_date, dereg_date),
-    admitted_primary_U072_ind = censor_indicator(admitted_primary_U072_date, dereg_date),
-    admitted_primary_U099_ind = censor_indicator(admitted_primary_U099_date, dereg_date),
-    admitted_primary_U109_ind = censor_indicator(admitted_primary_U109_date, dereg_date),
-    admitted_primary_U07_ind = censor_indicator(admitted_primary_U07_date, dereg_date),
-    admitted_primary_all_ind = censor_indicator(admitted_primary_all_date, dereg_date),
+    admitted_primary_U071_ind = censor_indicator(admitted_primary_U071_date, censor_date),
+    admitted_primary_U072_ind = censor_indicator(admitted_primary_U072_date, censor_date),
+    admitted_primary_U099_ind = censor_indicator(admitted_primary_U099_date, censor_date),
+    admitted_primary_U109_ind = censor_indicator(admitted_primary_U109_date, censor_date),
+    admitted_primary_U07_ind = censor_indicator(admitted_primary_U07_date, censor_date),
+    admitted_primary_all_ind = censor_indicator(admitted_primary_all_date, censor_date),
 
-    admitted_any_U071_ind = censor_indicator(admitted_any_U071_date, dereg_date),
-    admitted_any_U072_ind = censor_indicator(admitted_any_U072_date, dereg_date),
-    admitted_any_U099_ind = censor_indicator(admitted_any_U099_date, dereg_date),
-    admitted_any_U109_ind = censor_indicator(admitted_any_U109_date, dereg_date),
-    admitted_any_U07_ind = censor_indicator(admitted_any_U07_date, dereg_date),
-    admitted_any_all_ind = censor_indicator(admitted_any_all_date, dereg_date),
+    admitted_any_U071_ind = censor_indicator(admitted_any_U071_date, censor_date),
+    admitted_any_U072_ind = censor_indicator(admitted_any_U072_date, censor_date),
+    admitted_any_U099_ind = censor_indicator(admitted_any_U099_date, censor_date),
+    admitted_any_U109_ind = censor_indicator(admitted_any_U109_date, censor_date),
+    admitted_any_U07_ind = censor_indicator(admitted_any_U07_date, censor_date),
+    admitted_any_all_ind = censor_indicator(admitted_any_all_date, censor_date),
 
-    death_primary_U071_ind = censor_indicator(death_primary_U071_date, dereg_date),
-    death_primary_U072_ind = censor_indicator(death_primary_U072_date, dereg_date),
-    death_primary_U099_ind = censor_indicator(death_primary_U099_date, dereg_date),
-    death_primary_U109_ind = censor_indicator(death_primary_U109_date, dereg_date),
-    death_primary_U07_ind = censor_indicator(death_primary_U07_date, dereg_date),
-    death_primary_all_ind = censor_indicator(death_primary_all_date, dereg_date),
+    death_primary_U071_ind = censor_indicator(death_primary_U071_date, censor_date),
+    death_primary_U072_ind = censor_indicator(death_primary_U072_date, censor_date),
+    death_primary_U099_ind = censor_indicator(death_primary_U099_date, censor_date),
+    death_primary_U109_ind = censor_indicator(death_primary_U109_date, censor_date),
+    death_primary_U07_ind = censor_indicator(death_primary_U07_date, censor_date),
+    death_primary_all_ind = censor_indicator(death_primary_all_date, censor_date),
 
-    death_any_U071_ind = censor_indicator(death_any_U071_date, dereg_date),
-    death_any_U072_ind = censor_indicator(death_any_U072_date, dereg_date),
-    death_any_U099_ind = censor_indicator(death_any_U099_date, dereg_date),
-    death_any_U109_ind = censor_indicator(death_any_U109_date, dereg_date),
-    death_any_U07_ind = censor_indicator(death_any_U07_date, dereg_date),
-    death_any_all_ind = censor_indicator(death_any_all_date, dereg_date),
+    death_any_U071_ind = censor_indicator(death_any_U071_date, censor_date),
+    death_any_U072_ind = censor_indicator(death_any_U072_date, censor_date),
+    death_any_U099_ind = censor_indicator(death_any_U099_date, censor_date),
+    death_any_U109_ind = censor_indicator(death_any_U109_date, censor_date),
+    death_any_U07_ind = censor_indicator(death_any_U07_date, censor_date),
+    death_any_all_ind = censor_indicator(death_any_all_date, censor_date),
 
   )
 
@@ -245,7 +245,7 @@ km_plot <- function(.data) {
     geom_step(aes(x = time, y = risk), direction = "vh") +
     geom_step(aes(x = time, y = risk), direction = "vh", linetype = "dashed", alpha = 0.5) +
     geom_rect(aes(xmin = lagtime, xmax = time, ymin = risk.ll, ymax = risk.ul), alpha = 0.1, colour = "transparent") +
-    facet_grid(rows = vars(event), cols=vars(scope)) +
+    facet_grid(rows = vars(event), cols=vars(scope), scales="free_y") +
     scale_color_brewer(type = "qual", palette = "Set1", na.value = "grey") +
     scale_fill_brewer(type = "qual", palette = "Set1", guide = "none", na.value = "grey") +
     scale_x_continuous(breaks = seq(0, 600, 14)) +
