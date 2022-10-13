@@ -147,8 +147,6 @@ metavars <- expand_grid(
 )
 
 
-Surv(data_processed[[glue("death_primary_U071_tte")]], data_processed[[glue("death_primary_U071_ind")]])
-
 data_surv <- metavars %>%
   mutate(
     surv_obj = pmap(
