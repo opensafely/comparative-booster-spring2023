@@ -59,7 +59,7 @@ data_processed <- data_extract %>%
       TRUE ~ NA_character_
     ),
 
-    censor_date = pmin(dereg_date, anycovidvax_3_date+maxfup, na.rm=TRUE),
+    censor_date = pmin(dereg_date, death_date, anycovidvax_3_date+maxfup, na.rm=TRUE),
 
     admitted_primary_U07_date = pmin(admitted_primary_U071_date, admitted_primary_U072_date, na.rm=TRUE),
     admitted_any_U07_date = pmin(admitted_any_U071_date, admitted_any_U072_date, na.rm=TRUE),
@@ -255,7 +255,7 @@ km_plot <- function(.data) {
       colour = NULL,
       title = NULL
     ) +
-    #theme_minimal() +
+    theme_minimal() +
     theme(
       axis.line.x = element_line(colour = "black"),
       panel.grid.minor.x = element_blank(),
