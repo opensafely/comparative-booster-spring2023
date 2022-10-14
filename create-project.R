@@ -77,7 +77,7 @@ action_match <- function(matchset){
       arguments = c(matchset),
       needs = list("data_selection",  glue("match_{matchset}")),
       moderately_sensitive = lst(
-        txt = glue("output/match/{matchset}/report/*.txt"),
+        #txt = glue("output/match/{matchset}/report/*.txt"),
         csv = glue("output/match/{matchset}/report/*.csv"),
         png = glue("output/match/{matchset}/report/*.png")
       )

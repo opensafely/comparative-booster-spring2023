@@ -90,7 +90,6 @@ actions:
     - match_A
     outputs:
       moderately_sensitive:
-        txt: output/match/A/report/*.txt
         csv: output/match/A/report/*.csv
         png: output/match/A/report/*.png
 
@@ -615,7 +614,6 @@ actions:
     - match_B
     outputs:
       moderately_sensitive:
-        txt: output/match/B/report/*.txt
         csv: output/match/B/report/*.csv
         png: output/match/B/report/*.png
 
