@@ -6,17 +6,17 @@ expectations:
 
 actions:
 
-  ## # # # # # # # # # # # # # # # # # # # 
-  ## DO NOT EDIT project.yaml DIRECTLY 
-  ## This file is created by create-project.R 
-  ## Edit and run create-project.R to update the project.yaml 
-  ## # # # # # # # # # # # # # # # # # # # 
-  ## # # # # # # # # # # # # # # # # # # # 
-  ## Pre-server scripts 
-  ## # # # # # # # # # # # # # # # # # # # 
-  ## # # # # # # # # # # # # # # # # # # # 
-  ## Extract and tidy 
-  ## # # # # # # # # # # # # # # # # # # # 
+  ## # # # # # # # # # # # # # # # # # # #
+  ## DO NOT EDIT project.yaml DIRECTLY
+  ## This file is created by create-project.R
+  ## Edit and run create-project.R to update the project.yaml
+  ## # # # # # # # # # # # # # # # # # # #
+  ## # # # # # # # # # # # # # # # # # # #
+  ## Pre-server scripts
+  ## # # # # # # # # # # # # # # # # # # #
+  ## # # # # # # # # # # # # # # # # # # #
+  ## Extract and tidy
+  ## # # # # # # # # # # # # # # # # # # #
 
   extract:
     run: cohortextractor:latest generate_cohort --study-definition study_definition
@@ -74,9 +74,9 @@ actions:
         png: output/geography/*.png
         csv: output/geography/*.csv
 
-  ## # # # # # # # # # # # # # # # # # # # 
-  ## matching set A 
-  ## # # # # # # # # # # # # # # # # # # # 
+  ## # # # # # # # # # # # # # # # # # # #
+  ## matching set A
+  ## # # # # # # # # # # # # # # # # # # #
 
   match_A:
     run: r:latest analysis/match.R A
@@ -100,7 +100,7 @@ actions:
         png: output/match/A/report/*.png
         html: output/match/A/report/*.html
 
-  ## ### Overall models (''all'') 
+  ## ### Overall models (''all'')
 
   ci_A_all_postest:
     run: r:latest analysis/ci.R A all postest
@@ -179,7 +179,7 @@ actions:
         csv: output/match/A/ci/all/noncoviddeath/*.csv
         png: output/match/A/ci/all/noncoviddeath/*.png
 
-  ## ### Models by primary course (''vax12_type'') 
+  ## ### Models by primary course (''vax12_type'')
 
   ci_A_vax12_type_postest:
     run: r:latest analysis/ci.R A vax12_type postest
@@ -258,7 +258,7 @@ actions:
         csv: output/match/A/ci/vax12_type/noncoviddeath/*.csv
         png: output/match/A/ci/vax12_type/noncoviddeath/*.png
 
-  ## ### Models by clinically vulnerable group (''cev_cv'') 
+  ## ### Models by clinically vulnerable group (''cev_cv'')
 
   ci_A_cev_cv_postest:
     run: r:latest analysis/ci.R A cev_cv postest
@@ -337,7 +337,7 @@ actions:
         csv: output/match/A/ci/cev_cv/noncoviddeath/*.csv
         png: output/match/A/ci/cev_cv/noncoviddeath/*.png
 
-  ## ### Models by prior infection (''prior_covid_infection'') 
+  ## ### Models by prior infection (''prior_covid_infection'')
 
   ci_A_prior_covid_infection_postest:
     run: r:latest analysis/ci.R A prior_covid_infection postest
@@ -416,7 +416,7 @@ actions:
         csv: output/match/A/ci/prior_covid_infection/noncoviddeath/*.csv
         png: output/match/A/ci/prior_covid_infection/noncoviddeath/*.png
 
-  ## ### Models by age (''age65plus'') 
+  ## ### Models by age (''age65plus'')
 
   ci_A_age65plus_postest:
     run: r:latest analysis/ci.R A age65plus postest
@@ -495,7 +495,7 @@ actions:
         csv: output/match/A/ci/age65plus/noncoviddeath/*.csv
         png: output/match/A/ci/age65plus/noncoviddeath/*.png
 
-  ## ### Models by variant era (''variantera'') 
+  ## ### Models by variant era (''variantera'')
 
   ci_A_variantera_postest:
     run: r:latest analysis/ci.R A variantera postest
@@ -574,9 +574,9 @@ actions:
         csv: output/match/A/ci/variantera/noncoviddeath/*.csv
         png: output/match/A/ci/variantera/noncoviddeath/*.png
 
-  ## # # # # # # # # # # # # # # # # # # # 
-  ## matching set B 
-  ## # # # # # # # # # # # # # # # # # # # 
+  ## # # # # # # # # # # # # # # # # # # #
+  ## matching set B
+  ## # # # # # # # # # # # # # # # # # # #
 
   match_B:
     run: r:latest analysis/match.R B
@@ -600,7 +600,7 @@ actions:
         png: output/match/B/report/*.png
         html: output/match/B/report/*.html
 
-  ## ### Overall models (''all'') 
+  ## ### Overall models (''all'')
 
   ci_B_all_postest:
     run: r:latest analysis/ci.R B all postest
@@ -679,7 +679,7 @@ actions:
         csv: output/match/B/ci/all/noncoviddeath/*.csv
         png: output/match/B/ci/all/noncoviddeath/*.png
 
-  ## ### Models by primary course (''vax12_type'') 
+  ## ### Models by primary course (''vax12_type'')
 
   ci_B_vax12_type_postest:
     run: r:latest analysis/ci.R B vax12_type postest
@@ -758,7 +758,7 @@ actions:
         csv: output/match/B/ci/vax12_type/noncoviddeath/*.csv
         png: output/match/B/ci/vax12_type/noncoviddeath/*.png
 
-  ## ### Models by clinically vulnerable group (''cev_cv'') 
+  ## ### Models by clinically vulnerable group (''cev_cv'')
 
   ci_B_cev_cv_postest:
     run: r:latest analysis/ci.R B cev_cv postest
@@ -837,7 +837,7 @@ actions:
         csv: output/match/B/ci/cev_cv/noncoviddeath/*.csv
         png: output/match/B/ci/cev_cv/noncoviddeath/*.png
 
-  ## ### Models by prior infection (''prior_covid_infection'') 
+  ## ### Models by prior infection (''prior_covid_infection'')
 
   ci_B_prior_covid_infection_postest:
     run: r:latest analysis/ci.R B prior_covid_infection postest
@@ -916,7 +916,7 @@ actions:
         csv: output/match/B/ci/prior_covid_infection/noncoviddeath/*.csv
         png: output/match/B/ci/prior_covid_infection/noncoviddeath/*.png
 
-  ## ### Models by age (''age65plus'') 
+  ## ### Models by age (''age65plus'')
 
   ci_B_age65plus_postest:
     run: r:latest analysis/ci.R B age65plus postest
@@ -995,7 +995,7 @@ actions:
         csv: output/match/B/ci/age65plus/noncoviddeath/*.csv
         png: output/match/B/ci/age65plus/noncoviddeath/*.png
 
-  ## ### Models by variant era (''variantera'') 
+  ## ### Models by variant era (''variantera'')
 
   ci_B_variantera_postest:
     run: r:latest analysis/ci.R B variantera postest
@@ -1074,9 +1074,9 @@ actions:
         csv: output/match/B/ci/variantera/noncoviddeath/*.csv
         png: output/match/B/ci/variantera/noncoviddeath/*.png
 
-  ## # # # # # # # # # # # # # # # # # # # 
-  ## Combine KM / CI estimates across outcomes and subgroups 
-  ## # # # # # # # # # # # # # # # # # # # 
+  ## # # # # # # # # # # # # # # # # # # #
+  ## Combine KM / CI estimates across outcomes and subgroups
+  ## # # # # # # # # # # # # # # # # # # #
 
   ci_combine_A:
     run: r:latest analysis/ci_combine.R A
@@ -1164,9 +1164,9 @@ actions:
         csv: output/match/B/ci/combined/*.csv
         png: output/match/B/ci/combined/plots/*.png
 
-  ## # # # # # # # # # # # # # # # # # # # 
-  ## Files for release 
-  ## # # # # # # # # # # # # # # # # # # # 
+  ## # # # # # # # # # # # # # # # # # # #
+  ## Files for release
+  ## # # # # # # # # # # # # # # # # # # #
 
   release_objects:
     run: r:latest analysis/release_objects.R
@@ -1182,9 +1182,9 @@ actions:
         command: output/osrelease-command.txt
         csv: output/release-objects/*/*.csv
 
-  ## # # # # # # # # # # # # # # # # # # # 
-  ## ICD10 check 
-  ## # # # # # # # # # # # # # # # # # # # 
+  ## # # # # # # # # # # # # # # # # # # #
+  ## ICD10 check
+  ## # # # # # # # # # # # # # # # # # # #
 
   extract_ICD10check:
     run: cohortextractor:latest generate_cohort --study-definition study_definition_ICD10check
@@ -1194,7 +1194,7 @@ actions:
       highly_sensitive:
         cohort: output/input_ICD10check.feather
 
-  report_ICD10check:
+  report_ICD10check2:
     run: r:latest analysis/report_ICD10check.R
     needs:
     - extract_ICD10check
@@ -1202,7 +1202,7 @@ actions:
       moderately_sensitive:
         png: output/ICD10check/*.png
 
-  ## # # # # # # # # # # # # # # # # # # # 
-  ## End 
-  ## # # # # # # # # # # # # # # # # # # # 
+  ## # # # # # # # # # # # # # # # # # # #
+  ## End
+  ## # # # # # # # # # # # # # # # # # # #
 
