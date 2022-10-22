@@ -9,11 +9,11 @@ library('tidyverse')
 library('here')
 library('glue')
 library('survival')
+library('gt')
+library('gtsummary')
 
 ## Import custom user functions from lib
 source(here("lib", "functions", "utility.R"))
-#source(here("lib", "functions", "survival.R"))
-source(here("lib", "functions", "redaction.R"))
 
 ## Import design elements
 source(here("lib", "design", "design.R"))
@@ -40,26 +40,9 @@ if(length(args)==0){
 output_dir <- here("output", "match", matchset, "report")
 fs::dir_create(output_dir)
 
-## create special log file ----
-cat(glue("## script info for match report ##"), "  \n", file = fs::path(output_dir, glue("log.txt")), append = FALSE)
-
-## functions to pass additional log info to separate file
-logoutput <- function(...){
-  cat(..., file = fs::path(output_dir, glue("log.txt")), sep = "\n  ", append = TRUE)
-  cat("\n", file = fs::path(output_dir, glue("log.txt")), sep = "\n  ", append = TRUE)
-}
-
-logoutput_datasize <- function(x){
-  nm <- deparse(substitute(x))
-  logoutput(
-    glue(nm, " data size = ", nrow(x)),
-    glue(nm, " memory usage = ", format(object.size(x), units="GB", standard="SI", digits=3L))
-  )
-}
 
 ## import matching info ----
 data_matchstatus <- read_rds(fs::path(here("output", "match", matchset), "data_matchstatus.rds"))
-
 
 # matching coverage on each day of recruitment period ----
 
@@ -104,8 +87,6 @@ data_coverage <-
 
 
 
-## round to nearest 6 for disclosure control
-threshold <- 6
 
 data_coverage_rounded <-
   data_coverage %>%
@@ -238,15 +219,15 @@ ggsave(plot_coverage_cumuln, filename="coverage_stack.png", path=output_dir)
 
 # table 1 style baseline characteristics ----
 
-library('gt')
-library('gtsummary')
+
 
 var_labels <- list(
   N  ~ "Total N",
   treatment_descr ~ "Vaccine type",
   vax12_type_descr ~ "Primary vaccine course",
-  #age ~ "Age",
-  ageband ~ "Age",
+  vax23_interval ~ "Dose 2/3 interval",
+  age ~ "Age",
+  ageband ~ "Age band",
   sex ~ "Sex",
   ethnicity_combined ~ "Ethnicity",
   imd_Q5 ~ "Deprivation",
@@ -264,7 +245,7 @@ var_labels <- list(
   chronic_neuro_disease ~ "Chronic neurological disease",
   cancer ~ "Cancer, within previous 3 years",
 
-  #multimorb ~ "Morbidity count",
+  multimorb ~ "Morbidity count",
   immunosuppressed ~ "Immunosuppressed",
   asplenia ~ "Asplenia or poor spleen function",
   learndis ~ "Learning disabilities",
@@ -279,6 +260,7 @@ var_labels <- list(
 map_chr(var_labels[-c(1,2)], ~last(as.character(.)))
 
 
+# append all reported characteristics to matchstatus data
 data_matched_baseline <- read_rds(here("output", "data", "data_cohort.rds")) %>%
   filter(patient_id %in% data_matchstatus$patient_id) %>%
   select(patient_id, all_of(names(var_labels[-c(1,2)]))) %>%
@@ -302,72 +284,78 @@ tab_summary_baseline <-
     by = treatment_descr,
     label = unname(var_labels[names(.)]),
     statistic = list(N = "{N}")
-  ) %>%
-  modify_footnote(starts_with("stat_") ~ NA) %>%
-  modify_header(stat_by = "**{level}**") %>%
-  bold_labels()
+  )
 
-tab_summary_baseline_redacted <- redact_tblsummary(tab_summary_baseline, 5, "[REDACTED]")
 
-raw_stats <- tab_summary_baseline_redacted$meta_data %>%
+raw_stats <- tab_summary_baseline$meta_data %>%
   select(var_label, df_stats) %>%
   unnest(df_stats)
 
-write_csv(tab_summary_baseline_redacted$table_body, fs::path(output_dir, "table1.csv"))
-write_csv(tab_summary_baseline_redacted$df_by, fs::path(output_dir, "table1by.csv"))
-gtsave(as_gt(tab_summary_baseline_redacted), fs::path(output_dir, "table1.html"))
-
-
-
-
-# love / smd plot ----
-
-data_smd <- tab_summary_baseline$meta_data %>%
-  select(var_label, df_stats) %>%
-  unnest(df_stats) %>%
-  filter(
-    variable != "N"
-  ) %>%
-  group_by(var_label, variable_levels) %>%
-  summarise(
-    diff = diff(p),
-    sd = sqrt(sum(p*(1-p))),
-    smd = diff/sd
-  ) %>%
-  ungroup() %>%
+raw_stats_redacted <- raw_stats %>%
   mutate(
-    variable = factor(var_label, levels=map_chr(var_labels[-c(1,2)], ~last(as.character(.)))),
-    variable_card = as.numeric(variable)%%2,
-    variable_levels = replace_na(as.character(variable_levels), ""),
-  ) %>%
-  arrange(variable) %>%
-  mutate(
-    level = fct_rev(fct_inorder(str_replace(paste(variable, variable_levels, sep=": "),  "\\:\\s$", ""))),
-    cardn = row_number()
+    n = roundmid_any(n, threshold),
+    N = roundmid_any(N, threshold),
+    p = n / N,
+    N_miss = roundmid_any(N_miss, threshold),
+    N_obs = roundmid_any(N_obs, threshold),
+    p_miss = N_miss / N_obs,
+    N_nonmiss = roundmid_any(N_nonmiss, threshold),
+    p_nonmiss = N_nonmiss / N_obs,
+    var_label = factor(var_label, levels = map_chr(var_labels[-c(1, 2)], ~ last(as.character(.)))),
+    variable_levels = replace_na(as.character(variable_levels), "")
   )
 
-plot_smd <-
-  ggplot(data_smd)+
-  geom_point(aes(x=smd, y=level))+
-  geom_rect(aes(alpha = variable_card, ymin = rev(cardn)-0.5, ymax =rev(cardn+0.5)), xmin = -Inf, xmax = Inf, fill='grey', colour="transparent") +
-  scale_alpha_continuous(range=c(0,0.3), guide=FALSE)+
-  labs(
-    x="Standardised mean difference",
-    y=NULL,
-    alpha=NULL
-  )+
-  theme_minimal() +
-  theme(
-    strip.placement = "outside",
-    strip.background = element_rect(fill="transparent", colour="transparent"),
-    strip.text.y.left = element_text(angle = 0, hjust=1),
-    panel.grid.major.y = element_blank(),
-    panel.grid.minor.y = element_blank(),
-    panel.spacing = unit(0, "lines")
-  )
+write_csv(raw_stats_redacted, fs::path(output_dir, "table1.csv"))
 
-write_csv(data_smd, fs::path(output_dir, "data_smd.csv"))
-ggsave(plot_smd, filename="plot_smd.png", path=output_dir)
+#
+# # love / smd plot ----
+#
+# data_smd <- tab_summary_baseline$meta_data %>%
+#   select(var_label, df_stats) %>%
+#   unnest(df_stats) %>%
+#   filter(
+#     variable != "N"
+#   ) %>%
+#   group_by(var_label, variable_levels) %>%
+#   summarise(
+#     diff = diff(p),
+#     sd = sqrt(sum(p*(1-p))),
+#     smd = diff/sd
+#   ) %>%
+#   ungroup() %>%
+#   mutate(
+#     variable = factor(var_label, levels=map_chr(var_labels[-c(1,2)], ~last(as.character(.)))),
+#     variable_card = as.numeric(variable)%%2,
+#     variable_levels = replace_na(as.character(variable_levels), ""),
+#   ) %>%
+#   arrange(variable) %>%
+#   mutate(
+#     level = fct_rev(fct_inorder(str_replace(paste(variable, variable_levels, sep=": "),  "\\:\\s$", ""))),
+#     cardn = row_number()
+#   )
+#
+# plot_smd <-
+#   ggplot(data_smd)+
+#   geom_point(aes(x=smd, y=level))+
+#   geom_rect(aes(alpha = variable_card, ymin = rev(cardn)-0.5, ymax =rev(cardn+0.5)), xmin = -Inf, xmax = Inf, fill='grey', colour="transparent") +
+#   scale_alpha_continuous(range=c(0,0.3), guide=FALSE)+
+#   labs(
+#     x="Standardised mean difference",
+#     y=NULL,
+#     alpha=NULL
+#   )+
+#   theme_minimal() +
+#   theme(
+#     strip.placement = "outside",
+#     strip.background = element_rect(fill="transparent", colour="transparent"),
+#     strip.text.y.left = element_text(angle = 0, hjust=1),
+#     panel.grid.major.y = element_blank(),
+#     panel.grid.minor.y = element_blank(),
+#     panel.spacing = unit(0, "lines")
+#   )
+#
+# write_csv(data_smd, fs::path(output_dir, "data_smd.csv"))
+# ggsave(plot_smd, filename="plot_smd.png", path=output_dir)
 
 
 

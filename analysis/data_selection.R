@@ -11,6 +11,9 @@
 library('tidyverse')
 library('here')
 library('glue')
+library('gt')
+library('gtsummary')
+
 
 # Import custom user functions from lib
 source(here("lib", "functions", "utility.R"))
@@ -56,6 +59,7 @@ data_criteria <- data_processed %>%
       (vax1_type=="moderna") & (vax1_date >= study_dates$firstmoderna_date) ~ TRUE,
       TRUE ~ FALSE
     ),
+    consistentvax3date = vax3_date == anycovidvax_3_date,
     vax3_afterstartdate = vax3_date >= study_dates$studystart_date,
     vax3_beforeenddate = vax3_date <= study_dates$studyend_date,
     vax12_homologous = vax1_type==vax2_type,
@@ -70,6 +74,7 @@ data_criteria <- data_processed %>%
     jcvi_group_6orhigher = jcvi_group %in% as.character(1:6),
 
     include = (
+      consistentvax3date &
       vax1_afterfirstvaxdate &
       vax3_afterstartdate & vax3_beforeenddate & has_expectedvax3type &
       has_age & has_sex & has_imd & has_region & #has_ethnicity &
@@ -95,7 +100,7 @@ data_inclusioncriteria <- data_criteria %>%
   transmute(
     patient_id,
     vax3_type,
-    c0 = vax1_afterfirstvaxdate & vax3_afterstartdate & vax3_beforeenddate & has_expectedvax3type,
+    c0 = consistentvax3date & vax1_afterfirstvaxdate & vax3_afterstartdate & vax3_beforeenddate & has_expectedvax3type,
     c1 = c0 & (has_age & has_sex & has_imd & has_region),
     c2 = c1 & (has_vaxgap12 & has_vaxgap23 & has_knownvax1 & has_knownvax2 & vax12_homologous),
     c3 = c2 & (isnot_hscworker),
@@ -182,15 +187,15 @@ write_csv(data_flowchart_rounded, fs::path(output_dir, "flowchart.csv"))
 
 # table 1 style baseline characteristics amongst those eligible for matching ----
 
-library('gt')
-library('gtsummary')
+
 
 var_labels <- list(
   N  ~ "Total N",
   treatment_descr ~ "Vaccine type",
   vax12_type_descr ~ "Primary vaccine course",
-  #age ~ "Age",
-  ageband ~ "Age",
+  vax23_interval ~ "Dose 2/3 interval",
+  age ~ "Age",
+  ageband ~ "Age band",
   sex ~ "Sex",
   ethnicity_combined ~ "Ethnicity",
   imd_Q5 ~ "Deprivation",
@@ -208,7 +213,7 @@ var_labels <- list(
   chronic_neuro_disease ~ "Chronic neurological disease",
   cancer ~ "Cancer, within previous 3 years",
 
-  #multimorb ~ "Morbidity count",
+  multimorb ~ "Morbidity count",
   immunosuppressed ~ "Immunosuppressed",
   asplenia ~ "Asplenia or poor spleen function",
   learndis ~ "Learning disabilities",
@@ -220,13 +225,12 @@ var_labels <- list(
 ) %>%
   set_names(., map_chr(., all.vars))
 
-map_chr(var_labels[-c(1,2)], ~last(as.character(.)))
 
 
-tab_summary_baseline <-
+tab_summary_prematch <-
   data_cohort %>%
   mutate(
-    N = 1L,
+    N=1L,
     treatment_descr = fct_recoderelevel(as.character((vax3_type=="moderna")*1L), recoder$treatment),
   ) %>%
   select(
@@ -237,50 +241,57 @@ tab_summary_baseline <-
     by = treatment_descr,
     label = unname(var_labels[names(.)]),
     statistic = list(N = "{N}")
-  ) %>%
-  modify_footnote(starts_with("stat_") ~ NA) %>%
-  modify_header(stat_by = "**{level}**") %>%
-  bold_labels()
+  )
 
-tab_summary_baseline_redacted <- redact_tblsummary(tab_summary_baseline, 5, "[REDACTED]")
 
-raw_stats <- tab_summary_baseline_redacted$meta_data %>%
+raw_stats <- tab_summary_prematch$meta_data %>%
   select(var_label, df_stats) %>%
   unnest(df_stats)
 
-
-write_csv(tab_summary_baseline_redacted$table_body, fs::path(output_dir, "table1.csv"))
-write_csv(tab_summary_baseline_redacted$df_by, fs::path(output_dir, "table1by.csv"))
-gtsave(as_gt(tab_summary_baseline_redacted), fs::path(output_dir, "table1.html"))
-
-
-
-# love / smd plot ----
-
-data_smd <- tab_summary_baseline$meta_data %>%
-  select(var_label, df_stats) %>%
-  unnest(df_stats) %>%
-  filter(
-    variable != "N"
-  ) %>%
-  group_by(var_label, variable_levels) %>%
-  summarise(
-    diff = diff(p),
-    sd = sqrt(sum(p*(1-p))),
-    smd = diff/sd
-  ) %>%
-  ungroup() %>%
+raw_stats_redacted <- raw_stats %>%
   mutate(
-    variable = factor(var_label, levels=map_chr(var_labels[-c(1,2)], ~last(as.character(.)))),
-    variable_card = as.numeric(variable)%%2,
-    variable_levels = replace_na(as.character(variable_levels), ""),
-  ) %>%
-  arrange(variable) %>%
-  mutate(
-    level = fct_rev(fct_inorder(str_replace(paste(variable, variable_levels, sep=": "),  "\\:\\s$", ""))),
-    cardn = row_number()
+    n = roundmid_any(n, threshold),
+    N = roundmid_any(N, threshold),
+    p = n / N,
+    N_miss = roundmid_any(N_miss, threshold),
+    N_obs = roundmid_any(N_obs, threshold),
+    p_miss = N_miss / N_obs,
+    N_nonmiss = roundmid_any(N_nonmiss, threshold),
+    p_nonmiss = N_nonmiss / N_obs,
+    var_label = factor(var_label, levels = map_chr(var_labels[-c(1, 2)], ~ last(as.character(.)))),
+    variable_levels = replace_na(as.character(variable_levels), "")
   )
 
-write_csv(data_smd, fs::path(output_dir, "smd.csv"))
+write_csv(raw_stats_redacted, fs::path(output_dir, "table1.csv"))
 
 
+#
+# # love / smd plot ----
+#
+# data_smd <- tab_summary_baseline$meta_data %>%
+#   select(var_label, df_stats) %>%
+#   unnest(df_stats) %>%
+#   filter(
+#     variable != "N"
+#   ) %>%
+#   group_by(var_label, variable_levels) %>%
+#   summarise(
+#     diff = diff(p),
+#     sd = sqrt(sum(p*(1-p))),
+#     smd = diff/sd
+#   ) %>%
+#   ungroup() %>%
+#   mutate(
+#     variable = factor(var_label, levels=map_chr(var_labels[-c(1,2)], ~last(as.character(.)))),
+#     variable_card = as.numeric(variable)%%2,
+#     variable_levels = replace_na(as.character(variable_levels), ""),
+#   ) %>%
+#   arrange(variable) %>%
+#   mutate(
+#     level = fct_rev(fct_inorder(str_replace(paste(variable, variable_levels, sep=": "),  "\\:\\s$", ""))),
+#     cardn = row_number()
+#   )
+#
+# write_csv(data_smd, fs::path(output_dir, "smd.csv"))
+#
+#

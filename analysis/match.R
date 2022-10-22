@@ -31,7 +31,6 @@ library('MatchIt')
 
 ## Import custom user functions from lib
 source(here("lib", "functions", "utility.R"))
-source(here("lib", "functions", "redaction.R"))
 
 ## Import design elements
 source(here("lib", "design", "design.R"))
@@ -41,29 +40,18 @@ source(here("lib", "design", "design.R"))
 output_dir <- here("output", "match", matchset)
 fs::dir_create(output_dir)
 
-## create special log file ----
-cat(glue("## script info for matching ##"), "  \n", file = fs::path(output_dir, glue("log.txt")), append = FALSE)
-
-## function to pass additional log info to separate file
-logoutput <- function(...){
-  cat(..., file = fs::path(output_dir, glue("log.txt")), sep = "\n  ", append = TRUE)
-  cat("\n", file = fs::path(output_dir, glue("log.txt")), sep = "\n  ", append = TRUE)
-}
-
-logoutput_datasize <- function(x){
-  nm <- deparse(substitute(x))
-  logoutput(
-    glue(nm, " data size = ", nrow(x)),
-    glue(nm, " memory usage = ", format(object.size(x), units="GB", standard="SI", digits=3L))
-  )
-}
-
 # Prepare data ----
 
 ## one pow per patient ----
 data_cohort <- read_rds(here("output", "data", "data_cohort.rds"))
 
-logoutput_datasize(data_cohort)
+print(
+  cat(
+    glue("data_cohort", " data size = ", nrow(data_cohort)),
+    glue("data_cohort", " memory usage = ", format(object.size(data_cohort), units="GB", standard="SI", digits=3L)),
+    sep = "\n  "
+  )
+)
 
 ## select all matching candidates and variables necessary for matching
 data_matchingcandidates <-
@@ -171,7 +159,7 @@ data_matchstatus <-
 parallel::stopCluster(cl = cluster)
 
 data_matchstatus <- data_matchstatus %>%
-  arrange(threadmatch_id, thread_id) %>%
+  arrange(thread_id, threadmatch_id) %>%
   mutate(
     match_id = dense_rank(threadmatch_id * max(thread_id) + thread_id) # create unique match id across all threads
   )

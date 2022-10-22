@@ -68,10 +68,6 @@ action_match <- function(matchset){
       needs = list("data_selection"),
       highly_sensitive = lst(
         rds = glue("output/match/{matchset}/*.rds")
-      ),
-      moderately_sensitive = lst(
-        txt = glue("output/match/{matchset}/*.txt"),
-        #csv = glue("output/match/{matchset}/*.csv"),
       )
     ),
 
@@ -81,10 +77,9 @@ action_match <- function(matchset){
       arguments = c(matchset),
       needs = list("data_selection",  glue("match_{matchset}")),
       moderately_sensitive = lst(
-        txt = glue("output/match/{matchset}/report/*.txt"),
+        #txt = glue("output/match/{matchset}/report/*.txt"),
         csv = glue("output/match/{matchset}/report/*.csv"),
-        png = glue("output/match/{matchset}/report/*.png"),
-        html = glue("output/match/{matchset}/report/*.html")
+        png = glue("output/match/{matchset}/report/*.png")
       )
     )
   )
@@ -100,34 +95,61 @@ action_contrasts <- function(
   splice(
 
     ## kaplan-meier action
-    # action(
-    #   name = glue("km_{matchset}_{subgroup}_{outcome}"),
-    #   run = glue("r:latest analysis/km.R"),
-    #   arguments = c(matchset, subgroup, outcome),
-    #   needs = list(
-    #     glue("match_{matchset}"),
-    #     "data_selection"
-    #   ),
-    #   moderately_sensitive = lst(
-    #     txt = glue("output/match/{matchset}/km/{subgroup}/{outcome}/*.txt"),
-    #     csv = glue("output/match/{matchset}/km/{subgroup}/{outcome}/*.csv"),
-    #     png = glue("output/match/{matchset}/km/{subgroup}/{outcome}/*.png"),
-    #   )
-    # ),
-
-    ## competing risks action, including kaplan-meier estimates
     action(
-      name = glue("ci_{matchset}_{subgroup}_{outcome}"),
-      run = glue("r:latest analysis/ci.R"),
+      name = glue("km_{matchset}_{subgroup}_{outcome}"),
+      run = glue("r:latest analysis/km.R"),
       arguments = c(matchset, subgroup, outcome),
       needs = list(
         glue("match_{matchset}"),
         "data_selection"
       ),
       moderately_sensitive = lst(
-        txt = glue("output/match/{matchset}/ci/{subgroup}/{outcome}/*.txt"),
-        csv = glue("output/match/{matchset}/ci/{subgroup}/{outcome}/*.csv"),
-        png = glue("output/match/{matchset}/ci/{subgroup}/{outcome}/*.png"),
+        #txt = glue("output/match/{matchset}/km/{subgroup}/{outcome}/*.txt"),
+        rds = glue("output/match/{matchset}/km/{subgroup}/{outcome}/*.rds"),
+        png = glue("output/match/{matchset}/km/{subgroup}/{outcome}/*.png"),
+      )
+    )
+
+    ## competing risks action, including kaplan-meier estimates
+    # action(
+    #   name = glue("ci_{matchset}_{subgroup}_{outcome}"),
+    #   run = glue("r:latest analysis/ci.R"),
+    #   arguments = c(matchset, subgroup, outcome),
+    #   needs = list(
+    #     glue("match_{matchset}"),
+    #     "data_selection"
+    #   ),
+    #   moderately_sensitive = lst(
+    #     txt = glue("output/match/{matchset}/ci/{subgroup}/{outcome}/*.txt"),
+    #     csv = glue("output/match/{matchset}/ci/{subgroup}/{outcome}/*.csv"),
+    #     png = glue("output/match/{matchset}/ci/{subgroup}/{outcome}/*.png"),
+    #   )
+    # )
+  )
+}
+
+
+
+## get delayedentry km actions function ----
+action_delayedentry_contrasts <- function(
+    matchset, subgroup, outcome
+){
+
+  splice(
+
+    ## kaplan-meier action
+    action(
+      name = glue("delayedentry_{matchset}_{subgroup}_{outcome}"),
+      run = glue("r:latest analysis/delayedentry.R"),
+      arguments = c(matchset, subgroup, outcome),
+      needs = list(
+        glue("match_{matchset}"),
+        "data_selection"
+      ),
+      moderately_sensitive = lst(
+        #txt = glue("output/match/{matchset}/delayedentry/{subgroup}/{outcome}/*.txt"),
+        rds = glue("output/match/{matchset}/delayedentry/{subgroup}/{outcome}/*.rds"),
+        png = glue("output/match/{matchset}/delayedentry/{subgroup}/{outcome}/*.png"),
       )
     )
   )
@@ -165,8 +187,8 @@ action_contrasts_combine <- function(
     # ),
 
     action(
-      name = glue("ci_combine_{matchset}"),
-      run = glue("r:latest analysis/ci_combine.R"),
+      name = glue("contrasts_combine_{matchset}"),
+      run = glue("r:latest analysis/contrasts_combine.R"),
       arguments = c(matchset),
       needs = splice(
         as.list(
@@ -175,13 +197,20 @@ action_contrasts_combine <- function(
               subgroup=subgroups,
               outcome=outcomes
             ),
-            "ci_{matchset}_{subgroup}_{outcome}"
+            "km_{matchset}_{subgroup}_{outcome}"
+          ),
+          glue_data(
+            .x=expand_grid(
+              subgroup="all",
+              outcome=outcomes
+            ),
+            "delayedentry_{matchset}_{subgroup}_{outcome}"
           )
         )
       ),
       moderately_sensitive = lst(
-        csv = glue("output/match/{matchset}/ci/combined/*.csv"),
-        png = glue("output/match/{matchset}/ci/combined/plots/*.png"),
+        csv = glue("output/match/{matchset}/combined/*.csv"),
+        png = glue("output/match/{matchset}/combined/plots/*.png"),
       )
     )
 
@@ -324,14 +353,11 @@ actions_list <- splice(
     run = "r:latest analysis/data_selection.R",
     needs = list("data_process"),
     highly_sensitive = lst(
-      feather = "output/data/data_cohort.feather",
-      cohortrds = "output/data/data_cohort.rds",
-      criteriards = "output/data/data_inclusioncriteria.rds"
+      feather = "output/data/*.feather",
+      rds = "output/data/*.rds",
     ),
     moderately_sensitive = lst(
-      flow = "output/prematch/flowchart.csv",
-      table = "output/prematch/table*.csv",
-      smd = "output/prematch/smd.csv",
+      csv = "output/prematch/*.csv"
     )
   ),
 
@@ -383,6 +409,15 @@ actions_list <- splice(
   action_contrasts("A", "all", "covidcritcare"),
   action_contrasts("A", "all", "coviddeath"),
   action_contrasts("A", "all", "noncoviddeath"),
+
+  action_delayedentry_contrasts("A", "all", "postest"),
+  action_delayedentry_contrasts("A", "all", "covidemergency"),
+  action_delayedentry_contrasts("A", "all", "covidadmittedproxy1"),
+  action_delayedentry_contrasts("A", "all", "covidadmitted"),
+  #action_delayedentry_contrasts("A", "all", "noncovidadmitted"),
+  action_delayedentry_contrasts("A", "all", "covidcritcare"),
+  action_delayedentry_contrasts("A", "all", "coviddeath"),
+  action_delayedentry_contrasts("A", "all", "noncoviddeath"),
 
 
   comment("### Models by primary course ('vax12_type')"),
@@ -459,6 +494,15 @@ actions_list <- splice(
   action_contrasts("B", "all", "coviddeath"),
   action_contrasts("B", "all", "noncoviddeath"),
 
+  action_delayedentry_contrasts("B", "all", "postest"),
+  action_delayedentry_contrasts("B", "all", "covidemergency"),
+  action_delayedentry_contrasts("B", "all", "covidadmittedproxy1"),
+  action_delayedentry_contrasts("B", "all", "covidadmitted"),
+  #action_delayedentry_contrasts("B", "all", "noncovidadmitted"),
+  action_delayedentry_contrasts("B", "all", "covidcritcare"),
+  action_delayedentry_contrasts("B", "all", "coviddeath"),
+  action_delayedentry_contrasts("B", "all", "noncoviddeath"),
+
 
   comment("### Models by primary course ('vax12_type')"),
 
@@ -524,13 +568,13 @@ actions_list <- splice(
   action_contrasts_combine(
     "A",
     subgroups = c("all", "vax12_type", "prior_covid_infection", "age65plus", "cev_cv"),
-    outcomes=c("postest", "covidemergency", "covidadmittedproxy1", "covidadmitted", "covidcritcare", "coviddeath", "noncoviddeath")
+    outcomes = c("postest", "covidemergency", "covidadmittedproxy1", "covidadmitted", "covidcritcare", "coviddeath", "noncoviddeath")
   ),
 
   action_contrasts_combine(
     "B",
     subgroups = c("all", "vax12_type", "prior_covid_infection", "age65plus", "cev_cv"),
-    outcomes=c("postest", "covidemergency", "covidadmittedproxy1", "covidadmitted", "covidcritcare", "coviddeath", "noncoviddeath")
+    outcomes = c("postest", "covidemergency", "covidadmittedproxy1", "covidadmitted", "covidcritcare", "coviddeath", "noncoviddeath")
   ),
 
 
@@ -543,10 +587,8 @@ actions_list <- splice(
       "data_selection",
       "match_report_A",
       "match_report_B",
-      #"km_combine_A",
-      #"km_combine_B",
-      "ci_combine_A",
-      "ci_combine_B"
+      "contrasts_combine_A",
+      "contrasts_combine_B"
     ),
     moderately_sensitive = lst(
       releaselist = "output/files-for-release.txt",

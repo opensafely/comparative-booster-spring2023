@@ -84,9 +84,7 @@ if(Sys.getenv("OPENSAFELY_BACKEND") %in% c("", "expectations")){
     apply(unmatched_types, 1, function(row) paste(paste(row, collapse=" : "), "\n"))
   )
 
-  data_extract <- data_custom_dummy %>%
-    # because dummy data for days in critical care is factor, so that we can do zero-inflation
-    mutate(across(starts_with("covidadmitted_ccdays"), ~ as.numeric(as.character(.))))
+  data_extract <- data_custom_dummy
 } else {
   data_extract <- read_feather(here("output", "input.feather")) %>%
     #because date types are not returned consistently by cohort extractor
@@ -227,8 +225,8 @@ data_processed <- data_extract %>%
     all=factor("all"),
     age65plus = age>=65,
     variantera = fct_case_when(
-      covid_vax_disease_3_date <= as.Date("2021-12-31") ~ "Delta (29 Nov - 31 Dec)",
-      covid_vax_disease_3_date >= as.Date("2022-01-01") ~ "Omicron (1 Jan onwards)",
+      anycovidvax_3_date <= as.Date("2021-12-31") ~ "Delta (29 Nov - 31 Dec)",
+      anycovidvax_3_date >= as.Date("2022-01-01") ~ "Omicron (1 Jan onwards)",
       TRUE ~ NA_character_
     ),
 
@@ -242,18 +240,11 @@ data_processed <- data_extract %>%
     anycovid_0_date = pmax(postest_0_date, covidemergency_0_date, covidadmitted_0_date, na.rm=TRUE),
 
     covidadmittedproxy1_date = covidemergencyhosp_date,
-    covidadmittedproxy2_date = if_else((postest_date<=covid_vax_disease_3_date) & (postest_date>=covid_vax_disease_3_date-14), emergencyhosp_date, as.Date(NA)),
-    #covidadmittedproxy3_date = if_else((postest_date<=covid_vax_disease_3_date) & (postest_date>=covid_vax_disease_3_date-14), respemergencyhosp_date, as.Date(NA)),
+    covidadmittedproxy2_date = if_else((postest_date<=anycovidvax_3_date) & (postest_date>=anycovidvax_3_date-14), emergencyhosp_date, as.Date(NA)),
+    #covidadmittedproxy3_date = if_else((postest_date<=anycovidvax_3_date) & (postest_date>=anycovidvax_3_date-14), respemergencyhosp_date, as.Date(NA)),
 
     # earliest covid event after study start
     anycovid_date = pmin(postest_date, covidemergency_date, covidadmitted_date, coviddeath_date, na.rm=TRUE),
-
-    covidcritcare_date = case_when(
-      as.numeric(as.character(potentialcovidcritcare_1_ccdays))>0 & !is.na(potentialcovidcritcare_1_date) ~ potentialcovidcritcare_1_date,
-      as.numeric(as.character(potentialcovidcritcare_2_ccdays))>0 & !is.na(potentialcovidcritcare_2_date) ~ potentialcovidcritcare_2_date,
-      as.numeric(as.character(potentialcovidcritcare_3_ccdays))>0 & !is.na(potentialcovidcritcare_3_date) ~ potentialcovidcritcare_3_date,
-      TRUE ~ as.Date(NA_character_)
-    ),
 
     covidcritcare_date = pmin(covidcritcare_date, coviddeath_date, na.rm=TRUE),
 
@@ -349,16 +340,12 @@ data_vax_wide = data_vax %>%
     id_cols= patient_id,
     names_from = c("vax_index"),
     values_from = c("date", "type"),
-    names_glue = "covid_vax_{vax_index}_{.value}"
+    names_glue = "vax{vax_index}_{.value}"
   )
 
 data_processed <- data_processed %>%
   left_join(data_vax_wide, by ="patient_id") %>%
   mutate(
-    vax1_type = covid_vax_1_type,
-    vax2_type = covid_vax_2_type,
-    vax3_type = covid_vax_3_type,
-    vax4_type = covid_vax_4_type,
 
     vax12_type = paste0(vax1_type, "-", vax2_type),
 
@@ -389,18 +376,8 @@ data_processed <- data_processed %>%
 
     vax12_type_descr = paste0(vax1_type_descr, "-", vax2_type_descr),
 
-    vax1_date = covid_vax_1_date,
-    vax2_date = covid_vax_2_date,
-    vax3_date = covid_vax_3_date,
-    vax4_date = covid_vax_4_date,
-    vax1_day = as.integer(floor((vax1_date - study_dates$studystart_date))+1), # day 0 is the day before "start_date"
-    vax2_day = as.integer(floor((vax2_date - study_dates$studystart_date))+1), # day 0 is the day before "start_date"
-    vax3_day = as.integer(floor((vax3_date - study_dates$studystart_date))+1), # day 0 is the day before "start_date"
-    vax4_day = as.integer(floor((vax4_date - study_dates$studystart_date))+1), # day 0 is the day before "start_date"
-    vax1_week = as.integer(floor((vax1_date - study_dates$studystart_date)/7)+1), # week 1 is days 1-7.
-    vax2_week = as.integer(floor((vax2_date - study_dates$studystart_date)/7)+1), # week 1 is days 1-7.
-    vax3_week = as.integer(floor((vax3_date - study_dates$studystart_date)/7)+1), # week 1 is days 1-7.
-    vax4_week = as.integer(floor((vax4_date - study_dates$studystart_date)/7)+1), # week 1 is days 1-7.
+    vax23_interval = as.integer(vax3_date - vax2_date)
+
 ) %>%
 select(
   -starts_with("covid_vax_"),

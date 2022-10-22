@@ -55,12 +55,15 @@ treatement_lookup <-
   )
 
 # where to split follow-up time after recruitment
-postbaselinecuts <- c(0,7,14,21,28,42,56,70,84)
+postbaselinecuts <- c(0,7,14,21,28,42,56,70,84,112,140,168,182)
 
 # maximum follow-up duration
 
 maxfup <- max(postbaselinecuts)
 
+
+# redaction threshold
+threshold <- 6
 
 ## lookups to convert coded variables to full, descriptive variables ----
 
@@ -134,20 +137,20 @@ if(exists("matchset")){
       "vax3_date",
       "jcvi_ageband",
       "cev_cv",
-      "sex",
+      #"sex",
       "vax12_type",
-      "region",
-      "imd_Q5",
+      #"region",
+      #"imd_Q5",
 
 
-      "multimorb",
+      #"multimorb",
       "prior_covid_infection",
       NULL
     )
 
     caliper <- c(
       age = 3,
-      vax2_day = 7,
+      vax23_interval = 7,
       #imd = 1000,
       NULL
     )
@@ -177,7 +180,7 @@ if(exists("matchset")){
 
     caliper <- c(
       age = 3,
-      vax2_day = 7,
+      vax23_interval = 7,
       NULL
     )
 

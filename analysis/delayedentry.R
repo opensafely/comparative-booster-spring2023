@@ -1,9 +1,9 @@
 
 # # # # # # # # # # # # # # # # # # # # #
-# Purpose: Get Kaplan-Meier estimates for specified outcome, and derive risk differences
+# Purpose: Get delayed-entry survival estimates for specified outcome, and derive risk differences
 #  - import matched data
 #  - adds outcome variable and restricts follow-up
-#  - gets KM estimates
+#  - gets KM estimates, stratified by calendar time
 #  - The script must be accompanied by three arguments:
 #    `matchset` - the matching set used for matching
 #    `subgroup` - the subgroup variable, which is used to stratify KM estimates
@@ -59,11 +59,16 @@ subgroup_sym <- sym(subgroup)
 
 # create output directories ----
 
-output_dir <- here("output", "match", matchset, "km", subgroup, outcome)
+output_dir <- here("output", "match", matchset, "delayedentry", subgroup, outcome)
 fs::dir_create(output_dir)
 
 ## import match data
 data_matchstatus <- read_rds(here("output", "match", matchset, "data_matchstatus.rds"))
+
+# define calendar date cut points for calendar period specific analysis ----
+# used for variant era specific analyses
+calendarcuts <- c(study_dates$studystart_date, as.Date("2022-01-01"), study_dates$followupend_date+1)
+
 
 ## import baseline data, restrict to matched individuals and derive time-to-event variables
 data_matched <-
@@ -102,7 +107,15 @@ data_matched <-
       treatment_date + maxfup,
       na.rm=TRUE
     ),
-
+  ) %>%
+  # define censoring within the matched pair
+  group_by(match_id) %>%
+  mutate(
+    matchcensor_date = min(censor_date),
+    matchnoncompetingcensor_date = min(noncompetingcensor_date),
+  ) %>%
+  ungroup() %>%
+  mutate(
     tte_outcome = tte(treatment_date, outcome_date, censor_date, na.censor=FALSE),
     ind_outcome = censor_indicator(outcome_date, censor_date),
 
@@ -165,19 +178,92 @@ table(
 #
 # write_csv(event_counts, fs::path(output_dir, "model_preflight.csv"))
 
-## redaction threshold ----
 
-threshold <- 7
+## create stset-style datasets, splitting on both time-since-baseline (cuts) and calendar-time (calendarcuts) ----
 
-## cumulative risk differences ----
+splitdata <- function(data, cuts=NULL, calendarcuts=NULL){
 
+  if(is.null(cuts)) stop("define cuts")
+  if(is.null(calendarcuts)) stop("define calendarcuts")
+
+  fup_split <-
+    data %>%
+    select(patient_id, treatment) %>%
+    uncount(weights = length(cuts)-1, .id="fup_id") %>%
+    mutate(
+      fup_time = cuts[fup_id],
+      fup_period = paste0(cuts[fup_id], "-", cuts[fup_id+1]-1)
+    ) %>%
+    droplevels() %>%
+    select(
+      patient_id, fup_id, fup_time, fup_period
+    )
+
+  calendar_split <-
+    data %>%
+    select(patient_id, treatment, vax3_date) %>%
+    uncount(weights = length(calendarcuts)-1, .id="calendar_id") %>%
+    mutate(
+      calendar_date = calendarcuts[calendar_id],
+      calendar_period = paste0(calendarcuts[calendar_id], "-", calendarcuts[calendar_id+1]-1)
+    ) %>%
+    droplevels() %>%
+    select(
+      patient_id, vax3_date, calendar_id, calendar_date, calendar_period
+    )
+
+  data_split <-
+    tmerge(
+      data1 = data,
+      data2 = data,
+      id = patient_id,
+      tstart = 0,
+      tstop = tte_outcome,
+      ind_outcome = event(if_else(ind_outcome, tte_outcome, NA_real_))
+    ) %>%
+    # add post-treatment periods
+    tmerge(
+      data1 = .,
+      data2 = fup_split,
+      id = patient_id,
+      fup_id = tdc(fup_time, fup_id)
+    ) %>%
+    tmerge(
+      data1 = .,
+      data2 = calendar_split,
+      id = patient_id,
+      calendar_id = tdc(calendar_date - vax3_date, calendar_id)
+    ) %>%
+    mutate(
+      fup_start = cuts[fup_id],
+      fup_end = cuts[fup_id+1],
+      calendar_start = calendarcuts[calendar_id],
+      calendar_end = calendarcuts[calendar_id+1],
+      calendar_period = paste0(calendar_start, " - ", calendar_end-1),
+      cstart = tstart+vax3_date,
+      cstop = tstop+vax3_date
+    )
+
+  data_split
+
+}
+
+
+data_split_cuts <- splitdata(data_matched, postbaselinecuts, calendarcuts)
+data_split_overall <- splitdata(data_matched, c(0, maxfup), calendarcuts)
+
+## treatment-group and calendar-time specific kaplan-meier estimates ----
+# uses delayed entry
+# eligible for entry into each calendar period if:
+# - matched
+# - no events from baseline until start of period
 data_surv <-
-  data_matched %>%
-  group_by(treatment, !!subgroup_sym) %>%
+  data_split_overall %>%
+  group_by(!!subgroup_sym, treatment, calendar_start, calendar_end, calendar_period) %>%
   nest() %>%
   mutate(
     surv_obj = map(data, ~ {
-      survfit(Surv(tte_outcome, ind_outcome) ~ 1, data = .x, conf.type="log-log")
+      survfit(Surv(tstart, tstop, ind_outcome) ~ 1, data = .x)
     }),
     surv_obj_tidy = map(surv_obj, ~ {
       broom::tidy(.x) %>%
@@ -185,10 +271,15 @@ data_surv <-
           time = seq_len(maxfup), # fill in 1 row for each day of follow up
           fill = list(n.event = 0, n.censor = 0) # fill in zero events on those days
         ) %>%
-        fill(n.risk, .direction = c("up")) # fill in n.risk on each zero-event day
+        # fill in n.risk on each zero-event day
+        fill(n.risk, .direction = c("up")) %>%
+        mutate(
+          # calculate new delayed entries
+          n.entry = n.risk - lag(n.risk-n.event-n.censor,1,0)
+        )
     }), # return survival table for each day of follow up
   ) %>%
-  select(!!subgroup_sym, treatment, surv_obj_tidy) %>%
+  select(!!subgroup_sym, treatment, calendar_start, calendar_end, calendar_period, surv_obj_tidy) %>%
   unnest(surv_obj_tidy)
 
 
@@ -198,15 +289,16 @@ km_process <- function(.data, round_by) {
       lagtime = lag(time, 1, 0),
       leadtime = lead(time, 1, max(time) + 1),
       interval = time - lagtime,
-      N = max(n.risk, na.rm = TRUE),
 
       # rounded to `round_by - (round_by/2)`
+      cml.entry = roundmid_any(cumsum(n.entry), round_by),
       cml.eventcensor = roundmid_any(cumsum(n.event + n.censor), round_by),
       cml.event = roundmid_any(cumsum(n.event), round_by),
       cml.censor = cml.eventcensor - cml.event,
       n.event = diff(c(0, cml.event)),
       n.censor = diff(c(0, cml.censor)),
-      n.risk = roundmid_any(N, round_by) - lag(cml.eventcensor, 1, 0),
+      n.risk = cml.entry - lag(cml.eventcensor, 1, 0),
+      n.entry = diff(c(0, cml.entry)),
 
       # KM estimate for event of interest, combining censored and competing events as censored
       summand = (1 / (n.risk - n.event)) - (1 / n.risk), # = n.event / ((n.risk - n.event) * n.risk) but re-written to prevent integer overflow
@@ -215,8 +307,8 @@ km_process <- function(.data, round_by) {
       surv.ln.se = surv.se / surv,
 
       ## standard errors on log scale
-      # surv.ll = exp(log(surv) + qnorm(0.025)*surv.ln.se),
-      # surv.ul = exp(log(surv) + qnorm(0.975)*surv.ln.se),
+      #surv.ll = exp(log(surv) + qnorm(0.025)*surv.ln.se),
+      #surv.ul = exp(log(surv) + qnorm(0.975)*surv.ln.se),
 
       llsurv = log(-log(surv)),
       llsurv.se = sqrt((1 / log(surv)^2) * cumsum(summand)),
@@ -231,11 +323,13 @@ km_process <- function(.data, round_by) {
       risk.ul = 1 - surv.ll
     ) %>%
     select(
-      !!subgroup_sym, treatment, time, lagtime, leadtime, interval,
-      cml.event, cml.censor,
-      n.risk, n.event, n.censor,
+      !!subgroup_sym, treatment,
+      calendar_start, calendar_end, calendar_period,
+      time, lagtime, leadtime, interval,
+      cml.entry, cml.event, cml.censor, cml.eventcensor,
+      n.entry, n.risk, n.event, n.censor,
       surv, surv.se, surv.ll, surv.ul,
-      risk, risk.se, risk.ll, risk.ul
+      risk, risk.se, risk.ll, risk.ul,
     )
 }
 
@@ -271,7 +365,7 @@ km_plot <- function(.data) {
     geom_step(aes(x = time, y = risk), direction = "vh") +
     geom_step(aes(x = time, y = risk), direction = "vh", linetype = "dashed", alpha = 0.5) +
     geom_rect(aes(xmin = lagtime, xmax = time, ymin = risk.ll, ymax = risk.ul), alpha = 0.1, colour = "transparent") +
-    facet_grid(rows = vars(!!subgroup_sym)) +
+    facet_grid(rows = vars(!!subgroup_sym), cols=vars(calendar_period)) +
     scale_color_brewer(type = "qual", palette = "Set1", na.value = "grey") +
     scale_fill_brewer(type = "qual", palette = "Set1", guide = "none", na.value = "grey") +
     scale_x_continuous(breaks = seq(0, 600, 14)) +
@@ -316,13 +410,14 @@ kmcontrasts <- function(data, cuts = NULL) {
     transmute(
       !!subgroup_sym,
       treatment,
+      calendar_start, calendar_end, calendar_period,
       time, lagtime, interval,
       fup_start = as.integer(as.character(cut(time, cuts, right = TRUE, label = cuts[-length(cuts)]))),
       fup_end = as.integer(as.character(cut(time, cuts, right = TRUE, label = cuts[-1]))),
       fup_period = cut(time, cuts, right = TRUE, label = paste0(cuts[-length(cuts)] + 1, " - ", cuts[-1])),
       n.atrisk = replace_na(n.risk,0),
       n.event, n.censor,
-      cml.persontime = cumsum( n.atrisk * interval),
+      cml.persontime = cumsum(n.atrisk * interval),
       cml.event = cumsum(replace_na(n.event, 0)),
       cml.censor = cumsum(replace_na(n.censor, 0)),
       rate = n.event / n.atrisk,
@@ -332,7 +427,7 @@ kmcontrasts <- function(data, cuts = NULL) {
       inc = -(surv - lag(surv, 1, 1)) / lag(surv, 1, 1),
       inc2 = diff(c(0, -log(surv)))
     ) %>%
-    group_by(!!subgroup_sym, treatment, fup_start, fup_end, fup_period) %>%
+    group_by(!!subgroup_sym, treatment, fup_start, fup_end, fup_period, calendar_start, calendar_end, calendar_period) %>%
     summarise(
 
       ## time-period-specific quantities
@@ -376,7 +471,7 @@ kmcontrasts <- function(data, cuts = NULL) {
     ) %>%
     ungroup() %>%
     pivot_wider(
-      id_cols = all_of(c(subgroup, "fup_start", "fup_end", "fup_period", "interval")),
+      id_cols = all_of(c(subgroup, "fup_start", "fup_end", "fup_period", "interval", "calendar_start", "calendar_end", "calendar_period")),
       names_from = treatment,
       names_glue = "{.value}_{treatment}",
       values_from = c(
@@ -458,47 +553,12 @@ km_contrasts_rounded_overall <- kmcontrasts(data_surv_rounded, c(0,maxfup))
 
 ## Cox models ----
 
-coxcontrast <- function(data, cuts=NULL){
 
-  if(is.null(cuts)){cuts <- unique(c(0,data$time))}
-
-  fup_split <-
-    data %>%
-    select(patient_id, treatment) %>%
-    uncount(weights = length(cuts)-1, .id="period_id") %>%
-    mutate(
-      fup_time = cuts[period_id],
-      fup_period = paste0(cuts[period_id], "-", cuts[period_id+1]-1)
-    ) %>%
-    droplevels() %>%
-    select(
-      patient_id, period_id, fup_time, fup_period
-    )
-
-  data_split <-
-    tmerge(
-      data1 = data,
-      data2 = data,
-      id = patient_id,
-      tstart = 0,
-      tstop = tte_outcome,
-      ind_outcome = event(if_else(ind_outcome, tte_outcome, NA_real_))
-    ) %>%
-    # add post-treatment periods
-    tmerge(
-      data1 = .,
-      data2 = fup_split,
-      id = patient_id,
-      period_id = tdc(fup_time, period_id)
-    ) %>%
-    mutate(
-      fup_start = cuts[period_id],
-      fup_end = cuts[period_id+1],
-    )
+coxcontrasts <- function(data_split){
 
   data_cox <-
     data_split %>%
-    group_by(!!subgroup_sym, fup_start, fup_end) %>%
+    group_by(!!subgroup_sym, fup_start, fup_end, calendar_start, calendar_end) %>%
     nest() %>%
     mutate(
       cox_obj = map(data, ~{
@@ -506,11 +566,14 @@ coxcontrast <- function(data, cuts=NULL){
       }),
       cox_obj_tidy = map(cox_obj, ~broom::tidy(.x)),
     ) %>%
-    select(!!subgroup_sym, fup_start, fup_end, cox_obj_tidy) %>%
+    select(!!subgroup_sym, fup_start, fup_end, calendar_start, calendar_end, cox_obj_tidy) %>%
     unnest(cox_obj_tidy) %>%
     transmute(
       !!subgroup_sym,
-      fup_start, fup_end,
+      fup_start,
+      fup_end,
+      calendar_start,
+      calendar_end,
       coxhr = exp(estimate),
       coxhr.se = robust.se,
       coxhr.ll = exp(estimate + qnorm(0.025)*robust.se),
@@ -520,13 +583,13 @@ coxcontrast <- function(data, cuts=NULL){
 
 }
 
-cox_contrasts_cuts <- coxcontrast(data_matched, postbaselinecuts)
-cox_contrasts_overall <- coxcontrast(data_matched, c(0,maxfup))
+cox_contrasts_cuts <- coxcontrasts(data_split_cuts)
+cox_contrasts_overall <- coxcontrasts(data_split_overall)
 
 # cox HR is a safe statistic so no need to redact/round
 contrasts_rounded_daily <-  km_contrasts_rounded_daily # don't bother with cox as HR within daily intervals will be imprecisely estimated
-contrasts_rounded_cuts <-  left_join(km_contrasts_rounded_cuts, cox_contrasts_cuts, by=c(subgroup, "fup_start", "fup_end"))
-contrasts_rounded_overall <-  left_join(km_contrasts_rounded_overall, cox_contrasts_overall, by=c(subgroup, "fup_start", "fup_end"))
+contrasts_rounded_cuts <-  left_join(km_contrasts_rounded_cuts, cox_contrasts_cuts, by=c(subgroup, "fup_start", "fup_end", "calendar_start", "calendar_end"))
+contrasts_rounded_overall <-  left_join(km_contrasts_rounded_overall, cox_contrasts_overall, by=c(subgroup, "fup_start", "fup_end", "calendar_start", "calendar_end"))
 
 
 write_rds(contrasts_rounded_daily, fs::path(output_dir, "contrasts_daily_rounded.rds"))
