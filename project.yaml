@@ -1228,6 +1228,26 @@ actions:
         csv: output/release-objects/*/*.csv
 
   ## # # # # # # # # # # # # # # # # # # # 
+  ## ICD10 check 
+  ## # # # # # # # # # # # # # # # # # # # 
+
+  extract_ICD10check:
+    run: cohortextractor:latest generate_cohort --study-definition study_definition_ICD10check
+      --output-format feather
+    needs: []
+    outputs:
+      highly_sensitive:
+        cohort: output/input_ICD10check.feather
+
+  report_ICD10check:
+    run: r:latest analysis/report_ICD10check.R
+    needs:
+    - extract_ICD10check
+    outputs:
+      moderately_sensitive:
+        png: output/ICD10check/*.png
+
+  ## # # # # # # # # # # # # # # # # # # # 
   ## End 
   ## # # # # # # # # # # # # # # # # # # # 
 
