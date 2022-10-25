@@ -1161,6 +1161,13 @@ actions:
     - km_A_cev_cv_covidcritcare
     - km_A_cev_cv_coviddeath
     - km_A_cev_cv_noncoviddeath
+    - delayedentry_A_all_postest
+    - delayedentry_A_all_covidemergency
+    - delayedentry_A_all_covidadmittedproxy1
+    - delayedentry_A_all_covidadmitted
+    - delayedentry_A_all_covidcritcare
+    - delayedentry_A_all_coviddeath
+    - delayedentry_A_all_noncoviddeath
     outputs:
       moderately_sensitive:
         csv: output/match/A/combined/*.csv
@@ -1204,6 +1211,13 @@ actions:
     - km_B_cev_cv_covidcritcare
     - km_B_cev_cv_coviddeath
     - km_B_cev_cv_noncoviddeath
+    - delayedentry_B_all_postest
+    - delayedentry_B_all_covidemergency
+    - delayedentry_B_all_covidadmittedproxy1
+    - delayedentry_B_all_covidadmitted
+    - delayedentry_B_all_covidcritcare
+    - delayedentry_B_all_coviddeath
+    - delayedentry_B_all_noncoviddeath
     outputs:
       moderately_sensitive:
         csv: output/match/B/combined/*.csv
