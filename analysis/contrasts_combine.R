@@ -65,12 +65,13 @@ km_estimates <- metaparams %>%
       subgroup <- as.character(subgroup)
       dat <- read_rds(here("output", "match", matchset, "km", subgroup, outcome, "km_estimates_rounded.rds"))
       dat %>%
-      add_column(
-        subgroup_level = as.character(.[[subgroup]]),
-        subgroup_level_descr = fct_recoderelevel(.[[subgroup]], recoder[[subgroup]]),
-        .before=1
-      ) %>%
-      select(-all_of(subgroup))
+        ungroup() %>%
+        add_column(
+          subgroup_level = as.character(.[[subgroup]]),
+          subgroup_level_descr = fct_recoderelevel(.[[subgroup]], recoder[[subgroup]]),
+          .before=1
+        ) %>%
+        select(-all_of(c(subgroup)))
     })
   ) %>%
   unnest(data)
@@ -84,6 +85,7 @@ contrasts_daily <- metaparams %>%
       subgroup <- as.character(subgroup)
       dat <- read_rds(here("output", "match", matchset, "km", subgroup, outcome, "contrasts_daily_rounded.rds"))
       dat %>%
+        ungroup() %>%
         add_column(
           subgroup_level = as.character(.[[subgroup]]),
           subgroup_level_descr = fct_recoderelevel(.[[subgroup]], recoder[[subgroup]]),
@@ -104,6 +106,7 @@ contrasts_cuts <- metaparams %>%
       subgroup <- as.character(subgroup)
       dat <- read_rds(here("output", "match", matchset, "km", subgroup, outcome, "contrasts_cuts_rounded.rds"))
       dat %>%
+        ungroup() %>%
         add_column(
           subgroup_level = as.character(.[[subgroup]]),
           subgroup_level_descr = fct_recoderelevel(.[[subgroup]], recoder[[subgroup]]),
@@ -124,6 +127,7 @@ contrasts_overall <- metaparams %>%
       subgroup <- as.character(subgroup)
       dat <- read_rds(here("output", "match", matchset, "km", subgroup, outcome, "contrasts_overall_rounded.rds"))
       dat %>%
+        ungroup() %>%
         add_column(
           subgroup_level = as.character(.[[subgroup]]),
           subgroup_level_descr = fct_recoderelevel(.[[subgroup]], recoder[[subgroup]]),
@@ -142,11 +146,13 @@ write_csv(contrasts_overall, fs::path(output_dir, "contrasts_overall_rounded.csv
 ## delayed entry KM estimates ----
 
 delayedentry_estimates <- metaparams %>%
+  filter(subgroup=="all") %>%
   mutate(
     data = pmap(list(matchset, subgroup, outcome), function(matchset, subgroup, outcome) {
       subgroup <- as.character(subgroup)
       dat <- read_rds(here("output", "match", matchset, "delayedentry", subgroup, outcome, "km_estimates_rounded.rds"))
       dat %>%
+        ungroup() %>%
         add_column(
           subgroup_level = as.character(.[[subgroup]]),
           subgroup_level_descr = fct_recoderelevel(.[[subgroup]], recoder[[subgroup]]),
@@ -161,11 +167,13 @@ write_rds(delayedentry_estimates, fs::path(output_dir, "delayedentry_estimates_r
 
 
 delayedentry_contrasts_daily <- metaparams %>%
+  filter(subgroup=="all") %>%
   mutate(
     data = pmap(list(matchset, outcome, subgroup), function(matchset, outcome, subgroup){
       subgroup <- as.character(subgroup)
       dat <- read_rds(here("output", "match", matchset, "delayedentry", subgroup, outcome, "contrasts_daily_rounded.rds"))
       dat %>%
+        ungroup() %>%
         add_column(
           subgroup_level = as.character(.[[subgroup]]),
           subgroup_level_descr = fct_recoderelevel(.[[subgroup]], recoder[[subgroup]]),
@@ -181,11 +189,13 @@ write_csv(delayedentry_contrasts_daily, fs::path(output_dir, "contrasts_daily_ro
 
 
 delayedentry_contrasts_cuts <- metaparams %>%
+  filter(subgroup=="all") %>%
   mutate(
     data = pmap(list(matchset, outcome, subgroup), function(matchset, outcome, subgroup){
       subgroup <- as.character(subgroup)
       dat <- read_rds(here("output", "match", matchset, "delayedentry", subgroup, outcome, "contrasts_cuts_rounded.rds"))
       dat %>%
+        ungroup() %>%
         add_column(
           subgroup_level = as.character(.[[subgroup]]),
           subgroup_level_descr = fct_recoderelevel(.[[subgroup]], recoder[[subgroup]]),
@@ -201,11 +211,13 @@ write_csv(delayedentry_contrasts_cuts, fs::path(output_dir, "contrasts_cuts_roun
 
 
 delayedentry_contrasts_overall <- metaparams %>%
+  filter(subgroup=="all") %>%
   mutate(
     data = pmap(list(matchset, outcome, subgroup), function(matchset, outcome, subgroup) {
       subgroup <- as.character(subgroup)
       dat <- read_rds(here("output", "match", matchset, "delayedentry", subgroup, outcome, "contrasts_overall_rounded.rds"))
       dat %>%
+        ungroup() %>%
         add_column(
           subgroup_level = as.character(.[[subgroup]]),
           subgroup_level_descr = fct_recoderelevel(.[[subgroup]], recoder[[subgroup]]),
