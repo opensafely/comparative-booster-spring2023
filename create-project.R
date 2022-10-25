@@ -191,22 +191,20 @@ action_contrasts_combine <- function(
       run = glue("r:latest analysis/contrasts_combine.R"),
       arguments = c(matchset),
       needs = splice(
-        as.list(
-          glue_data(
-            .x=expand_grid(
-              subgroup=subgroups,
-              outcome=outcomes
-            ),
-            "km_{matchset}_{subgroup}_{outcome}"
+        glue_data(
+          .x=expand_grid(
+            subgroup=subgroups,
+            outcome=outcomes
           ),
-          glue_data(
-            .x=expand_grid(
-              subgroup="all",
-              outcome=outcomes
-            ),
-            "delayedentry_{matchset}_{subgroup}_{outcome}"
-          )
-        )
+          "km_{matchset}_{subgroup}_{outcome}"
+        ) %>% as.list,
+        glue_data(
+          .x=expand_grid(
+            subgroup="all",
+            outcome=outcomes
+          ),
+          "delayedentry_{matchset}_{subgroup}_{outcome}"
+        ) %>% as.list
       ),
       moderately_sensitive = lst(
         csv = glue("output/match/{matchset}/combined/*.csv"),
