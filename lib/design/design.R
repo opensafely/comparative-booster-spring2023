@@ -63,7 +63,7 @@ maxfup <- max(postbaselinecuts)
 
 # define calendar date cut points for calendar period specific analysis ----
 # used for variant era specific analyses
-calendarcuts <- c(study_dates$studystart_date, as.Date("2022-12-15"), study_dates$followupend_date+1)
+calendarcuts <- c(study_dates$studystart_date, as.Date("2021-12-15"), study_dates$followupend_date+1)
 
 
 # redaction threshold
@@ -111,7 +111,7 @@ recoder <-
       `65 and over` = "TRUE"
     ),
     JCVI_ageband = c(
-      "18-39", "40-49", "50-54", "55-59", "60-64", "65-69", "70-74", "75-79", "80+",
+      "18-39", "40-49", "50-54", "55-59", "60-64", "65-69", "70-74", "75-79", "80+"
     ) %>% {set_names(.,.)},
     cev_cv = c(
       "Clinically extremely vulnerable",
@@ -125,7 +125,7 @@ recoder <-
     variantera = c(
       `Delta (up to 14 December 2021)` = "Delta (up to 14 December 2021)",
       `Omicron (15 December 2021 onwards)` = "Omicron (15 December 2021 onwards)"
-    ),
+    )
   )
 
 ## model formulae ----
