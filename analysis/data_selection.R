@@ -68,7 +68,7 @@ data_criteria <- data_processed %>%
     has_knownvax1 = vax1_type %in% c("pfizer", "az"),
     has_knownvax2 = vax2_type %in% c("pfizer", "az"),
     has_expectedvax3type = vax3_type %in% c("pfizer", "moderna"),
-    has_norecentcovid = vax3_date - anycovid_0_date >= 90 | is.na(anycovid_0_date),
+    has_norecentcovid = ((vax3_date - anycovid_0_date) >= 90) | is.na(anycovid_0_date),
     isnot_inhospital = !inhospital,
 
     jcvi_group_6orhigher = jcvi_group %in% as.character(1:6),
