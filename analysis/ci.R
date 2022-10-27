@@ -107,7 +107,7 @@ data_matched <-
       dereg_date,
       #vax4_date-1, # -1 because we assume vax occurs at the start of the day
       death_date,
-      study_dates$followupend_date,
+      if(outcome=="postest") {study_dates$postestfollowupend_date} else {study_dates$followupend_date},
       treatment_date + maxfup,
       na.rm=TRUE
     ),
@@ -115,7 +115,7 @@ data_matched <-
     noncompetingcensor_date = pmin(
       dereg_date,
       #vax4_date-1, # -1 because we assume vax occurs at the start of the day
-      study_dates$followupend_date,
+      if(outcome=="postest") {study_dates$postestfollowupend_date} else {study_dates$followupend_date},
       treatment_date + maxfup,
       na.rm=TRUE
     ),
