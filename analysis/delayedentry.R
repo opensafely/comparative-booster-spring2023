@@ -244,6 +244,10 @@ splitdata <- function(data, cuts=NULL, calendarcuts=NULL){
       calendar_period = paste0(calendar_start, " - ", calendar_end-1),
       cstart = tstart+vax3_date,
       cstop = tstop+vax3_date
+    ) %>%
+    filter(
+      # if a person is censored before the start of the calendar period, the pair is excluded.
+      matchcensor_date>=cstart
     )
 
   data_split
