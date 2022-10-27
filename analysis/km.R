@@ -82,6 +82,13 @@ data_matched <-
   ) %>%
   mutate(
 
+    # put here until data_process is re-run
+    variantera = fct_case_when(
+      vax3_date < as.Date("2021-12-15") ~ "Delta (up to 14 December 2021)",
+      vax3_date >= as.Date("2022-12-15") ~ "Omicron (15 December 2021 onwards)",
+      TRUE ~ NA_character_
+    ),
+
     treatment_date = vax3_date-1L, # -1 because we assume vax occurs at the start of the day, and so outcomes occurring on the same day as treatment are assumed "1 day" long
     outcome_date = .[[glue("{outcome}_date")]],
 

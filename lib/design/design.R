@@ -61,6 +61,10 @@ postbaselinecuts <- c(0,7,14,21,28,42,56,70,84,112,140,168,182)
 
 maxfup <- max(postbaselinecuts)
 
+# define calendar date cut points for calendar period specific analysis ----
+# used for variant era specific analyses
+calendarcuts <- c(study_dates$studystart_date, as.Date("2021-12-15"), study_dates$followupend_date+1)
+
 
 # redaction threshold
 threshold <- 6
@@ -73,6 +77,7 @@ recoder <-
       `Main` = "all",
       `Primary vaccine course` = "vax12_type",
       `Age` = "age65plus",
+      `JCVI age-band` = "jcvi_ageband",
       `Prior SARS-CoV-2 infection status` = "prior_covid_infection",
       `Clinical vulnerability` = "cev_cv",
       `Variant era` = "variantera"
@@ -105,18 +110,21 @@ recoder <-
       `18-64` = "FALSE",
       `65 and over` = "TRUE"
     ),
+    JCVI_ageband = c(
+      "18-39", "40-49", "50-54", "55-59", "60-64", "65-69", "70-74", "75-79", "80+"
+    ) %>% {set_names(.,.)},
     cev_cv = c(
-      "Clinically extremely vulnerable" = "Clinically extremely vulnerable",
-      "Clinically at-risk" = "Clinically at-risk",
-      "Not clinically at-risk" = "Not clinically at-risk"
-    ),
+      "Clinically extremely vulnerable",
+      "Clinically at-risk",
+      "Not clinically at-risk"
+    ) %>% {set_names(.,.)},
     prior_covid_infection = c(
       `No prior SARS-CoV-2 infection` = "FALSE",
       `Prior SARS-CoV-2 infection` = "TRUE"
     ),
     variantera = c(
-      `Delta (29 Nov - 31 Dec)` = "Delta (29 Nov - 31 Dec)",
-      `Omicron (1 Jan onwards)` = "Omicron (1 Jan onwards)"
+      `Delta (up to 14 December 2021)` = "Delta (up to 14 December 2021)",
+      `Omicron (15 December 2021 onwards)` = "Omicron (15 December 2021 onwards)"
     )
   )
 
