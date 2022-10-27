@@ -13,7 +13,7 @@ study_dates <- tibble::lst(
   studystart_date = "2021-10-29", # first possible study entry date (when both moderna and pfizer being administered for boosters), and index date for dates as "time since index date" format
   studyend_date = "2022-02-25", # last study entry dates
   followupend_date = "2022-07-01", # end of follow-up
-
+  postestfollowupend_date = "2022-03-31", # end of follow-up for postest, when free community testing stopped
   firstpfizer_date = "2020-12-08", # first pfizer vaccination in national roll-out
   firstaz_date = "2021-01-04", # first az vaccination in national roll-out
   firstmoderna_date = "2021-04-13", # first moderna vaccination in national roll-out
