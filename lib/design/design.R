@@ -73,6 +73,7 @@ recoder <-
       `Main` = "all",
       `Primary vaccine course` = "vax12_type",
       `Age` = "age65plus",
+      `JCVI age-band` = "jcvi_ageband",
       `Prior SARS-CoV-2 infection status` = "prior_covid_infection",
       `Clinical vulnerability` = "cev_cv",
       `Variant era` = "variantera"
@@ -105,11 +106,14 @@ recoder <-
       `18-64` = "FALSE",
       `65 and over` = "TRUE"
     ),
+    JCVI_ageband = c(
+      "18-39", "40-49", "50-54", "55-59", "60-64", "65-69", "70-74", "75-79", "80+",
+    ) %>% {set_names(.,.)},
     cev_cv = c(
-      "Clinically extremely vulnerable" = "Clinically extremely vulnerable",
-      "Clinically at-risk" = "Clinically at-risk",
-      "Not clinically at-risk" = "Not clinically at-risk"
-    ),
+      "Clinically extremely vulnerable",
+      "Clinically at-risk",
+      "Not clinically at-risk"
+    ) %>% {set_names(.,.)},
     prior_covid_infection = c(
       `No prior SARS-CoV-2 infection` = "FALSE",
       `Prior SARS-CoV-2 infection` = "TRUE"

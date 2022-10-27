@@ -465,6 +465,17 @@ actions_list <- splice(
   action_contrasts("A", "age65plus", "coviddeath"),
   action_contrasts("A", "age65plus", "noncoviddeath"),
 
+  comment("### Models by JCVI age-band ('jcvi_ageband')"),
+
+  action_contrasts("A", "jcvi_ageband", "postest"),
+  action_contrasts("A", "jcvi_ageband", "covidemergency"),
+  action_contrasts("A", "jcvi_ageband", "covidadmittedproxy1"),
+  action_contrasts("A", "jcvi_ageband", "covidadmitted"),
+  #action_contrasts("A", "jcvi_ageband", "noncovidadmitted"),
+  action_contrasts("A", "jcvi_ageband", "covidcritcare"),
+  action_contrasts("A", "jcvi_ageband", "coviddeath"),
+  action_contrasts("A", "jcvi_ageband", "noncoviddeath"),
+
   comment("### Models by variant era ('variantera')"),
 
   action_contrasts("A", "variantera", "postest"),
@@ -548,6 +559,19 @@ actions_list <- splice(
   action_contrasts("B", "age65plus", "covidcritcare"),
   action_contrasts("B", "age65plus", "coviddeath"),
   action_contrasts("B", "age65plus", "noncoviddeath"),
+
+
+  comment("### Models by JCVI age-band ('jcvi_ageband')"),
+
+  action_contrasts("B", "jcvi_ageband", "postest"),
+  action_contrasts("B", "jcvi_ageband", "covidemergency"),
+  action_contrasts("B", "jcvi_ageband", "covidadmittedproxy1"),
+  action_contrasts("B", "jcvi_ageband", "covidadmitted"),
+  #action_contrasts("B", "jcvi_ageband", "noncovidadmitted"),
+  action_contrasts("B", "jcvi_ageband", "covidcritcare"),
+  action_contrasts("B", "jcvi_ageband", "coviddeath"),
+  action_contrasts("B", "jcvi_ageband", "noncoviddeath"),
+
 
   comment("### Models by variant era ('variantera')"),
 

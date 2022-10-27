@@ -523,6 +523,78 @@ actions:
         rds: output/match/A/km/age65plus/noncoviddeath/*.rds
         png: output/match/A/km/age65plus/noncoviddeath/*.png
 
+  ## ### Models by JCVI age-band (''jcvi_ageband'') 
+
+  km_A_jcvi_ageband_postest:
+    run: r:latest analysis/km.R A jcvi_ageband postest
+    needs:
+    - match_A
+    - data_selection
+    outputs:
+      moderately_sensitive:
+        rds: output/match/A/km/jcvi_ageband/postest/*.rds
+        png: output/match/A/km/jcvi_ageband/postest/*.png
+
+  km_A_jcvi_ageband_covidemergency:
+    run: r:latest analysis/km.R A jcvi_ageband covidemergency
+    needs:
+    - match_A
+    - data_selection
+    outputs:
+      moderately_sensitive:
+        rds: output/match/A/km/jcvi_ageband/covidemergency/*.rds
+        png: output/match/A/km/jcvi_ageband/covidemergency/*.png
+
+  km_A_jcvi_ageband_covidadmittedproxy1:
+    run: r:latest analysis/km.R A jcvi_ageband covidadmittedproxy1
+    needs:
+    - match_A
+    - data_selection
+    outputs:
+      moderately_sensitive:
+        rds: output/match/A/km/jcvi_ageband/covidadmittedproxy1/*.rds
+        png: output/match/A/km/jcvi_ageband/covidadmittedproxy1/*.png
+
+  km_A_jcvi_ageband_covidadmitted:
+    run: r:latest analysis/km.R A jcvi_ageband covidadmitted
+    needs:
+    - match_A
+    - data_selection
+    outputs:
+      moderately_sensitive:
+        rds: output/match/A/km/jcvi_ageband/covidadmitted/*.rds
+        png: output/match/A/km/jcvi_ageband/covidadmitted/*.png
+
+  km_A_jcvi_ageband_covidcritcare:
+    run: r:latest analysis/km.R A jcvi_ageband covidcritcare
+    needs:
+    - match_A
+    - data_selection
+    outputs:
+      moderately_sensitive:
+        rds: output/match/A/km/jcvi_ageband/covidcritcare/*.rds
+        png: output/match/A/km/jcvi_ageband/covidcritcare/*.png
+
+  km_A_jcvi_ageband_coviddeath:
+    run: r:latest analysis/km.R A jcvi_ageband coviddeath
+    needs:
+    - match_A
+    - data_selection
+    outputs:
+      moderately_sensitive:
+        rds: output/match/A/km/jcvi_ageband/coviddeath/*.rds
+        png: output/match/A/km/jcvi_ageband/coviddeath/*.png
+
+  km_A_jcvi_ageband_noncoviddeath:
+    run: r:latest analysis/km.R A jcvi_ageband noncoviddeath
+    needs:
+    - match_A
+    - data_selection
+    outputs:
+      moderately_sensitive:
+        rds: output/match/A/km/jcvi_ageband/noncoviddeath/*.rds
+        png: output/match/A/km/jcvi_ageband/noncoviddeath/*.png
+
   ## ### Models by variant era (''variantera'') 
 
   km_A_variantera_postest:
@@ -1046,6 +1118,78 @@ actions:
       moderately_sensitive:
         rds: output/match/B/km/age65plus/noncoviddeath/*.rds
         png: output/match/B/km/age65plus/noncoviddeath/*.png
+
+  ## ### Models by JCVI age-band (''jcvi_ageband'') 
+
+  km_B_jcvi_ageband_postest:
+    run: r:latest analysis/km.R B jcvi_ageband postest
+    needs:
+    - match_B
+    - data_selection
+    outputs:
+      moderately_sensitive:
+        rds: output/match/B/km/jcvi_ageband/postest/*.rds
+        png: output/match/B/km/jcvi_ageband/postest/*.png
+
+  km_B_jcvi_ageband_covidemergency:
+    run: r:latest analysis/km.R B jcvi_ageband covidemergency
+    needs:
+    - match_B
+    - data_selection
+    outputs:
+      moderately_sensitive:
+        rds: output/match/B/km/jcvi_ageband/covidemergency/*.rds
+        png: output/match/B/km/jcvi_ageband/covidemergency/*.png
+
+  km_B_jcvi_ageband_covidadmittedproxy1:
+    run: r:latest analysis/km.R B jcvi_ageband covidadmittedproxy1
+    needs:
+    - match_B
+    - data_selection
+    outputs:
+      moderately_sensitive:
+        rds: output/match/B/km/jcvi_ageband/covidadmittedproxy1/*.rds
+        png: output/match/B/km/jcvi_ageband/covidadmittedproxy1/*.png
+
+  km_B_jcvi_ageband_covidadmitted:
+    run: r:latest analysis/km.R B jcvi_ageband covidadmitted
+    needs:
+    - match_B
+    - data_selection
+    outputs:
+      moderately_sensitive:
+        rds: output/match/B/km/jcvi_ageband/covidadmitted/*.rds
+        png: output/match/B/km/jcvi_ageband/covidadmitted/*.png
+
+  km_B_jcvi_ageband_covidcritcare:
+    run: r:latest analysis/km.R B jcvi_ageband covidcritcare
+    needs:
+    - match_B
+    - data_selection
+    outputs:
+      moderately_sensitive:
+        rds: output/match/B/km/jcvi_ageband/covidcritcare/*.rds
+        png: output/match/B/km/jcvi_ageband/covidcritcare/*.png
+
+  km_B_jcvi_ageband_coviddeath:
+    run: r:latest analysis/km.R B jcvi_ageband coviddeath
+    needs:
+    - match_B
+    - data_selection
+    outputs:
+      moderately_sensitive:
+        rds: output/match/B/km/jcvi_ageband/coviddeath/*.rds
+        png: output/match/B/km/jcvi_ageband/coviddeath/*.png
+
+  km_B_jcvi_ageband_noncoviddeath:
+    run: r:latest analysis/km.R B jcvi_ageband noncoviddeath
+    needs:
+    - match_B
+    - data_selection
+    outputs:
+      moderately_sensitive:
+        rds: output/match/B/km/jcvi_ageband/noncoviddeath/*.rds
+        png: output/match/B/km/jcvi_ageband/noncoviddeath/*.png
 
   ## ### Models by variant era (''variantera'') 
 
