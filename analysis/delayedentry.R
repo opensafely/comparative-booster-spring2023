@@ -65,11 +65,6 @@ fs::dir_create(output_dir)
 ## import match data
 data_matchstatus <- read_rds(here("output", "match", matchset, "data_matchstatus.rds"))
 
-# define calendar date cut points for calendar period specific analysis ----
-# used for variant era specific analyses
-calendarcuts <- c(study_dates$studystart_date, as.Date("2022-01-01"), study_dates$followupend_date+1)
-
-
 ## import baseline data, restrict to matched individuals and derive time-to-event variables
 data_matched <-
   read_rds(here("output", "data", "data_cohort.rds")) %>%
@@ -86,6 +81,13 @@ data_matched <-
     by= c("patient_id")
   ) %>%
   mutate(
+
+    # put here until data_process is re-run
+    variantera = fct_case_when(
+      vax3_date < as.Date("2021-12-15") ~ "Delta (up to 14 December 2021)",
+      vax3_date >= as.Date("2022-12-15") ~ "Omicron (15 December 2021 onwards)",
+      TRUE ~ NA_character_
+    ),
 
     treatment_date = vax3_date-1L, # -1 because we assume vax occurs at the start of the day, and so outcomes occurring on the same day as treatment are assumed "1 day" long
     outcome_date = .[[glue("{outcome}_date")]],

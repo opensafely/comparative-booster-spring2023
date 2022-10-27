@@ -61,6 +61,10 @@ postbaselinecuts <- c(0,7,14,21,28,42,56,70,84,112,140,168,182)
 
 maxfup <- max(postbaselinecuts)
 
+# define calendar date cut points for calendar period specific analysis ----
+# used for variant era specific analyses
+calendarcuts <- c(study_dates$studystart_date, as.Date("2022-12-15"), study_dates$followupend_date+1)
+
 
 # redaction threshold
 threshold <- 6
@@ -119,9 +123,9 @@ recoder <-
       `Prior SARS-CoV-2 infection` = "TRUE"
     ),
     variantera = c(
-      `Delta (29 Nov - 31 Dec)` = "Delta (29 Nov - 31 Dec)",
-      `Omicron (1 Jan onwards)` = "Omicron (1 Jan onwards)"
-    )
+      `Delta (up to 14 December 2021)` = "Delta (up to 14 December 2021)",
+      `Omicron (15 December 2021 onwards)` = "Omicron (15 December 2021 onwards)"
+    ),
   )
 
 ## model formulae ----

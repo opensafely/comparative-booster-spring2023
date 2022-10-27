@@ -225,8 +225,8 @@ data_processed <- data_extract %>%
     all=factor("all"),
     age65plus = age>=65,
     variantera = fct_case_when(
-      anycovidvax_3_date <= as.Date("2021-12-31") ~ "Delta (29 Nov - 31 Dec)",
-      anycovidvax_3_date >= as.Date("2022-01-01") ~ "Omicron (1 Jan onwards)",
+      anycovidvax_3_date < as.Date("2021-12-15") ~ "Delta (up to 14 December 2021)",
+      anycovidvax_3_date >= as.Date("2022-12-15") ~ "Omicron (15 December 2021 onwards)",
       TRUE ~ NA_character_
     ),
 
