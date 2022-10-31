@@ -23,8 +23,8 @@ if(length(args)==0){
   # use for interactive testing
   removeobjects <- FALSE
   matchset <- "A"
-  subgroup <- "all"
-  #subgroup <- "vax12_type"
+  #subgroup <- "all"
+  subgroup <- "jcvi_ageband"
   outcome <- "covidadmitted"
 
 } else {
@@ -85,7 +85,7 @@ data_matched <-
     # put here until data_process is re-run
     variantera = fct_case_when(
       vax3_date < as.Date("2021-12-15") ~ "Delta (up to 14 December 2021)",
-      vax3_date >= as.Date("2022-12-15") ~ "Omicron (15 December 2021 onwards)",
+      vax3_date >= as.Date("2021-12-15") ~ "Omicron (15 December 2021 onwards)",
       TRUE ~ NA_character_
     ),
 

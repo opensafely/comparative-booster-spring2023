@@ -23,8 +23,8 @@ if(length(args)==0){
   # use for interactive testing
   removeobjects <- FALSE
   matchset <- "A"
-  subgroup <- "all"
-  #subgroup <- "vax12_type"
+  #subgroup <- "all"
+  subgroup <- "jcvi_ageband"
   outcome <- "covidadmitted"
 
 } else {

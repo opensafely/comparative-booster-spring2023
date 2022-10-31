@@ -227,7 +227,7 @@ var_labels <- list(
   vax12_type_descr ~ "Primary vaccine course",
   vax23_interval ~ "Days between dose 2 and 3",
   age ~ "Age",
-  ageband ~ "Age band",
+  jcvi_ageband ~ "Age band",
   sex ~ "Sex",
   ethnicity_combined ~ "Ethnicity",
   imd_Q5 ~ "Deprivation",

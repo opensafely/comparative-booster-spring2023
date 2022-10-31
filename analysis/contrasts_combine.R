@@ -46,7 +46,7 @@ metaparams <-
     outcome = factor(c("postest", "covidemergency", "covidadmittedproxy1", "covidadmitted", "covidcritcare", "coviddeath", "noncoviddeath")),
     subgroup = factor(recoder$subgroups),
     #outcome = factor("covidadmitted"),
-    #subgroup = factor("all"),
+    #subgroup = factor(c("all", "jcvi_ageband")),
   ) %>%
   mutate(
     outcome_descr = fct_recoderelevel(outcome,  recoder$outcome),

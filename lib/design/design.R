@@ -110,7 +110,7 @@ recoder <-
       `18-64` = "FALSE",
       `65 and over` = "TRUE"
     ),
-    JCVI_ageband = c(
+    jcvi_ageband = c(
       "18-39", "40-49", "50-54", "55-59", "60-64", "65-69", "70-74", "75-79", "80+"
     ) %>% {set_names(.,.)},
     cev_cv = c(
