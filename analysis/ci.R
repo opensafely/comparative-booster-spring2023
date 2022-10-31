@@ -171,11 +171,6 @@ cif.se <- function(time, ci, n.risk, n.event, kmsurv, kmsummand){
 # outcome frequency
 outcomes_per_treated <- table(outcome=data_matched$ind_outcome, treated=data_matched$treatment)
 
-
-## redaction threshold ----
-
-threshold <- 6
-
 ## competing risks cumulative risk differences ----
 
 data_surv <-

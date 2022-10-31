@@ -172,10 +172,6 @@ table(
 #
 # write_csv(event_counts, fs::path(output_dir, "model_preflight.csv"))
 
-## redaction threshold ----
-
-threshold <- 7
-
 ## cumulative risk differences ----
 
 data_surv <-
