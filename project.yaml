@@ -1298,6 +1298,13 @@ actions:
     - km_A_age65plus_covidcritcare
     - km_A_age65plus_coviddeath
     - km_A_age65plus_noncoviddeath
+    - km_A_jcvi_ageband_postest
+    - km_A_jcvi_ageband_covidemergency
+    - km_A_jcvi_ageband_covidadmittedproxy1
+    - km_A_jcvi_ageband_covidadmitted
+    - km_A_jcvi_ageband_covidcritcare
+    - km_A_jcvi_ageband_coviddeath
+    - km_A_jcvi_ageband_noncoviddeath
     - km_A_cev_cv_postest
     - km_A_cev_cv_covidemergency
     - km_A_cev_cv_covidadmittedproxy1
@@ -1305,6 +1312,13 @@ actions:
     - km_A_cev_cv_covidcritcare
     - km_A_cev_cv_coviddeath
     - km_A_cev_cv_noncoviddeath
+    - km_A_variantera_postest
+    - km_A_variantera_covidemergency
+    - km_A_variantera_covidadmittedproxy1
+    - km_A_variantera_covidadmitted
+    - km_A_variantera_covidcritcare
+    - km_A_variantera_coviddeath
+    - km_A_variantera_noncoviddeath
     - delayedentry_A_all_postest
     - delayedentry_A_all_covidemergency
     - delayedentry_A_all_covidadmittedproxy1
@@ -1348,6 +1362,13 @@ actions:
     - km_B_age65plus_covidcritcare
     - km_B_age65plus_coviddeath
     - km_B_age65plus_noncoviddeath
+    - km_B_jcvi_ageband_postest
+    - km_B_jcvi_ageband_covidemergency
+    - km_B_jcvi_ageband_covidadmittedproxy1
+    - km_B_jcvi_ageband_covidadmitted
+    - km_B_jcvi_ageband_covidcritcare
+    - km_B_jcvi_ageband_coviddeath
+    - km_B_jcvi_ageband_noncoviddeath
     - km_B_cev_cv_postest
     - km_B_cev_cv_covidemergency
     - km_B_cev_cv_covidadmittedproxy1
@@ -1355,6 +1376,13 @@ actions:
     - km_B_cev_cv_covidcritcare
     - km_B_cev_cv_coviddeath
     - km_B_cev_cv_noncoviddeath
+    - km_B_variantera_postest
+    - km_B_variantera_covidemergency
+    - km_B_variantera_covidadmittedproxy1
+    - km_B_variantera_covidadmitted
+    - km_B_variantera_covidcritcare
+    - km_B_variantera_coviddeath
+    - km_B_variantera_noncoviddeath
     - delayedentry_B_all_postest
     - delayedentry_B_all_covidemergency
     - delayedentry_B_all_covidadmittedproxy1
