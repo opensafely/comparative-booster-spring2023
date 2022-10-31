@@ -159,7 +159,7 @@ delayedentry_estimates <- metaparams %>%
   ) %>%
   unnest(data)
 
-write_rds(delayedentry_estimates, fs::path(output_dir, "delayedentry_estimates_rounded.csv"))
+write_rds(delayedentry_estimates, fs::path(output_dir, "contrasts_era_estimates_rounded.csv"))
 
 
 delayedentry_contrasts_daily <- metaparams %>%
@@ -181,7 +181,7 @@ delayedentry_contrasts_daily <- metaparams %>%
   ) %>%
   unnest(data)
 
-write_csv(delayedentry_contrasts_daily, fs::path(output_dir, "contrasts_daily_rounded.csv"))
+write_csv(delayedentry_contrasts_daily, fs::path(output_dir, "contrasts_era_daily_rounded.csv"))
 
 
 delayedentry_contrasts_cuts <- metaparams %>%
@@ -203,7 +203,7 @@ delayedentry_contrasts_cuts <- metaparams %>%
   ) %>%
   unnest(data)
 
-write_csv(delayedentry_contrasts_cuts, fs::path(output_dir, "contrasts_cuts_rounded.csv"))
+write_csv(delayedentry_contrasts_cuts, fs::path(output_dir, "contrasts_era_cuts_rounded.csv"))
 
 
 delayedentry_contrasts_overall <- metaparams %>%
@@ -225,7 +225,7 @@ delayedentry_contrasts_overall <- metaparams %>%
   ) %>%
   unnest(data)
 
-write_csv(delayedentry_contrasts_overall, fs::path(output_dir, "contrasts_overall_rounded.csv"))
+write_csv(delayedentry_contrasts_overall, fs::path(output_dir, "contrasts_era_overall_rounded.csv"))
 
 
 
