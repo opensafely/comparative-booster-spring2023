@@ -15,9 +15,6 @@ library('survival')
 fs::dir_create(here("output", "release-objects", "prematch"))
 
 fs::file_copy(here("output", "prematch", "table1.csv"), fs::path(here("output", "release-objects", "prematch", "prematch_table1.csv")), overwrite = TRUE)
-fs::file_copy(here("output", "prematch", "table1by.csv"), fs::path(here("output", "release-objects", "prematch", "prematch_table1by.csv")), overwrite = TRUE)
-fs::file_copy(here("output", "prematch", "smd.csv"), fs::path(here("output", "release-objects", "prematch", "prematch_smd.csv")), overwrite = TRUE)
-
 
 ## post-matching ----
 
@@ -30,9 +27,7 @@ for(matchset in c("A", "B")){
   ## matching ----
 
   fs::file_copy(here("output", "match", matchset, "report", "table1.csv"), fs::path(output_dir, "match_table1.csv"), overwrite = TRUE)
-  fs::file_copy(here("output", "match", matchset, "report", "table1by.csv"), fs::path(output_dir, "match_table1by.csv"), overwrite = TRUE)
   fs::file_copy(here("output", "match", matchset, "report", "data_coverage.csv"), fs::path(output_dir, "match_coverage.csv"), overwrite = TRUE)
-  fs::file_copy(here("output", "match", matchset, "report", "data_smd.csv"), fs::path(output_dir, "match_smd.csv"), overwrite = TRUE)
   fs::file_copy(here("output", "match", matchset, "report", "flowchart.csv"), fs::path(output_dir, "match_flowchart.csv"), overwrite = TRUE)
 
   ## Contrasts ----
