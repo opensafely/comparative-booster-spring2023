@@ -311,11 +311,14 @@ kmcontrasts <- function(data, cuts = NULL) {
   # c(0, 140)
 
   if (is.null(cuts)) {
-    cuts <- unique(c(0, data$time))
+    stop("cuts must be provided")
   }
 
   data %>%
-    filter(time != 0) %>%
+    filter(
+      time != 0,
+      time <= max(cuts)
+    ) %>%
     transmute(
       !!subgroup_sym,
       treatment,
@@ -453,9 +456,27 @@ kmcontrasts <- function(data, cuts = NULL) {
 #km_contrasts_overall <- kmcontrast(data_surv, c(0,maxfup))
 
 
-km_contrasts_rounded_daily <- kmcontrasts(data_surv_rounded)
-km_contrasts_rounded_cuts <- kmcontrasts(data_surv_rounded, postbaselinecuts)
-km_contrasts_rounded_overall <- kmcontrasts(data_surv_rounded, c(0,maxfup))
+# select max follow-up time available in the data
+maxfup_data <-
+  data_surv_rounded %>%
+  ungroup() %>%
+  summarise(
+    maxfup=max(time[!is.na(surv)])
+  )  %>%
+  pull(maxfup)
+
+
+cat("max follow-up time is ", maxfup_data)
+
+# select available time-periods
+postbaselinecuts_data <-
+  postbaselinecuts[postbaselinecuts<=maxfup_data]
+
+cat("available time-periods are ", paste(postbaselinecuts_data, collapse=" "))
+
+km_contrasts_rounded_daily <- kmcontrasts(data_surv_rounded, c(0,seq_len(max(postbaselinecuts_data))))
+km_contrasts_rounded_cuts <- kmcontrasts(data_surv_rounded, postbaselinecuts_data)
+km_contrasts_rounded_overall <- kmcontrasts(data_surv_rounded, c(0,max(postbaselinecuts_data)))
 
 
 
@@ -463,7 +484,9 @@ km_contrasts_rounded_overall <- kmcontrasts(data_surv_rounded, c(0,maxfup))
 
 coxcontrast <- function(data, cuts=NULL){
 
-  if(is.null(cuts)){cuts <- unique(c(0,data$time))}
+  if (is.null(cuts)) {
+    stop("cuts must be provided")
+  }
 
   fup_split <-
     data %>%
@@ -523,8 +546,8 @@ coxcontrast <- function(data, cuts=NULL){
 
 }
 
-cox_contrasts_cuts <- coxcontrast(data_matched, postbaselinecuts)
-cox_contrasts_overall <- coxcontrast(data_matched, c(0,maxfup))
+cox_contrasts_cuts <- coxcontrast(data_matched, postbaselinecuts_data) %>% filter(fup_end<=max(postbaselinecuts_data))
+cox_contrasts_overall <- coxcontrast(data_matched, c(0,max(postbaselinecuts_data))) %>% filter(fup_end<=max(postbaselinecuts_data))
 
 # cox HR is a safe statistic so no need to redact/round
 contrasts_rounded_daily <-  km_contrasts_rounded_daily # don't bother with cox as HR within daily intervals will be imprecisely estimated
