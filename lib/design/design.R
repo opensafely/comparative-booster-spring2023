@@ -55,7 +55,7 @@ treatement_lookup <-
   )
 
 # where to split follow-up time after recruitment
-postbaselinecuts <- c(0,7,14,21,28,42,56,70,84,112,140,168,182)
+postbaselinecuts <- c(0,7,14,21,28,42,56,70,84,112,140,168,196)
 
 # maximum follow-up duration
 

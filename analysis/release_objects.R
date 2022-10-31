@@ -36,6 +36,7 @@ for(matchset in c("A", "B")){
   fs::file_copy(here("output", "match", matchset, "combined", "contrasts_daily_rounded.csv"), fs::path(output_dir, "contrasts_daily_rounded.csv"), overwrite = TRUE)
   fs::file_copy(here("output", "match", matchset, "combined", "contrasts_cuts_rounded.csv"), fs::path(output_dir, "contrasts_cuts_rounded.csv"), overwrite = TRUE)
   fs::file_copy(here("output", "match", matchset, "combined", "contrasts_overall_rounded.csv"), fs::path(output_dir, "contrasts_overall_rounded.csv"), overwrite = TRUE)
+  fs::file_copy(here("output", "match", matchset, "combined", "contrasts_20_rounded.csv"), fs::path(output_dir, "contrasts_20_rounded.csv"), overwrite = TRUE)
 
   ## era Contrasts ----
 
@@ -43,6 +44,7 @@ for(matchset in c("A", "B")){
   fs::file_copy(here("output", "match", matchset, "combined", "contrasts_era_daily_rounded.csv"), fs::path(output_dir, "contrasts_era_daily_rounded.csv"), overwrite = TRUE)
   fs::file_copy(here("output", "match", matchset, "combined", "contrasts_era_cuts_rounded.csv"), fs::path(output_dir, "contrasts_era_cuts_rounded.csv"), overwrite = TRUE)
   fs::file_copy(here("output", "match", matchset, "combined", "contrasts_era_overall_rounded.csv"), fs::path(output_dir, "contrasts_era_overall_rounded.csv"), overwrite = TRUE)
+  fs::file_copy(here("output", "match", matchset, "combined", "contrasts_era_20_rounded.csv"), fs::path(output_dir, "contrasts_era_20_rounded.csv"), overwrite = TRUE)
 
 
 }

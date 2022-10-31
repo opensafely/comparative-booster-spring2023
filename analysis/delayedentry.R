@@ -577,6 +577,7 @@ cat("available time-periods are ", paste(postbaselinecuts_data, collapse=" "))
 km_contrasts_rounded_daily <- kmcontrasts(data_surv_rounded, c(0,seq_len(max(postbaselinecuts_data))))
 km_contrasts_rounded_cuts <- kmcontrasts(data_surv_rounded, postbaselinecuts_data)
 km_contrasts_rounded_overall <- kmcontrasts(data_surv_rounded, c(0,max(postbaselinecuts_data)))
+km_contrasts_rounded_20 <- kmcontrasts(data_surv_rounded, c(0,20*7))
 
 
 
@@ -616,13 +617,16 @@ coxcontrasts <- function(data_split){
 
 cox_contrasts_cuts <- coxcontrasts(data_split_cuts) %>% filter(fup_end <= maxfup_data)
 cox_contrasts_overall <- coxcontrasts(data_split_overall) %>% filter(fup_end <= maxfup_data)
+cox_contrasts_20 <- coxcontrasts(data_split_overall) %>% filter(fup_end <= 20*7)
 
 # cox HR is a safe statistic so no need to redact/round
 contrasts_rounded_daily <-  km_contrasts_rounded_daily # don't bother with cox as HR within daily intervals will be imprecisely estimated
 contrasts_rounded_cuts <-  left_join(km_contrasts_rounded_cuts, cox_contrasts_cuts, by=c(subgroup, "fup_start", "fup_end", "calendar_start", "calendar_end"))
 contrasts_rounded_overall <-  left_join(km_contrasts_rounded_overall, cox_contrasts_overall, by=c(subgroup, "fup_start", "fup_end", "calendar_start", "calendar_end"))
+contrasts_rounded_20 <-  left_join(km_contrasts_rounded_20, cox_contrasts_20, by=c(subgroup, "fup_start", "fup_end", "calendar_start", "calendar_end"))
 
 
 write_rds(contrasts_rounded_daily, fs::path(output_dir, "contrasts_daily_rounded.rds"))
 write_rds(contrasts_rounded_cuts, fs::path(output_dir, "contrasts_cuts_rounded.rds"))
 write_rds(contrasts_rounded_overall, fs::path(output_dir, "contrasts_overall_rounded.rds"))
+write_rds(contrasts_rounded_20, fs::path(output_dir, "contrasts_20_rounded.rds"))
