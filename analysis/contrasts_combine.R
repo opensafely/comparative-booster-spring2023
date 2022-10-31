@@ -159,7 +159,7 @@ delayedentry_estimates <- metaparams %>%
   ) %>%
   unnest(data)
 
-write_rds(delayedentry_estimates, fs::path(output_dir, "contrasts_era_estimates_rounded.csv"))
+write_rds(delayedentry_estimates, fs::path(output_dir, "km_era_estimates_rounded.csv"))
 
 
 delayedentry_contrasts_daily <- metaparams %>%
