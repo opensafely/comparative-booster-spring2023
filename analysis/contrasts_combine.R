@@ -72,8 +72,7 @@ km_estimates <- metaparams %>%
   ) %>%
   unnest(data)
 
-write_rds(km_estimates, fs::path(output_dir, "km_estimates_rounded.csv"))
-
+write_csv(km_estimates, fs::path(output_dir, "km_estimates_rounded.csv"))
 
 contrasts_daily <- metaparams %>%
   mutate(
@@ -180,7 +179,7 @@ delayedentry_estimates <- metaparams %>%
   ) %>%
   unnest(data)
 
-write_rds(delayedentry_estimates, fs::path(output_dir, "km_era_estimates_rounded.csv"))
+write_csv(delayedentry_estimates, fs::path(output_dir, "km_era_estimates_rounded.csv"))
 
 
 delayedentry_contrasts_daily <- metaparams %>%
