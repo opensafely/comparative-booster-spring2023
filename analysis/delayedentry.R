@@ -181,6 +181,27 @@ table(
 # write_csv(event_counts, fs::path(output_dir, "model_preflight.csv"))
 
 
+# select max follow-up time available in the data
+maxfup_data <-
+  data_matched %>%
+  group_by(treatment) %>%
+  summarise(
+    maxfup=max(tte_outcome)
+  )  %>%
+  ungroup() %>%
+  summarise(
+    maxfup=max(maxfup)
+  ) %>%
+  pull(maxfup)
+
+cat("max follow-up time is ", maxfup_data)
+
+# select available time-periods
+postbaselinecuts_data <-
+  postbaselinecuts[postbaselinecuts<=maxfup_data]
+
+cat("available time-periods are ", paste(postbaselinecuts_data, collapse=" "))
+
 ## create stset-style datasets, splitting on both time-since-baseline (cuts) and calendar-time (calendarcuts) ----
 
 splitdata <- function(data, cuts=NULL, calendarcuts=NULL){
@@ -254,9 +275,9 @@ splitdata <- function(data, cuts=NULL, calendarcuts=NULL){
 
 }
 
-
-data_split_cuts <- splitdata(data_matched, postbaselinecuts, calendarcuts)
-data_split_overall <- splitdata(data_matched, c(0, maxfup), calendarcuts)
+data_split_cuts <- splitdata(data_matched, postbaselinecuts_data, calendarcuts)
+data_split_overall <- splitdata(data_matched, c(0, maxfup_data), calendarcuts)
+data_split_20 <- splitdata(data_matched, c(0, 20*7), calendarcuts)
 
 ## treatment-group and calendar-time specific kaplan-meier estimates ----
 # uses delayed entry
@@ -274,7 +295,7 @@ data_surv <-
     surv_obj_tidy = map(surv_obj, ~ {
       broom::tidy(.x) %>%
         complete(
-          time = seq_len(maxfup), # fill in 1 row for each day of follow up
+          time = seq_len(maxfup_data), # fill in 1 row for each day of follow up
           fill = list(n.event = 0, n.censor = 0) # fill in zero events on those days
         ) %>%
         # fill in n.risk on each zero-event day
@@ -550,37 +571,13 @@ kmcontrasts <- function(data, cuts = NULL) {
     )
 }
 
-#km_contrasts_daily <- kmcontrast(data_surv)
-#km_contrasts_cuts <- kmcontrast(data_surv, postbaselinecuts)
-#km_contrasts_overall <- kmcontrast(data_surv, c(0,maxfup))
 
 
-# select max follow-up time available in the data
-maxfup_data <-
-  data_surv_rounded %>%
-  ungroup() %>%
-  summarise(
-    maxfup=max(time[!is.na(surv)])
-  )  %>%
-  pull(maxfup)
-
-maxfup_data <-80
-
-cat("max follow-up time is ", maxfup_data)
-
-# select available time-periods
-postbaselinecuts_data <-
-  postbaselinecuts[postbaselinecuts<=maxfup_data]
-
-cat("available time-periods are ", paste(postbaselinecuts_data, collapse=" "))
 
 km_contrasts_rounded_daily <- kmcontrasts(data_surv_rounded, c(0,seq_len(max(postbaselinecuts_data))))
 km_contrasts_rounded_cuts <- kmcontrasts(data_surv_rounded, postbaselinecuts_data)
 km_contrasts_rounded_overall <- kmcontrasts(data_surv_rounded, c(0,max(postbaselinecuts_data)))
 km_contrasts_rounded_20 <- kmcontrasts(data_surv_rounded, c(0,20*7))
-
-
-
 
 ## Cox models ----
 
@@ -615,9 +612,9 @@ coxcontrasts <- function(data_split){
 
 }
 
-cox_contrasts_cuts <- coxcontrasts(data_split_cuts) %>% filter(fup_end <= maxfup_data)
-cox_contrasts_overall <- coxcontrasts(data_split_overall) %>% filter(fup_end <= maxfup_data)
-cox_contrasts_20 <- coxcontrasts(data_split_overall) %>% filter(fup_end <= 20*7)
+cox_contrasts_cuts <- coxcontrasts(data_split_cuts)
+cox_contrasts_overall <- coxcontrasts(data_split_overall)
+cox_contrasts_20 <- coxcontrasts(data_split_20)
 
 # cox HR is a safe statistic so no need to redact/round
 contrasts_rounded_daily <-  km_contrasts_rounded_daily # don't bother with cox as HR within daily intervals will be imprecisely estimated
