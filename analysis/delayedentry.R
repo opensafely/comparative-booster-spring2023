@@ -466,7 +466,8 @@ kmcontrasts <- function(data, cuts = NULL) {
 
       inc = weighted.mean(inc, n.atrisk * interval),
       inc2 = weighted.mean(inc2, n.atrisk * interval),
-      n.atrisk = first(n.atrisk), # number at risk at start of time period
+      #n.atrisk = first(n.atrisk), # number at risk at start of time period # NOTE: not definable with delayed entry
+
       n.event = sum(n.event, na.rm = TRUE), # number of events within time period
       n.censor = sum(n.censor, na.rm = TRUE), # number censored within time period
 
@@ -506,7 +507,7 @@ kmcontrasts <- function(data, cuts = NULL) {
       names_from = treatment,
       names_glue = "{.value}_{treatment}",
       values_from = c(
-        persontime, n.atrisk, n.event, n.censor,
+        persontime, n.event, n.censor,
         inc, inc2,
         surv, surv.se, surv.ll, surv.ul,
         risk, risk.se, risk.ll, risk.ul,
@@ -514,9 +515,6 @@ kmcontrasts <- function(data, cuts = NULL) {
       )
     ) %>%
     mutate(
-      n.nonevent_0 = n.atrisk_0 - n.event_0,
-      n.nonevent_1 = n.atrisk_1 - n.event_1,
-
       ## time-period-specific quantities
 
       # incidence rate ratio
