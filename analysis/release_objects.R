@@ -59,7 +59,7 @@ fs::dir_ls(here("output", "release-objects"), type="file", recurse=TRUE) %>%
 
 ## create command for releasing using osrelease ----
 fs::dir_ls(here("output", "release-objects"), type="file", recurse=TRUE) %>%
-  map_chr(~str_remove(., fixed(here()))) %>%
+  map_chr(~str_remove(., fixed(paste0(here(), "/")))) %>%
   #map_chr(~paste0("'",. ,"'")) %>%
   paste(., collapse=" ") %>%
   paste("osrelease", .) %>%
