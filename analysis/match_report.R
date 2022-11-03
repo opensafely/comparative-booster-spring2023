@@ -283,7 +283,11 @@ tab_summary_baseline <-
   tbl_summary(
     by = treatment_descr,
     label = unname(var_labels[names(.)]),
-    statistic = list(N = "{N}")
+    statistic = list(
+      N = "{N}",
+      age="{mean} ({sd})",
+      vax23_interval="{mean} ({sd})"
+    ),
   )
 
 
@@ -307,7 +311,8 @@ raw_stats_redacted <- raw_stats %>%
 
 write_csv(raw_stats_redacted, fs::path(output_dir, "table1.csv"))
 
-#
+
+
 # # love / smd plot ----
 #
 # data_smd <- tab_summary_baseline$meta_data %>%
@@ -317,10 +322,14 @@ write_csv(raw_stats_redacted, fs::path(output_dir, "table1.csv"))
 #     variable != "N"
 #   ) %>%
 #   group_by(var_label, variable_levels) %>%
+#   mutate(
+#     mean = coalesce(mean,p),
+#     sd = coalesce(sd,sqrt(p*(1-p)))
+#   ) %>%
 #   summarise(
-#     diff = diff(p),
-#     sd = sqrt(sum(p*(1-p))),
-#     smd = diff/sd
+#     diff = diff(mean),
+#     sd = sqrt(mean(sd^2)),
+#     smd = diff/sd,
 #   ) %>%
 #   ungroup() %>%
 #   mutate(

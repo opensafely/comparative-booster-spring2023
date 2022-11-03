@@ -193,7 +193,7 @@ var_labels <- list(
   N  ~ "Total N",
   treatment_descr ~ "Vaccine type",
   vax12_type_descr ~ "Primary vaccine course",
-  vax23_interval ~ "Dose 2/3 interval",
+  vax23_interval ~ "Days between dose 2 and 3",
   age ~ "Age",
   jcvi_ageband ~ "Age band",
   sex ~ "Sex",
@@ -240,7 +240,11 @@ tab_summary_prematch <-
   tbl_summary(
     by = treatment_descr,
     label = unname(var_labels[names(.)]),
-    statistic = list(N = "{N}")
+    statistic = list(
+      N = "{N}",
+      age="{mean} ({sd})",
+      vax23_interval="{mean} ({sd})"
+    ),
   )
 
 
