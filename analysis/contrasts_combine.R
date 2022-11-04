@@ -270,6 +270,7 @@ delayedentry_contrasts_20 <- metaparams %>%
 write_csv(delayedentry_contrasts_20, fs::path(output_dir, "contrasts_era_20_rounded.csv"))
 
 
+
 ## move km plots to single folder ----
 fs::dir_create(here("output", "match", matchset, "combined", "plots"))
 
@@ -340,4 +341,73 @@ plot_estimates(rd, rd.ll, rd.ul, "rd")
 plot_estimates(rr, rr.ll, rr.ul, "rr")
 plot_estimates(coxhr, coxhr.ll, coxhr.ul, "coxhr")
 plot_estimates(irr, irr.ll, irr.ul, "irr")
+
+
+
+## follow-up summary statistics ----
+
+
+## this is inefficient because of the `rep` -- could obtain this in km scripts instead
+followup_treatment <- km_estimates %>%
+  group_by(
+    outcome, outcome_descr, subgroup, subgroup_descr, subgroup_level, subgroup_level_descr, treatment
+  ) %>%
+  summarise(
+    persontime = sum(interval*n.risk), # = sum(time*(n.censor+n.event)),
+    entry_n = first(n.risk), # = sum(n.risk - (lag(n.risk,1,0) - lag(n.censor+n.event, 1, 0))),
+    exit_n = sum(n.censor+n.event),
+    exittime_mean = weighted.mean(time,n.censor+n.event),
+    exittime_median = median(rep(time, times=n.censor+n.event)),
+    exittime_Q1 = quantile(rep(time, times=n.censor+n.event), 0.25),
+    exittime_Q3 = quantile(rep(time, times=n.censor+n.event), 0.75),
+    #exittime_min = min(time[n.censor+n.event>0]),
+    #exittime_max = max(time[n.censor+n.event>0]),
+  )
+
+write_csv(followup_treatment, fs::path(output_dir, "followup_treatment_rounded.csv"))
+
+followup <- km_estimates %>%
+  group_by(
+    outcome, outcome_descr, subgroup, subgroup_descr, subgroup_level, subgroup_level_descr
+  ) %>%
+  summarise(
+    persontime = sum(interval*n.risk), # = sum(time*(n.censor+n.event)),
+    entry_n = sum(n.risk - (lag(n.risk,1,0) - lag(n.censor+n.event, 1, 0))),
+    exit_n = sum(n.censor+n.event),
+    exittime_mean = weighted.mean(time,n.censor+n.event),
+    exittime_median = median(rep(time, times=n.censor+n.event)),
+    exittime_Q1 = quantile(rep(time, times=n.censor+n.event), 0.25),
+    exittime_Q3 = quantile(rep(time, times=n.censor+n.event), 0.75),
+    #exittime_min = min(time[n.censor+n.event>0]),
+    #exittime_max = max(time[n.censor+n.event>0]),
+  )
+
+
+write_csv(followup, fs::path(output_dir, "followup_rounded.csv"))
+
+## do not do era as this _must_ be done in delayedentry script, because we don't know from the km tables the individual entry and exit times for each person
+
+
+## keep incase need to use the entire lsit of follow-up times
+# followup_treatment <- km_estimates %>%
+#   group_by(
+#     outcome, outcome_descr, subgroup, subgroup_descr, subgroup_level, subgroup_level_descr, treatment
+#   ) %>%
+#   summarise(
+#     #entrytime = list(sort(rep(time, times=n.risk - (lag(n.risk,1,0) - lag(n.censor+n.event, 1, 0))))),
+#     exittime = list(sort(rep(time, times=n.censor+n.event))),
+#     .groups = 'keep'
+#   ) %>%
+#   unnest(c(exittime)) %>%
+#   summarise(
+#     persontime = sum(exittime), # = sum(time*(n.censor+n.event)),
+#     #entry_n = length(entrytime), # = sum(n.risk - (lag(n.risk,1,0) - lag(n.censor+n.event, 1, 0))),
+#     exit_n = length(exittime),
+#     exittime_mean = mean(exittime),
+#     exittime_median = median(exittime),
+#     exittime_Q1 = quantile(exittime, 0.25),
+#     exittime_Q3 = quantile(exittime, 0.75),
+#     #exittime_min = min(exittime),
+#     #exittime_max = max(exittime),
+#   )
 
