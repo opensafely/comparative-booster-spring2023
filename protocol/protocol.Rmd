@@ -84,7 +84,7 @@ We will consider all adults aged $\ge$ 18 years who received a booster dose of B
 * they are registered at a GP practice using TPP's SystmOne clinical information system at the time of boosting;
 * they received a two-dose primary vaccination course of either BNT162b2 or ChAdOx1-S (mixed dosing and Moderna mRNA-1273 were not considered due to small numbers);
 * they are not a health or social care worker, not resident in a care or nursing home; not medically housebound or receiving end-of-life care;
-* there is no evidence of SARS-CoV-2 infection or COVID-19 disease within the 90 days prior to booster dose;
+* there is no evidence of SARS-CoV-2 infection or COVID-19 disease within the 28 days prior to booster dose;
 * they are not undergoing an unplanned hospital admission at the time of boosting;
 * they have complete information on sex, ethnicity, deprivation, and NHS region.
 

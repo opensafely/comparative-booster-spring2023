@@ -68,7 +68,7 @@ data_criteria <- data_processed %>%
     has_knownvax1 = vax1_type %in% c("pfizer", "az"),
     has_knownvax2 = vax2_type %in% c("pfizer", "az"),
     has_expectedvax3type = vax3_type %in% c("pfizer", "moderna"),
-    has_norecentcovid = ((vax3_date - anycovid_0_date) >= 90) | is.na(anycovid_0_date),
+    has_norecentcovid = ((vax3_date - anycovid_0_date) >= 28) | is.na(anycovid_0_date),
     isnot_inhospital = !inhospital,
 
     jcvi_group_6orhigher = jcvi_group %in% as.character(1:6),
@@ -140,7 +140,7 @@ data_flowchart <-
       crit == "c2" ~ "  with homologous primary vaccination course of BNT162b2 or ChAdOx1",
       crit == "c3" ~ "  and not a health and social care worker",
       crit == "c4" ~ "  and not a care/nursing home resident, end-of-life or housebound",
-      crit == "c5" ~ "  and no COVID-19-related events within 90 days",
+      crit == "c5" ~ "  and no COVID-19-related events within 28 days",
       crit == "c6" ~ "  and not admitted in hospital at time of booster",
       TRUE ~ NA_character_
     )
@@ -175,7 +175,7 @@ data_flowchart_rounded <-
       crit == "c2" ~ "  with homologous primary vaccination course of BNT162b2 or ChAdOx1",
       crit == "c3" ~ "  and not a health and social care worker",
       crit == "c4" ~ "  and not a care/nursing home resident, end-of-life or housebound",
-      crit == "c5" ~ "  and no COVID-19-related events within 90 days",
+      crit == "c5" ~ "  and no COVID-19-related events within 28 days",
       crit == "c6" ~ "  and not admitted in hospital at time of booster",
       TRUE ~ NA_character_
     )

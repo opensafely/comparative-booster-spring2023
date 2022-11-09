@@ -403,7 +403,7 @@ data_flowchart_match <-
       crit == "c2" ~ "  with homologous primary vaccination course of BNT162b2 or ChAdOx1",
       crit == "c3" ~ "  and not a health and social care worker",
       crit == "c4" ~ "  and not a care/nursing home resident, end-of-life or housebound",
-      crit == "c5" ~ "  and no COVID-19-related events within 90 days",
+      crit == "c5" ~ "  and no COVID-19-related events within 28 days",
       crit == "c6" ~ "  and not admitted in hospital at time of booster",
       crit == "c7" ~ "  and successfully matched",
       TRUE ~ NA_character_
@@ -445,7 +445,7 @@ data_flowchart_match_rounded <-
       crit == "c2" ~ "  with homologous primary vaccination course of BNT162b2 or ChAdOx1",
       crit == "c3" ~ "  and not a health and social care worker",
       crit == "c4" ~ "  and not a care/nursing home resident, end-of-life or housebound",
-      crit == "c5" ~ "  and no COVID-19-related events within 90 days",
+      crit == "c5" ~ "  and no COVID-19-related events within 28 days",
       crit == "c6" ~ "  and not admitted in hospital at time of booster",
       crit == "c7" ~ "  and successfully matched",
       TRUE ~ NA_character_
