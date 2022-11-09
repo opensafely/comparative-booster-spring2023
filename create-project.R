@@ -415,7 +415,7 @@ actions_list <- splice(
 
   action_contrasts("A", "all", "postest"),
   action_contrasts("A", "all", "covidemergency"),
-  action_contrasts("A", "all", "covidadmittedproxy1"),
+  #action_contrasts("A", "all", "covidadmittedproxy1"),
   action_contrasts("A", "all", "covidadmitted"),
   #action_contrasts("A", "all", "noncovidadmitted"),
   action_contrasts("A", "all", "covidcritcare"),
@@ -424,7 +424,7 @@ actions_list <- splice(
 
   action_delayedentry_contrasts("A", "all", "postest"),
   action_delayedentry_contrasts("A", "all", "covidemergency"),
-  action_delayedentry_contrasts("A", "all", "covidadmittedproxy1"),
+  #action_delayedentry_contrasts("A", "all", "covidadmittedproxy1"),
   action_delayedentry_contrasts("A", "all", "covidadmitted"),
   #action_delayedentry_contrasts("A", "all", "noncovidadmitted"),
   action_delayedentry_contrasts("A", "all", "covidcritcare"),
@@ -436,7 +436,7 @@ actions_list <- splice(
 
   action_contrasts("A", "vax12_type", "postest"),
   action_contrasts("A", "vax12_type", "covidemergency"),
-  action_contrasts("A", "vax12_type", "covidadmittedproxy1"),
+  #action_contrasts("A", "vax12_type", "covidadmittedproxy1"),
   action_contrasts("A", "vax12_type", "covidadmitted"),
   #action_contrasts("A", "vax12_type", "noncovidadmitted"),
   action_contrasts("A", "vax12_type", "covidcritcare"),
@@ -448,7 +448,7 @@ actions_list <- splice(
 
   action_contrasts("A", "cev_cv", "postest"),
   action_contrasts("A", "cev_cv", "covidemergency"),
-  action_contrasts("A", "cev_cv", "covidadmittedproxy1"),
+  #action_contrasts("A", "cev_cv", "covidadmittedproxy1"),
   action_contrasts("A", "cev_cv", "covidadmitted"),
   #action_contrasts("A", "cev_cv", "noncovidadmitted"),
   action_contrasts("A", "cev_cv", "covidcritcare"),
@@ -460,7 +460,7 @@ actions_list <- splice(
 
   action_contrasts("A", "prior_covid_infection", "postest"),
   action_contrasts("A", "prior_covid_infection", "covidemergency"),
-  action_contrasts("A", "prior_covid_infection", "covidadmittedproxy1"),
+  #action_contrasts("A", "prior_covid_infection", "covidadmittedproxy1"),
   action_contrasts("A", "prior_covid_infection", "covidadmitted"),
   #action_contrasts("A", "prior_covid_infection", "noncovidadmitted"),
   action_contrasts("A", "prior_covid_infection", "covidcritcare"),
@@ -472,29 +472,40 @@ actions_list <- splice(
 
   action_contrasts("A", "age65plus", "postest"),
   action_contrasts("A", "age65plus", "covidemergency"),
-  action_contrasts("A", "age65plus", "covidadmittedproxy1"),
+  #action_contrasts("A", "age65plus", "covidadmittedproxy1"),
   action_contrasts("A", "age65plus", "covidadmitted"),
   #action_contrasts("A", "age65plus", "noncovidadmitted"),
   action_contrasts("A", "age65plus", "covidcritcare"),
   action_contrasts("A", "age65plus", "coviddeath"),
   action_contrasts("A", "age65plus", "noncoviddeath"),
 
-  comment("### Models by JCVI age-band ('jcvi_ageband')"),
+  # comment("### Models by JCVI age-band ('jcvi_ageband')"),
+  #
+  # action_contrasts("A", "jcvi_ageband", "postest"),
+  # action_contrasts("A", "jcvi_ageband", "covidemergency"),
+  # #action_contrasts("A", "jcvi_ageband", "covidadmittedproxy1"),
+  # action_contrasts("A", "jcvi_ageband", "covidadmitted"),
+  # #action_contrasts("A", "jcvi_ageband", "noncovidadmitted"),
+  # action_contrasts("A", "jcvi_ageband", "covidcritcare"),
+  # action_contrasts("A", "jcvi_ageband", "coviddeath"),
+  # action_contrasts("A", "jcvi_ageband", "noncoviddeath"),
 
-  action_contrasts("A", "jcvi_ageband", "postest"),
-  action_contrasts("A", "jcvi_ageband", "covidemergency"),
-  action_contrasts("A", "jcvi_ageband", "covidadmittedproxy1"),
-  action_contrasts("A", "jcvi_ageband", "covidadmitted"),
-  #action_contrasts("A", "jcvi_ageband", "noncovidadmitted"),
-  action_contrasts("A", "jcvi_ageband", "covidcritcare"),
-  action_contrasts("A", "jcvi_ageband", "coviddeath"),
-  action_contrasts("A", "jcvi_ageband", "noncoviddeath"),
+  comment("### Models by age-band ('ageband')"),
+
+  action_contrasts("A", "ageband", "postest"),
+  action_contrasts("A", "ageband", "covidemergency"),
+  #action_contrasts("A", "ageband", "covidadmittedproxy1"),
+  action_contrasts("A", "ageband", "covidadmitted"),
+  #action_contrasts("A", "ageband", "noncovidadmitted"),
+  action_contrasts("A", "ageband", "covidcritcare"),
+  action_contrasts("A", "ageband", "coviddeath"),
+  action_contrasts("A", "ageband", "noncoviddeath"),
 
   comment("### Models by variant era ('variantera')"),
 
   action_contrasts("A", "variantera", "postest"),
   action_contrasts("A", "variantera", "covidemergency"),
-  action_contrasts("A", "variantera", "covidadmittedproxy1"),
+  #action_contrasts("A", "variantera", "covidadmittedproxy1"),
   action_contrasts("A", "variantera", "covidadmitted"),
   #action_contrasts("A", "variantera", "noncovidadmitted"),
   action_contrasts("A", "variantera", "covidcritcare"),
@@ -510,7 +521,7 @@ actions_list <- splice(
 
   action_contrasts("B", "all", "postest"),
   action_contrasts("B", "all", "covidemergency"),
-  action_contrasts("B", "all", "covidadmittedproxy1"),
+  #action_contrasts("B", "all", "covidadmittedproxy1"),
   action_contrasts("B", "all", "covidadmitted"),
   #action_contrasts("B", "all", "noncovidadmitted"),
   action_contrasts("B", "all", "covidcritcare"),
@@ -519,7 +530,7 @@ actions_list <- splice(
 
   action_delayedentry_contrasts("B", "all", "postest"),
   action_delayedentry_contrasts("B", "all", "covidemergency"),
-  action_delayedentry_contrasts("B", "all", "covidadmittedproxy1"),
+  #action_delayedentry_contrasts("B", "all", "covidadmittedproxy1"),
   action_delayedentry_contrasts("B", "all", "covidadmitted"),
   #action_delayedentry_contrasts("B", "all", "noncovidadmitted"),
   action_delayedentry_contrasts("B", "all", "covidcritcare"),
@@ -531,7 +542,7 @@ actions_list <- splice(
 
   action_contrasts("B", "vax12_type", "postest"),
   action_contrasts("B", "vax12_type", "covidemergency"),
-  action_contrasts("B", "vax12_type", "covidadmittedproxy1"),
+  #action_contrasts("B", "vax12_type", "covidadmittedproxy1"),
   action_contrasts("B", "vax12_type", "covidadmitted"),
   #action_contrasts("B", "vax12_type", "noncovidadmitted"),
   action_contrasts("B", "vax12_type", "covidcritcare"),
@@ -543,7 +554,7 @@ actions_list <- splice(
 
   action_contrasts("B", "cev_cv", "postest"),
   action_contrasts("B", "cev_cv", "covidemergency"),
-  action_contrasts("B", "cev_cv", "covidadmittedproxy1"),
+  #action_contrasts("B", "cev_cv", "covidadmittedproxy1"),
   action_contrasts("B", "cev_cv", "covidadmitted"),
   #action_contrasts("B", "cev_cv", "noncovidadmitted"),
   action_contrasts("B", "cev_cv", "covidcritcare"),
@@ -555,7 +566,7 @@ actions_list <- splice(
 
   action_contrasts("B", "prior_covid_infection", "postest"),
   action_contrasts("B", "prior_covid_infection", "covidemergency"),
-  action_contrasts("B", "prior_covid_infection", "covidadmittedproxy1"),
+  #action_contrasts("B", "prior_covid_infection", "covidadmittedproxy1"),
   action_contrasts("B", "prior_covid_infection", "covidadmitted"),
   #action_contrasts("B", "prior_covid_infection", "noncovidadmitted"),
   action_contrasts("B", "prior_covid_infection", "covidcritcare"),
@@ -567,7 +578,7 @@ actions_list <- splice(
 
   action_contrasts("B", "age65plus", "postest"),
   action_contrasts("B", "age65plus", "covidemergency"),
-  action_contrasts("B", "age65plus", "covidadmittedproxy1"),
+  #action_contrasts("B", "age65plus", "covidadmittedproxy1"),
   action_contrasts("B", "age65plus", "covidadmitted"),
   #action_contrasts("B", "age65plus", "noncovidadmitted"),
   action_contrasts("B", "age65plus", "covidcritcare"),
@@ -575,23 +586,34 @@ actions_list <- splice(
   action_contrasts("B", "age65plus", "noncoviddeath"),
 
 
-  comment("### Models by JCVI age-band ('jcvi_ageband')"),
+  # comment("### Models by JCVI age-band ('jcvi_ageband')"),
+  #
+  # action_contrasts("B", "jcvi_ageband", "postest"),
+  # action_contrasts("B", "jcvi_ageband", "covidemergency"),
+  # #action_contrasts("B", "jcvi_ageband", "covidadmittedproxy1"),
+  # action_contrasts("B", "jcvi_ageband", "covidadmitted"),
+  # #action_contrasts("B", "jcvi_ageband", "noncovidadmitted"),
+  # action_contrasts("B", "jcvi_ageband", "covidcritcare"),
+  # action_contrasts("B", "jcvi_ageband", "coviddeath"),
+  # action_contrasts("B", "jcvi_ageband", "noncoviddeath"),
 
-  action_contrasts("B", "jcvi_ageband", "postest"),
-  action_contrasts("B", "jcvi_ageband", "covidemergency"),
-  action_contrasts("B", "jcvi_ageband", "covidadmittedproxy1"),
-  action_contrasts("B", "jcvi_ageband", "covidadmitted"),
-  #action_contrasts("B", "jcvi_ageband", "noncovidadmitted"),
-  action_contrasts("B", "jcvi_ageband", "covidcritcare"),
-  action_contrasts("B", "jcvi_ageband", "coviddeath"),
-  action_contrasts("B", "jcvi_ageband", "noncoviddeath"),
+  comment("### Models by age-band ('ageband')"),
+
+  action_contrasts("B", "ageband", "postest"),
+  action_contrasts("B", "ageband", "covidemergency"),
+  #action_contrasts("B", "ageband", "covidadmittedproxy1"),
+  action_contrasts("B", "ageband", "covidadmitted"),
+  #action_contrasts("B", "ageband", "noncovidadmitted"),
+  action_contrasts("B", "ageband", "covidcritcare"),
+  action_contrasts("B", "ageband", "coviddeath"),
+  action_contrasts("B", "ageband", "noncoviddeath"),
 
 
   comment("### Models by variant era ('variantera')"),
 
   action_contrasts("B", "variantera", "postest"),
   action_contrasts("B", "variantera", "covidemergency"),
-  action_contrasts("B", "variantera", "covidadmittedproxy1"),
+  #action_contrasts("B", "variantera", "covidadmittedproxy1"),
   action_contrasts("B", "variantera", "covidadmitted"),
   #action_contrasts("B", "variantera", "noncovidadmitted"),
   action_contrasts("B", "variantera", "covidcritcare"),
@@ -606,14 +628,14 @@ actions_list <- splice(
 
   action_contrasts_combine(
     "A",
-    subgroups = c("all", "vax12_type", "prior_covid_infection", "age65plus", "jcvi_ageband", "cev_cv", "variantera"),
-    outcomes = c("postest", "covidemergency", "covidadmittedproxy1", "covidadmitted", "covidcritcare", "coviddeath", "noncoviddeath")
+    subgroups = c("all", "vax12_type", "prior_covid_infection", "age65plus", "ageband", "cev_cv", "variantera"),
+    outcomes = c("postest", "covidemergency", "covidadmitted", "covidcritcare", "coviddeath", "noncoviddeath")
   ),
 
   action_contrasts_combine(
     "B",
-    subgroups = c("all", "vax12_type", "prior_covid_infection", "age65plus", "jcvi_ageband", "cev_cv", "variantera"),
-    outcomes = c("postest", "covidemergency", "covidadmittedproxy1", "covidadmitted", "covidcritcare", "coviddeath", "noncoviddeath")
+    subgroups = c("all", "vax12_type", "prior_covid_infection", "age65plus", "ageband", "cev_cv", "variantera"),
+    outcomes = c("postest", "covidemergency", "covidadmitted", "covidcritcare", "coviddeath", "noncoviddeath")
   ),
 
 
