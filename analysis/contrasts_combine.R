@@ -343,6 +343,10 @@ plot_estimates(coxhr, coxhr.ll, coxhr.ul, "coxhr")
 plot_estimates(irr, irr.ll, irr.ul, "irr")
 
 
+## move event counts data ----
+
+eventcounts <- read_rds(here("output", "match", matchset, "eventcounts", "eventcounts.rds"))
+write_csv(eventcounts, fs::path(output_dir, "eventcounts.csv"))
 
 ## follow-up summary statistics ----
 

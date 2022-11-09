@@ -22,6 +22,7 @@ with open("./lib/design/study-dates.json") as f:
 studystart_date = study_dates["studystart_date"] 
 studyend_date = study_dates["studyend_date"]
 followupend_date = study_dates["followupend_date"]
+postestfollowupend_date = study_dates["postestfollowupend_date"]
 firstpfizer_date = study_dates["firstpfizer_date"]
 firstaz_date = study_dates["firstaz_date"]
 firstmoderna_date = study_dates["firstmoderna_date"]
@@ -1005,6 +1006,22 @@ study = StudyDefinition(
   death_date=patients.died_from_any_cause(
     returning="date_of_death",
     date_format="YYYY-MM-DD",
+  ),
+  
+  test_count = patients.with_test_result_in_sgss(
+      pathogen = "SARS-CoV-2",
+      test_result = "any",
+      returning = "number_of_matches_in_period",
+      between = ["anycovidvax_3_date", f"{postestfollowupend_date}"],
+      restrict_to_earliest_specimen_date=False
+    ),
+  
+  postest_count = patients.with_test_result_in_sgss(
+    pathogen = "SARS-CoV-2",
+    test_result = "positive",
+    returning = "number_of_matches_in_period",
+    between = ["anycovidvax_3_date", f"{postestfollowupend_date}"],
+    restrict_to_earliest_specimen_date=False
   ),
 
 

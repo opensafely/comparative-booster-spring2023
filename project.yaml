@@ -1263,6 +1263,24 @@ actions:
         rds: output/match/B/km/variantera/noncoviddeath/*.rds
         png: output/match/B/km/variantera/noncoviddeath/*.png
 
+  eventcounts_A:
+    run: r:latest analysis/eventcounts.R A
+    needs:
+    - match_A
+    - data_selection
+    outputs:
+      moderately_sensitive:
+        rds: output/match/A/eventcounts/*.rds
+
+  eventcounts_B:
+    run: r:latest analysis/eventcounts.R B
+    needs:
+    - match_B
+    - data_selection
+    outputs:
+      moderately_sensitive:
+        rds: output/match/B/eventcounts/*.rds
+
   ## # # # # # # # # # # # # # # # # # # # 
   ## Combine KM / CI estimates across outcomes and subgroups 
   ## # # # # # # # # # # # # # # # # # # # 
@@ -1326,6 +1344,7 @@ actions:
     - delayedentry_A_all_covidcritcare
     - delayedentry_A_all_coviddeath
     - delayedentry_A_all_noncoviddeath
+    - eventcounts_A
     outputs:
       moderately_sensitive:
         csv: output/match/A/combined/*.csv
@@ -1390,6 +1409,7 @@ actions:
     - delayedentry_B_all_covidcritcare
     - delayedentry_B_all_coviddeath
     - delayedentry_B_all_noncoviddeath
+    - eventcounts_B
     outputs:
       moderately_sensitive:
         csv: output/match/B/combined/*.csv

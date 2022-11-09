@@ -33,8 +33,9 @@ action_match <- compose_action(
 )
 
 action_contrasts <- compose_action(
-    #here("analysis", "km.R"),
-    here("analysis", "ci.R")
+    here("analysis", "km.R"),
+    #here("analysis", "ci.R"),
+    here("analysis", "eventcounts.R")
 )
 
 action_combine <- compose_action(

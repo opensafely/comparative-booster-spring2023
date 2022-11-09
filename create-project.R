@@ -156,7 +156,20 @@ action_delayedentry_contrasts <- function(
 }
 
 
-
+action_eventcounts <- function(matchset) {
+  action(
+    name = glue("eventcounts_{matchset}"),
+    run = glue("r:latest analysis/eventcounts.R"),
+    arguments = c(matchset),
+    needs = list(
+      glue("match_{matchset}"),
+      "data_selection"
+    ),
+    moderately_sensitive = lst(
+      rds = glue("output/match/{matchset}/eventcounts/*.rds"),
+    )
+  )
+}
 
 
 ## model action function ----
@@ -204,7 +217,8 @@ action_contrasts_combine <- function(
             outcome=outcomes
           ),
           "delayedentry_{matchset}_{subgroup}_{outcome}"
-        ) %>% as.list
+        ) %>% as.list,
+        list(glue("eventcounts_{matchset}"))
       ),
       moderately_sensitive = lst(
         csv = glue("output/match/{matchset}/combined/*.csv"),
@@ -584,6 +598,9 @@ actions_list <- splice(
   action_contrasts("B", "variantera", "coviddeath"),
   action_contrasts("B", "variantera", "noncoviddeath"),
 
+
+  action_eventcounts("A"),
+  action_eventcounts("B"),
 
   comment("# # # # # # # # # # # # # # # # # # #", "Combine KM / CI estimates across outcomes and subgroups", "# # # # # # # # # # # # # # # # # # #"),
 

@@ -362,6 +362,14 @@ sim_list = lst(
     missing_rate = ~0.90
   ),
 
+  test_count = bn_node(
+    ~ rpois(n = ..n, 1)
+  ),
+
+  postest_count = bn_node(
+    ~ rpois(n = ..n, 0.1)
+  )
+
 
 )
 bn <- bn_create(sim_list, known_variables = known_variables)
