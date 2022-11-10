@@ -97,8 +97,8 @@ data_processed <- data_extract %>%
 
     ageband = cut(
       age,
-      breaks=c(-Inf, 18, 40, 50, 60, 70, 80, 90, Inf),
-      labels=c("under 18", "18-39", "40-49", "50-59", "60-69", "70-79", "80-89", "90+"),
+      breaks=c(-Inf, 18, 40, 55, 65, 75, Inf),
+      labels=c("under 18", "18-39", "40-54", "55-64", "65-74", "75+"),
       right=FALSE
     ),
 
@@ -172,12 +172,14 @@ data_processed <- data_extract %>%
       (chronic_liver_disease)+
       (chronic_resp_disease | asthma)+
       (chronic_neuro_disease)+
-      (cancer)#+
+      (cancer_haem | cancer_nonhaem)+
       #(learndis)+
       #(sev_mental),
-    ,
+      0,
     multimorb = cut(multimorb, breaks = c(0, 1, 2, Inf), labels=c("0", "1", "2+"), right=FALSE),
     immuno = immunosuppressed | asplenia,
+
+    immuno_any = immunosuppressed | asplenia | cancer_haem | cancer_nonhaem | solid_organ_transplant |  hiv_aids,
 
 
     # original priority groups https://assets.publishing.service.gov.uk/government/uploads/system/uploads/attachment_data/file/1007737/Greenbook_chapter_14a_30July2021.pdf#page=15

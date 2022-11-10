@@ -22,6 +22,7 @@ with open("./lib/design/study-dates.json") as f:
 studystart_date = study_dates["studystart_date"] 
 studyend_date = study_dates["studyend_date"]
 followupend_date = study_dates["followupend_date"]
+postestfollowupend_date = study_dates["postestfollowupend_date"]
 firstpfizer_date = study_dates["firstpfizer_date"]
 firstaz_date = study_dates["firstaz_date"]
 firstmoderna_date = study_dates["firstmoderna_date"]
@@ -629,30 +630,95 @@ study = StudyDefinition(
     on_or_before="anycovidvax_3_date - 1 day",
   ),
 
+  ## immunosupressive conditions / medications ####
+  #################################################
 
+  # Immunosuppression diagnosis codes
+  immdx=patients.with_these_clinical_events(
+    codelists.immdx_cov,
+    returning="binary_flag",
+    on_or_before="anycovidvax_3_date - 1 day",
+  ),
+    
+  # Immunosuppression medication codes
+  immrx=patients.with_these_medications(
+    codelists.immrx,
+    returning="binary_flag",
+    between=["anycovidvax_3_date - 182 days", "anycovidvax_3_date - 1 day"]
+  ),
+  
   immunosuppressed=patients.satisfying(
     "immrx OR immdx",
-
-    # Immunosuppression diagnosis codes
-    immdx=patients.with_these_clinical_events(
-      codelists.immdx_cov,
-      returning="binary_flag",
-      on_or_before="anycovidvax_3_date - 1 day",
-    ),
-    # Immunosuppression medication codes
-    immrx=patients.with_these_medications(
-      codelists.immrx,
-      returning="binary_flag",
-      between=["anycovidvax_3_date - 182 days", "anycovidvax_3_date - 1 day"]
-    ),
   ),
-
+  
   # Asplenia or Dysfunction of the Spleen codes
   asplenia=patients.with_these_clinical_events(
     codelists.spln_cov,
     returning="binary_flag",
     on_or_before="anycovidvax_3_date - 1 day",
   ),
+  
+  # haematological cancer
+  cancer_haem = patients.with_these_clinical_events(
+    codelists.cancer_haem_snomed,
+    returning="binary_flag",
+    between=["anycovidvax_3_date - 3 years", "anycovidvax_3_date - 1 day"],
+  ),
+  
+  # solid cancer
+  cancer_nonhaem = patients.with_these_clinical_events( 
+    codelists.cancer_nonhaem_snomed,
+    between=["anycovidvax_3_date - 3 years", "anycovidvax_3_date - 1 day"],
+    returning="binary_flag",
+  ), 
+  
+  # solid organ transplant
+  solid_organ_transplant = patients.with_these_clinical_events( 
+    codelists.solid_organ_transplant,
+    on_or_before="anycovidvax_3_date - 1 day",
+    returning="binary_flag",
+  ), 
+  
+  # HIV / AIDS
+  hiv_aids = patients.with_these_clinical_events( 
+    codelists.hiv_aids,
+    on_or_before="anycovidvax_3_date - 1 day",
+    returning="binary_flag",
+  ), 
+  
+  
+  
+  # NHSD Haematological diseases
+  
+  # haematological_disease_nhsd=patients.satisfying(
+  #   """
+  #   haematopoietic_stem_cell_transplant_nhsd_snomed OR
+  #   haematological_malignancies_nhsd_snomed OR
+  #   sickle_cell_disease_nhsd_snomed OR
+  #   """,
+  #   return_expectations={
+  #     "incidence": 0.05,
+  #   },
+  #   haematopoietic_stem_cell_transplant_nhsd_snomed=patients.with_these_clinical_events(
+  #     haematopoietic_stem_cell_transplant_nhsd_snomed_codes,
+  #     on_or_before="anycovidvax_3_date - 1 day",
+  #     returning="binary_flag",
+  #   ),
+  #   haematological_malignancies_nhsd_snomed=patients.with_these_clinical_events(
+  #     haematological_malignancies_nhsd_snomed_codes,
+  #     on_or_before="anycovidvax_3_date - 1 day",
+  #     returning="binary_flag",
+  #   ),
+  #   sickle_cell_disease_nhsd_snomed=patients.with_these_clinical_events(
+  #     sickle_cell_disease_nhsd_snomed_codes,
+  #     on_or_before="anycovidvax_3_date - 1 day",
+  #     returning="binary_flag",
+  #   ),
+  # ),
+  
+
+
+  
 
   # Wider Learning Disability
   learndis=patients.with_these_clinical_events(
@@ -716,28 +782,6 @@ study = StudyDefinition(
   #   date_format="YYYY-MM-DD",
   # ),
   
-  cancer = patients.satisfying(
-    
-    "cancer_primary_care",
-    # cancer_hosp=patients.admitted_to_hospital(
-    #   with_these_diagnoses=combine_codelists(
-    #     codelists.cancer_nonhaem_icd10,
-    #     codelists.cancer_haem_icd10,
-    #     codelists.cancer_unspec_icd10,
-    #   ),
-    #   between=["anycovidvax_3_date - 3 years", "anycovidvax_3_date - 1 day"],
-    #   returning="binary_flag",
-    # ),
-    cancer_primary_care=patients.with_these_clinical_events( 
-      combine_codelists(
-        codelists.cancer_nonhaem_snomed,
-        codelists.cancer_haem_snomed
-      ),
-      between=["anycovidvax_3_date - 3 years", "anycovidvax_3_date - 1 day"],
-      returning="binary_flag",
-    ), 
-  ),
-
   
   
   #####################################
@@ -1005,6 +1049,22 @@ study = StudyDefinition(
   death_date=patients.died_from_any_cause(
     returning="date_of_death",
     date_format="YYYY-MM-DD",
+  ),
+  
+  test_count = patients.with_test_result_in_sgss(
+      pathogen = "SARS-CoV-2",
+      test_result = "any",
+      returning = "number_of_matches_in_period",
+      between = ["anycovidvax_3_date", f"{postestfollowupend_date}"],
+      restrict_to_earliest_specimen_date=False
+    ),
+  
+  postest_count = patients.with_test_result_in_sgss(
+    pathogen = "SARS-CoV-2",
+    test_result = "positive",
+    returning = "number_of_matches_in_period",
+    between = ["anycovidvax_3_date", f"{postestfollowupend_date}"],
+    restrict_to_earliest_specimen_date=False
   ),
 
 

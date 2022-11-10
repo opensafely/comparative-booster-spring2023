@@ -43,7 +43,7 @@ fs::dir_create(output_dir)
 
 metaparams <-
   expand_grid(
-    outcome = factor(c("postest", "covidemergency", "covidadmittedproxy1", "covidadmitted", "covidcritcare", "coviddeath", "noncoviddeath")),
+    outcome = factor(c("postest", "covidemergency", "covidadmitted", "covidcritcare", "coviddeath", "noncoviddeath")),
     subgroup = factor(recoder$subgroups),
     #outcome = factor("covidadmitted"),
     #subgroup = factor(c("all", "jcvi_ageband")),
@@ -343,6 +343,10 @@ plot_estimates(coxhr, coxhr.ll, coxhr.ul, "coxhr")
 plot_estimates(irr, irr.ll, irr.ul, "irr")
 
 
+## move event counts data ----
+
+eventcounts <- read_rds(here("output", "match", matchset, "eventcounts", "eventcounts.rds"))
+write_csv(eventcounts, fs::path(output_dir, "eventcounts.csv"))
 
 ## follow-up summary statistics ----
 

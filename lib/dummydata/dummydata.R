@@ -237,9 +237,17 @@ sim_list = lst(
   chronic_heart_disease = bn_node( ~rbernoulli(n=..n, p = 0.02)),
   chronic_kidney_disease = bn_node( ~rbernoulli(n=..n, p = 0.02)),
   chronic_liver_disease = bn_node( ~rbernoulli(n=..n, p = 0.02)),
-  cancer = bn_node( ~rbernoulli(n=..n, p = 0.02)),
-  immunosuppressed = bn_node( ~rbernoulli(n=..n, p = 0.02)),
+
+  immunosuppressed = bn_node( ~immdx | immrx),
+  immdx = bn_node( ~rbernoulli(n=..n, p = 0.02)),
+  immrx = bn_node( ~rbernoulli(n=..n, p = 0.02)),
+
   asplenia = bn_node( ~rbernoulli(n=..n, p = 0.02)),
+  cancer_haem = bn_node( ~rbernoulli(n=..n, p = 0.01)),
+  cancer_nonhaem = bn_node( ~rbernoulli(n=..n, p = 0.01)),
+  solid_organ_transplant = bn_node( ~rbernoulli(n=..n, p = 0.01)),
+  hiv_aids = bn_node( ~rbernoulli(n=..n, p = 0.01)),
+
   learndis = bn_node( ~rbernoulli(n=..n, p = 0.02)),
 
   cev_ever = bn_node( ~rbernoulli(n=..n, p = 0.05)),
@@ -361,6 +369,14 @@ sim_list = lst(
     ~as.integer(runif(n=..n, anycovidvax_3_day, anycovidvax_3_day+100)),
     missing_rate = ~0.90
   ),
+
+  test_count = bn_node(
+    ~ rpois(n = ..n, 1)
+  ),
+
+  postest_count = bn_node(
+    ~ rpois(n = ..n, 0.1)
+  )
 
 
 )

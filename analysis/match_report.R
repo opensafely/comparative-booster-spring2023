@@ -243,11 +243,19 @@ var_labels <- list(
   chronic_resp_disease ~ "Chronic respiratory disease",
   asthma ~ "Asthma",
   chronic_neuro_disease ~ "Chronic neurological disease",
-  cancer ~ "Cancer, within previous 3 years",
 
   multimorb ~ "Morbidity count",
+
   immunosuppressed ~ "Immunosuppressed",
+  immuno_any ~ "Immunosuppressed (all)",
+
   asplenia ~ "Asplenia or poor spleen function",
+  cancer_nonhaem ~ "Cancer (excluding haem), within previous 3 years",
+  cancer_haem ~ "Haematological cancer, within previous 3 years",
+  solid_organ_transplant ~ "Solid organ transplant",
+  immrx ~ "Immunosuppressive medications, within 6 months",
+  hiv_aids ~ "HIV/AIDS",
+
   learndis ~ "Learning disabilities",
   sev_mental ~ "Serious mental illness",
 
@@ -403,7 +411,7 @@ data_flowchart_match <-
       crit == "c2" ~ "  with homologous primary vaccination course of BNT162b2 or ChAdOx1",
       crit == "c3" ~ "  and not a health and social care worker",
       crit == "c4" ~ "  and not a care/nursing home resident, end-of-life or housebound",
-      crit == "c5" ~ "  and no COVID-19-related events within 90 days",
+      crit == "c5" ~ "  and no COVID-19-related events within 28 days",
       crit == "c6" ~ "  and not admitted in hospital at time of booster",
       crit == "c7" ~ "  and successfully matched",
       TRUE ~ NA_character_
@@ -445,7 +453,7 @@ data_flowchart_match_rounded <-
       crit == "c2" ~ "  with homologous primary vaccination course of BNT162b2 or ChAdOx1",
       crit == "c3" ~ "  and not a health and social care worker",
       crit == "c4" ~ "  and not a care/nursing home resident, end-of-life or housebound",
-      crit == "c5" ~ "  and no COVID-19-related events within 90 days",
+      crit == "c5" ~ "  and no COVID-19-related events within 28 days",
       crit == "c6" ~ "  and not admitted in hospital at time of booster",
       crit == "c7" ~ "  and successfully matched",
       TRUE ~ NA_character_
