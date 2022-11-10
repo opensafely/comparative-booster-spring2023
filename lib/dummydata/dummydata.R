@@ -237,9 +237,17 @@ sim_list = lst(
   chronic_heart_disease = bn_node( ~rbernoulli(n=..n, p = 0.02)),
   chronic_kidney_disease = bn_node( ~rbernoulli(n=..n, p = 0.02)),
   chronic_liver_disease = bn_node( ~rbernoulli(n=..n, p = 0.02)),
-  cancer = bn_node( ~rbernoulli(n=..n, p = 0.02)),
-  immunosuppressed = bn_node( ~rbernoulli(n=..n, p = 0.02)),
+
+  immunosuppressed = bn_node( ~immdx | immrx),
+  immdx = bn_node( ~rbernoulli(n=..n, p = 0.02)),
+  immrx = bn_node( ~rbernoulli(n=..n, p = 0.02)),
+
   asplenia = bn_node( ~rbernoulli(n=..n, p = 0.02)),
+  cancer_haem = bn_node( ~rbernoulli(n=..n, p = 0.01)),
+  cancer_nonhaem = bn_node( ~rbernoulli(n=..n, p = 0.01)),
+  solid_organ_transplant = bn_node( ~rbernoulli(n=..n, p = 0.01)),
+  hiv_aids = bn_node( ~rbernoulli(n=..n, p = 0.01)),
+
   learndis = bn_node( ~rbernoulli(n=..n, p = 0.02)),
 
   cev_ever = bn_node( ~rbernoulli(n=..n, p = 0.05)),

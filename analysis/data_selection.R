@@ -211,11 +211,19 @@ var_labels <- list(
   chronic_resp_disease ~ "Chronic respiratory disease",
   asthma ~ "Asthma",
   chronic_neuro_disease ~ "Chronic neurological disease",
-  cancer ~ "Cancer, within previous 3 years",
+
+  immunosuppressed ~ "Immunosuppressed",
+  immuno_any ~ "Immunosuppressed (all)",
+
+  asplenia ~ "Asplenia or poor spleen function",
+  cancer_nonhaem ~ "Cancer (excluding haem), within previous 3 years",
+  cancer_haem ~ "Haematological cancer, within previous 3 years",
+  solid_organ_transplant ~ "Solid organ transplant",
+  immrx ~ "Immunosuppressive medications, within 6 months",
+  hiv_aids ~ "HIV/AIDS",
 
   multimorb ~ "Morbidity count",
-  immunosuppressed ~ "Immunosuppressed",
-  asplenia ~ "Asplenia or poor spleen function",
+
   learndis ~ "Learning disabilities",
   sev_mental ~ "Serious mental illness",
 

@@ -450,9 +450,30 @@ cancer_lung_snomed=codelist_from_csv(
     column="id",
 )
 
+chemotherapy_radiotherapy_snomed = codelist_from_csv(
+  "codelists/opensafely-chemotherapy-or-radiotherapy-snomed.csv", 
+  system = "snomed", 
+  column = "id"
+)
+
 cancer_nonhaem_snomed=combine_codelists(
     cancer_nonhaem_nonlung_snomed,
     cancer_lung_snomed,
+    chemotherapy_radiotherapy_snomed
+)
+
+# solid organ transplant
+solid_organ_transplant=codelist_from_csv(
+    "codelists/opensafely-solid-organ-transplantation-snomed.csv",
+    system="snomed",
+    column="id",
+)
+
+# HIV/AIDS
+hiv_aids=codelist_from_csv(
+    "codelists/nhsd-hiv-aids-snomed.csv",
+    system="snomed",
+    column="code",
 )
 
 

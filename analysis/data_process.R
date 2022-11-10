@@ -172,12 +172,14 @@ data_processed <- data_extract %>%
       (chronic_liver_disease)+
       (chronic_resp_disease | asthma)+
       (chronic_neuro_disease)+
-      (cancer)#+
+      (cancer_haem | cancer_nonhaem)+
       #(learndis)+
       #(sev_mental),
-    ,
+      0,
     multimorb = cut(multimorb, breaks = c(0, 1, 2, Inf), labels=c("0", "1", "2+"), right=FALSE),
     immuno = immunosuppressed | asplenia,
+
+    immuno_any = immunosuppressed | asplenia | cancer_haem | cancer_nonhaem | solid_organ_transplant |  hiv_aids,
 
 
     # original priority groups https://assets.publishing.service.gov.uk/government/uploads/system/uploads/attachment_data/file/1007737/Greenbook_chapter_14a_30July2021.pdf#page=15
