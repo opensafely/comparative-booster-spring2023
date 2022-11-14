@@ -99,7 +99,7 @@ data_counts <-
       function(subgroup)
       {
         data_matched %>%
-          group_by_(c(subgroup, "treatment")) %>%
+          group_by_(subgroup, "treatment") %>%
           summarise(
             n = roundmid_any(n(), threshold),
             persontime = sum(as.numeric(censor_date - (vax3_date - 1))),
