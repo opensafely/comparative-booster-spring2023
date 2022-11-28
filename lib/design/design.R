@@ -58,7 +58,8 @@ treatement_lookup <-
   )
 
 # where to split follow-up time after recruitment
-postbaselinecuts <- c(0,7,14,21,28,42,56,70,84,112,140,168,196)
+#postbaselinecuts <- c(0,7,14,28,42,56,70,84,112,140,168,196)
+postbaselinecuts <- c(0,7,14,28,56,84,112,140,168,196)
 
 # maximum follow-up duration
 
@@ -84,6 +85,7 @@ recoder <-
       `Age-band` = "ageband",
       `Prior SARS-CoV-2 infection status` = "prior_covid_infection",
       `Clinical vulnerability` = "cev_cv",
+      `Clinically at-risk` = "cv",
       `Variant era` = "variantera"
     ),
     status = c(
@@ -126,6 +128,10 @@ recoder <-
       "Clinically at-risk",
       "Not clinically at-risk"
     ) %>% {set_names(.,.)},
+    cv = c(
+      `Clinically extremely vulnerable or at-risk` = "TRUE",
+      `Not clinically at-risk` = "FALSE"
+    ),
     prior_covid_infection = c(
       `No prior SARS-CoV-2 infection` = "FALSE",
       `Prior SARS-CoV-2 infection` = "TRUE"

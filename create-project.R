@@ -447,7 +447,7 @@ actions_list <- splice(
   action_contrasts("A", "vax12_type", "fracture"),
 
 
-  comment("### Models by clinically vulnerable group ('cev_cv')"),
+  comment("### Models by clinically vulnerable group ('cev_cv' or 'cv')"),
 
   action_contrasts("A", "cev_cv", "postest"),
   action_contrasts("A", "cev_cv", "covidemergency"),
@@ -458,6 +458,16 @@ actions_list <- splice(
   action_contrasts("A", "cev_cv", "coviddeath"),
   action_contrasts("A", "cev_cv", "noncoviddeath"),
   action_contrasts("A", "cev_cv", "fracture"),
+
+  action_contrasts("A", "cv", "postest"),
+  action_contrasts("A", "cv", "covidemergency"),
+  #action_contrasts("A", "cv", "covidadmittedproxy1"),
+  action_contrasts("A", "cv", "covidadmitted"),
+  #action_contrasts("A", "cv", "noncovidadmitted"),
+  action_contrasts("A", "cv", "covidcritcare"),
+  action_contrasts("A", "cv", "coviddeath"),
+  action_contrasts("A", "cv", "noncoviddeath"),
+  action_contrasts("A", "cv", "fracture"),
 
 
   comment("### Models by prior infection ('prior_covid_infection')"),
@@ -563,7 +573,7 @@ actions_list <- splice(
   action_contrasts("B", "vax12_type", "fracture"),
 
 
-  comment("### Models by clinically vulnerable group ('cev_cv')"),
+  comment("### Models by clinically vulnerable group ('cev_cv' or 'cv')"),
 
   action_contrasts("B", "cev_cv", "postest"),
   action_contrasts("B", "cev_cv", "covidemergency"),
@@ -574,6 +584,16 @@ actions_list <- splice(
   action_contrasts("B", "cev_cv", "coviddeath"),
   action_contrasts("B", "cev_cv", "noncoviddeath"),
   action_contrasts("B", "cev_cv", "fracture"),
+
+  action_contrasts("B", "cv", "postest"),
+  action_contrasts("B", "cv", "covidemergency"),
+  #action_contrasts("B", "cv", "covidadmittedproxy1"),
+  action_contrasts("B", "cv", "covidadmitted"),
+  #action_contrasts("B", "cv", "noncovidadmitted"),
+  action_contrasts("B", "cv", "covidcritcare"),
+  action_contrasts("B", "cv", "coviddeath"),
+  action_contrasts("B", "cv", "noncoviddeath"),
+  action_contrasts("B", "cv", "fracture"),
 
 
   comment("### Models by prior infection ('prior_covid_infection')"),
