@@ -35,12 +35,15 @@ events_lookup <- tribble(
   "covidadmittedproxy2", "covidadmittedproxy2_date", "COVID-19 hospitalisation (A&E proxy v2)",
   "covidcritcare", "covidcritcare_date", "COVID-19 critical care",
   "coviddeath", "coviddeath_date", "COVID-19 death",
-  "noncoviddeath", "noncoviddeath_date", "Non-COVID-19 death",
   "death", "death_date", "Any death",
 
   # safety
   "admitted", "admitted_unplanned_1_date", "Unplanned hospitalisation",
   "emergency", "emergency_date", "A&E attendance",
+
+  # negative control
+  "noncoviddeath", "noncoviddeath_date", "Non-COVID-19 death",
+  "fracture", "fracture_date", "Fracture",
 )
 
 treatement_lookup <-
@@ -100,7 +103,8 @@ recoder <-
       "COVID-19 critical care" = "covidcritcare",
       "COVID-19 death" = "coviddeath",
       "Non-COVID-19 death" = "noncoviddeath",
-      "All-cause death" = "death"
+      "All-cause death" = "death",
+      "Fracture" = "fracture"
     ),
     all = c(` ` = "all"),
     vax12_type = c(

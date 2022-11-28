@@ -259,6 +259,7 @@ data_processed <- data_extract %>%
       TRUE ~ NA_character_
     ),
 
+    fracture_date = pmin(fractureemergency_date, fractureadmitted_date, fracturedeath_date, na.rm=TRUE),
 
   )
 

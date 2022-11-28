@@ -359,6 +359,12 @@
       "url": "https://codelists.opensafely.org/codelist/opensafely/no-longer-housebound/29a88ca6/",
       "downloaded_at": "2022-04-13 08:56:47.991375Z",
       "sha": "cedcdcc0354885c1aa08224072718ff6bdae7450"
+    },
+    "opensafely-fractures.csv": {
+      "id": "opensafely/fractures/086e92fc",
+      "url": "https://codelists.opensafely.org/codelist/opensafely/fractures/086e92fc/",
+      "downloaded_at": "2022-11-23 17:34:07.168152Z",
+      "sha": "0c73d4faea48e0e5cc410cc8a4373e287196dcdc"
     }
   }
 }
