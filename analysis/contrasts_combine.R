@@ -43,7 +43,7 @@ fs::dir_create(output_dir)
 
 metaparams <-
   expand_grid(
-    outcome = factor(c("postest", "covidemergency", "covidadmitted", "covidcritcare", "coviddeath", "noncoviddeath")),
+    outcome = factor(c("postest", "covidemergency", "covidadmitted", "covidcritcare", "coviddeath", "noncoviddeath", "fracture")),
     subgroup = factor(recoder$subgroups),
     #outcome = factor("covidadmitted"),
     #subgroup = factor(c("all", "jcvi_ageband")),

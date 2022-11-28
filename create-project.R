@@ -421,6 +421,7 @@ actions_list <- splice(
   action_contrasts("A", "all", "covidcritcare"),
   action_contrasts("A", "all", "coviddeath"),
   action_contrasts("A", "all", "noncoviddeath"),
+  action_contrasts("A", "all", "fracture"),
 
   action_delayedentry_contrasts("A", "all", "postest"),
   action_delayedentry_contrasts("A", "all", "covidemergency"),
@@ -430,6 +431,7 @@ actions_list <- splice(
   action_delayedentry_contrasts("A", "all", "covidcritcare"),
   action_delayedentry_contrasts("A", "all", "coviddeath"),
   action_delayedentry_contrasts("A", "all", "noncoviddeath"),
+  action_delayedentry_contrasts("A", "all", "fracture"),
 
 
   comment("### Models by primary course ('vax12_type')"),
@@ -442,6 +444,7 @@ actions_list <- splice(
   action_contrasts("A", "vax12_type", "covidcritcare"),
   action_contrasts("A", "vax12_type", "coviddeath"),
   action_contrasts("A", "vax12_type", "noncoviddeath"),
+  action_contrasts("A", "vax12_type", "fracture"),
 
 
   comment("### Models by clinically vulnerable group ('cev_cv')"),
@@ -454,6 +457,7 @@ actions_list <- splice(
   action_contrasts("A", "cev_cv", "covidcritcare"),
   action_contrasts("A", "cev_cv", "coviddeath"),
   action_contrasts("A", "cev_cv", "noncoviddeath"),
+  action_contrasts("A", "cev_cv", "fracture"),
 
 
   comment("### Models by prior infection ('prior_covid_infection')"),
@@ -466,6 +470,7 @@ actions_list <- splice(
   action_contrasts("A", "prior_covid_infection", "covidcritcare"),
   action_contrasts("A", "prior_covid_infection", "coviddeath"),
   action_contrasts("A", "prior_covid_infection", "noncoviddeath"),
+  action_contrasts("A", "prior_covid_infection", "fracture"),
 
 
   comment("### Models by age ('age65plus')"),
@@ -478,6 +483,7 @@ actions_list <- splice(
   action_contrasts("A", "age65plus", "covidcritcare"),
   action_contrasts("A", "age65plus", "coviddeath"),
   action_contrasts("A", "age65plus", "noncoviddeath"),
+  action_contrasts("A", "age65plus", "fracture"),
 
   # comment("### Models by JCVI age-band ('jcvi_ageband')"),
   #
@@ -489,6 +495,8 @@ actions_list <- splice(
   # action_contrasts("A", "jcvi_ageband", "covidcritcare"),
   # action_contrasts("A", "jcvi_ageband", "coviddeath"),
   # action_contrasts("A", "jcvi_ageband", "noncoviddeath"),
+  # action_contrasts("A", "jcvi_ageband", "fracture"),
+
 
   comment("### Models by age-band ('ageband')"),
 
@@ -500,6 +508,7 @@ actions_list <- splice(
   action_contrasts("A", "ageband", "covidcritcare"),
   action_contrasts("A", "ageband", "coviddeath"),
   action_contrasts("A", "ageband", "noncoviddeath"),
+  action_contrasts("A", "ageband", "fracture"),
 
   comment("### Models by variant era ('variantera')"),
 
@@ -511,6 +520,7 @@ actions_list <- splice(
   action_contrasts("A", "variantera", "covidcritcare"),
   action_contrasts("A", "variantera", "coviddeath"),
   action_contrasts("A", "variantera", "noncoviddeath"),
+  action_contrasts("A", "variantera", "fracture"),
 
 
   comment("# # # # # # # # # # # # # # # # # # #", "matching set B", "# # # # # # # # # # # # # # # # # # #"),
@@ -527,6 +537,7 @@ actions_list <- splice(
   action_contrasts("B", "all", "covidcritcare"),
   action_contrasts("B", "all", "coviddeath"),
   action_contrasts("B", "all", "noncoviddeath"),
+  action_contrasts("B", "all", "fracture"),
 
   action_delayedentry_contrasts("B", "all", "postest"),
   action_delayedentry_contrasts("B", "all", "covidemergency"),
@@ -536,6 +547,7 @@ actions_list <- splice(
   action_delayedentry_contrasts("B", "all", "covidcritcare"),
   action_delayedentry_contrasts("B", "all", "coviddeath"),
   action_delayedentry_contrasts("B", "all", "noncoviddeath"),
+  action_delayedentry_contrasts("B", "all", "fracture"),
 
 
   comment("### Models by primary course ('vax12_type')"),
@@ -548,6 +560,7 @@ actions_list <- splice(
   action_contrasts("B", "vax12_type", "covidcritcare"),
   action_contrasts("B", "vax12_type", "coviddeath"),
   action_contrasts("B", "vax12_type", "noncoviddeath"),
+  action_contrasts("B", "vax12_type", "fracture"),
 
 
   comment("### Models by clinically vulnerable group ('cev_cv')"),
@@ -560,6 +573,7 @@ actions_list <- splice(
   action_contrasts("B", "cev_cv", "covidcritcare"),
   action_contrasts("B", "cev_cv", "coviddeath"),
   action_contrasts("B", "cev_cv", "noncoviddeath"),
+  action_contrasts("B", "cev_cv", "fracture"),
 
 
   comment("### Models by prior infection ('prior_covid_infection')"),
@@ -572,6 +586,7 @@ actions_list <- splice(
   action_contrasts("B", "prior_covid_infection", "covidcritcare"),
   action_contrasts("B", "prior_covid_infection", "coviddeath"),
   action_contrasts("B", "prior_covid_infection", "noncoviddeath"),
+  action_contrasts("B", "prior_covid_infection", "fracture"),
 
 
   comment("### Models by age ('age65plus')"),
@@ -584,6 +599,7 @@ actions_list <- splice(
   action_contrasts("B", "age65plus", "covidcritcare"),
   action_contrasts("B", "age65plus", "coviddeath"),
   action_contrasts("B", "age65plus", "noncoviddeath"),
+  action_contrasts("B", "age65plus", "fracture"),
 
 
   # comment("### Models by JCVI age-band ('jcvi_ageband')"),
@@ -596,6 +612,7 @@ actions_list <- splice(
   # action_contrasts("B", "jcvi_ageband", "covidcritcare"),
   # action_contrasts("B", "jcvi_ageband", "coviddeath"),
   # action_contrasts("B", "jcvi_ageband", "noncoviddeath"),
+  # action_contrasts("B", "jcvi_ageband", "fracture"),
 
   comment("### Models by age-band ('ageband')"),
 
@@ -607,6 +624,7 @@ actions_list <- splice(
   action_contrasts("B", "ageband", "covidcritcare"),
   action_contrasts("B", "ageband", "coviddeath"),
   action_contrasts("B", "ageband", "noncoviddeath"),
+  action_contrasts("B", "ageband", "fracture"),
 
 
   comment("### Models by variant era ('variantera')"),
@@ -619,6 +637,7 @@ actions_list <- splice(
   action_contrasts("B", "variantera", "covidcritcare"),
   action_contrasts("B", "variantera", "coviddeath"),
   action_contrasts("B", "variantera", "noncoviddeath"),
+  action_contrasts("B", "variantera", "fracture"),
 
 
   action_eventcounts("A"),

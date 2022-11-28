@@ -24,8 +24,8 @@ if(length(args)==0){
   removeobjects <- FALSE
   matchset <- "A"
   #subgroup <- "all"
-  subgroup <- "jcvi_ageband"
-  outcome <- "covidadmitted"
+  subgroup <- "all"
+  outcome <- "postest"
 
 } else {
   removeobjects <- TRUE
@@ -202,6 +202,9 @@ km_process <- function(.data, round_by) {
       leadtime = lead(time, 1, max(time) + 1),
       interval = time - lagtime,
       N = max(n.risk, na.rm = TRUE),
+
+
+
 
       # rounded to `round_by - (round_by/2)`
       cml.eventcensor = roundmid_any(cumsum(n.event + n.censor), round_by),

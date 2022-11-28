@@ -155,6 +155,16 @@ actions:
         rds: output/match/A/km/all/noncoviddeath/*.rds
         png: output/match/A/km/all/noncoviddeath/*.png
 
+  km_A_all_fracture:
+    run: r:latest analysis/km.R A all fracture
+    needs:
+    - match_A
+    - data_selection
+    outputs:
+      moderately_sensitive:
+        rds: output/match/A/km/all/fracture/*.rds
+        png: output/match/A/km/all/fracture/*.png
+
   delayedentry_A_all_postest:
     run: r:latest analysis/delayedentry.R A all postest
     needs:
@@ -214,6 +224,16 @@ actions:
       moderately_sensitive:
         rds: output/match/A/delayedentry/all/noncoviddeath/*.rds
         png: output/match/A/delayedentry/all/noncoviddeath/*.png
+
+  delayedentry_A_all_fracture:
+    run: r:latest analysis/delayedentry.R A all fracture
+    needs:
+    - match_A
+    - data_selection
+    outputs:
+      moderately_sensitive:
+        rds: output/match/A/delayedentry/all/fracture/*.rds
+        png: output/match/A/delayedentry/all/fracture/*.png
 
   ## ### Models by primary course (''vax12_type'') 
 
@@ -277,6 +297,16 @@ actions:
         rds: output/match/A/km/vax12_type/noncoviddeath/*.rds
         png: output/match/A/km/vax12_type/noncoviddeath/*.png
 
+  km_A_vax12_type_fracture:
+    run: r:latest analysis/km.R A vax12_type fracture
+    needs:
+    - match_A
+    - data_selection
+    outputs:
+      moderately_sensitive:
+        rds: output/match/A/km/vax12_type/fracture/*.rds
+        png: output/match/A/km/vax12_type/fracture/*.png
+
   ## ### Models by clinically vulnerable group (''cev_cv'') 
 
   km_A_cev_cv_postest:
@@ -338,6 +368,16 @@ actions:
       moderately_sensitive:
         rds: output/match/A/km/cev_cv/noncoviddeath/*.rds
         png: output/match/A/km/cev_cv/noncoviddeath/*.png
+
+  km_A_cev_cv_fracture:
+    run: r:latest analysis/km.R A cev_cv fracture
+    needs:
+    - match_A
+    - data_selection
+    outputs:
+      moderately_sensitive:
+        rds: output/match/A/km/cev_cv/fracture/*.rds
+        png: output/match/A/km/cev_cv/fracture/*.png
 
   ## ### Models by prior infection (''prior_covid_infection'') 
 
@@ -401,6 +441,16 @@ actions:
         rds: output/match/A/km/prior_covid_infection/noncoviddeath/*.rds
         png: output/match/A/km/prior_covid_infection/noncoviddeath/*.png
 
+  km_A_prior_covid_infection_fracture:
+    run: r:latest analysis/km.R A prior_covid_infection fracture
+    needs:
+    - match_A
+    - data_selection
+    outputs:
+      moderately_sensitive:
+        rds: output/match/A/km/prior_covid_infection/fracture/*.rds
+        png: output/match/A/km/prior_covid_infection/fracture/*.png
+
   ## ### Models by age (''age65plus'') 
 
   km_A_age65plus_postest:
@@ -462,6 +512,16 @@ actions:
       moderately_sensitive:
         rds: output/match/A/km/age65plus/noncoviddeath/*.rds
         png: output/match/A/km/age65plus/noncoviddeath/*.png
+
+  km_A_age65plus_fracture:
+    run: r:latest analysis/km.R A age65plus fracture
+    needs:
+    - match_A
+    - data_selection
+    outputs:
+      moderately_sensitive:
+        rds: output/match/A/km/age65plus/fracture/*.rds
+        png: output/match/A/km/age65plus/fracture/*.png
 
   ## ### Models by age-band (''ageband'') 
 
@@ -525,6 +585,16 @@ actions:
         rds: output/match/A/km/ageband/noncoviddeath/*.rds
         png: output/match/A/km/ageband/noncoviddeath/*.png
 
+  km_A_ageband_fracture:
+    run: r:latest analysis/km.R A ageband fracture
+    needs:
+    - match_A
+    - data_selection
+    outputs:
+      moderately_sensitive:
+        rds: output/match/A/km/ageband/fracture/*.rds
+        png: output/match/A/km/ageband/fracture/*.png
+
   ## ### Models by variant era (''variantera'') 
 
   km_A_variantera_postest:
@@ -586,6 +656,16 @@ actions:
       moderately_sensitive:
         rds: output/match/A/km/variantera/noncoviddeath/*.rds
         png: output/match/A/km/variantera/noncoviddeath/*.png
+
+  km_A_variantera_fracture:
+    run: r:latest analysis/km.R A variantera fracture
+    needs:
+    - match_A
+    - data_selection
+    outputs:
+      moderately_sensitive:
+        rds: output/match/A/km/variantera/fracture/*.rds
+        png: output/match/A/km/variantera/fracture/*.png
 
   ## # # # # # # # # # # # # # # # # # # # 
   ## matching set B 
@@ -671,6 +751,16 @@ actions:
         rds: output/match/B/km/all/noncoviddeath/*.rds
         png: output/match/B/km/all/noncoviddeath/*.png
 
+  km_B_all_fracture:
+    run: r:latest analysis/km.R B all fracture
+    needs:
+    - match_B
+    - data_selection
+    outputs:
+      moderately_sensitive:
+        rds: output/match/B/km/all/fracture/*.rds
+        png: output/match/B/km/all/fracture/*.png
+
   delayedentry_B_all_postest:
     run: r:latest analysis/delayedentry.R B all postest
     needs:
@@ -730,6 +820,16 @@ actions:
       moderately_sensitive:
         rds: output/match/B/delayedentry/all/noncoviddeath/*.rds
         png: output/match/B/delayedentry/all/noncoviddeath/*.png
+
+  delayedentry_B_all_fracture:
+    run: r:latest analysis/delayedentry.R B all fracture
+    needs:
+    - match_B
+    - data_selection
+    outputs:
+      moderately_sensitive:
+        rds: output/match/B/delayedentry/all/fracture/*.rds
+        png: output/match/B/delayedentry/all/fracture/*.png
 
   ## ### Models by primary course (''vax12_type'') 
 
@@ -793,6 +893,16 @@ actions:
         rds: output/match/B/km/vax12_type/noncoviddeath/*.rds
         png: output/match/B/km/vax12_type/noncoviddeath/*.png
 
+  km_B_vax12_type_fracture:
+    run: r:latest analysis/km.R B vax12_type fracture
+    needs:
+    - match_B
+    - data_selection
+    outputs:
+      moderately_sensitive:
+        rds: output/match/B/km/vax12_type/fracture/*.rds
+        png: output/match/B/km/vax12_type/fracture/*.png
+
   ## ### Models by clinically vulnerable group (''cev_cv'') 
 
   km_B_cev_cv_postest:
@@ -854,6 +964,16 @@ actions:
       moderately_sensitive:
         rds: output/match/B/km/cev_cv/noncoviddeath/*.rds
         png: output/match/B/km/cev_cv/noncoviddeath/*.png
+
+  km_B_cev_cv_fracture:
+    run: r:latest analysis/km.R B cev_cv fracture
+    needs:
+    - match_B
+    - data_selection
+    outputs:
+      moderately_sensitive:
+        rds: output/match/B/km/cev_cv/fracture/*.rds
+        png: output/match/B/km/cev_cv/fracture/*.png
 
   ## ### Models by prior infection (''prior_covid_infection'') 
 
@@ -917,6 +1037,16 @@ actions:
         rds: output/match/B/km/prior_covid_infection/noncoviddeath/*.rds
         png: output/match/B/km/prior_covid_infection/noncoviddeath/*.png
 
+  km_B_prior_covid_infection_fracture:
+    run: r:latest analysis/km.R B prior_covid_infection fracture
+    needs:
+    - match_B
+    - data_selection
+    outputs:
+      moderately_sensitive:
+        rds: output/match/B/km/prior_covid_infection/fracture/*.rds
+        png: output/match/B/km/prior_covid_infection/fracture/*.png
+
   ## ### Models by age (''age65plus'') 
 
   km_B_age65plus_postest:
@@ -978,6 +1108,16 @@ actions:
       moderately_sensitive:
         rds: output/match/B/km/age65plus/noncoviddeath/*.rds
         png: output/match/B/km/age65plus/noncoviddeath/*.png
+
+  km_B_age65plus_fracture:
+    run: r:latest analysis/km.R B age65plus fracture
+    needs:
+    - match_B
+    - data_selection
+    outputs:
+      moderately_sensitive:
+        rds: output/match/B/km/age65plus/fracture/*.rds
+        png: output/match/B/km/age65plus/fracture/*.png
 
   ## ### Models by age-band (''ageband'') 
 
@@ -1041,6 +1181,16 @@ actions:
         rds: output/match/B/km/ageband/noncoviddeath/*.rds
         png: output/match/B/km/ageband/noncoviddeath/*.png
 
+  km_B_ageband_fracture:
+    run: r:latest analysis/km.R B ageband fracture
+    needs:
+    - match_B
+    - data_selection
+    outputs:
+      moderately_sensitive:
+        rds: output/match/B/km/ageband/fracture/*.rds
+        png: output/match/B/km/ageband/fracture/*.png
+
   ## ### Models by variant era (''variantera'') 
 
   km_B_variantera_postest:
@@ -1102,6 +1252,16 @@ actions:
       moderately_sensitive:
         rds: output/match/B/km/variantera/noncoviddeath/*.rds
         png: output/match/B/km/variantera/noncoviddeath/*.png
+
+  km_B_variantera_fracture:
+    run: r:latest analysis/km.R B variantera fracture
+    needs:
+    - match_B
+    - data_selection
+    outputs:
+      moderately_sensitive:
+        rds: output/match/B/km/variantera/fracture/*.rds
+        png: output/match/B/km/variantera/fracture/*.png
 
   eventcounts_A:
     run: r:latest analysis/eventcounts.R A

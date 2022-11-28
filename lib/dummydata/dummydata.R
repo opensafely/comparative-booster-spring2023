@@ -370,6 +370,23 @@ sim_list = lst(
     missing_rate = ~0.90
   ),
 
+  # fractures
+  fractureemergency_day = bn_node(
+    ~as.integer(runif(n=..n, anycovidvax_3_day, anycovidvax_3_day+100)),
+    missing_rate = ~0.95
+  ),
+
+  fractureadmitted_day = bn_node(
+    ~as.integer(runif(n=..n, anycovidvax_3_day, anycovidvax_3_day+100)),
+    missing_rate = ~0.97
+  ),
+
+  fracturedeath_day = bn_node(
+    ~death_day,
+    missing_rate = ~0.95,
+    needs = "death_day"
+  ),
+
   test_count = bn_node(
     ~ rpois(n = ..n, 1)
   ),
