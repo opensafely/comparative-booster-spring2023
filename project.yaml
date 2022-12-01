@@ -1434,48 +1434,63 @@ actions:
     - km_A_all_covidcritcare
     - km_A_all_coviddeath
     - km_A_all_noncoviddeath
+    - km_A_all_fracture
     - km_A_vax12_type_postest
     - km_A_vax12_type_covidemergency
     - km_A_vax12_type_covidadmitted
     - km_A_vax12_type_covidcritcare
     - km_A_vax12_type_coviddeath
     - km_A_vax12_type_noncoviddeath
+    - km_A_vax12_type_fracture
     - km_A_prior_covid_infection_postest
     - km_A_prior_covid_infection_covidemergency
     - km_A_prior_covid_infection_covidadmitted
     - km_A_prior_covid_infection_covidcritcare
     - km_A_prior_covid_infection_coviddeath
     - km_A_prior_covid_infection_noncoviddeath
+    - km_A_prior_covid_infection_fracture
     - km_A_age65plus_postest
     - km_A_age65plus_covidemergency
     - km_A_age65plus_covidadmitted
     - km_A_age65plus_covidcritcare
     - km_A_age65plus_coviddeath
     - km_A_age65plus_noncoviddeath
+    - km_A_age65plus_fracture
     - km_A_ageband_postest
     - km_A_ageband_covidemergency
     - km_A_ageband_covidadmitted
     - km_A_ageband_covidcritcare
     - km_A_ageband_coviddeath
     - km_A_ageband_noncoviddeath
+    - km_A_ageband_fracture
     - km_A_cev_cv_postest
     - km_A_cev_cv_covidemergency
     - km_A_cev_cv_covidadmitted
     - km_A_cev_cv_covidcritcare
     - km_A_cev_cv_coviddeath
     - km_A_cev_cv_noncoviddeath
+    - km_A_cev_cv_fracture
+    - km_A_cv_postest
+    - km_A_cv_covidemergency
+    - km_A_cv_covidadmitted
+    - km_A_cv_covidcritcare
+    - km_A_cv_coviddeath
+    - km_A_cv_noncoviddeath
+    - km_A_cv_fracture
     - km_A_variantera_postest
     - km_A_variantera_covidemergency
     - km_A_variantera_covidadmitted
     - km_A_variantera_covidcritcare
     - km_A_variantera_coviddeath
     - km_A_variantera_noncoviddeath
+    - km_A_variantera_fracture
     - delayedentry_A_all_postest
     - delayedentry_A_all_covidemergency
     - delayedentry_A_all_covidadmitted
     - delayedentry_A_all_covidcritcare
     - delayedentry_A_all_coviddeath
     - delayedentry_A_all_noncoviddeath
+    - delayedentry_A_all_fracture
     - eventcounts_A
     outputs:
       moderately_sensitive:
@@ -1491,48 +1506,63 @@ actions:
     - km_B_all_covidcritcare
     - km_B_all_coviddeath
     - km_B_all_noncoviddeath
+    - km_B_all_fracture
     - km_B_vax12_type_postest
     - km_B_vax12_type_covidemergency
     - km_B_vax12_type_covidadmitted
     - km_B_vax12_type_covidcritcare
     - km_B_vax12_type_coviddeath
     - km_B_vax12_type_noncoviddeath
+    - km_B_vax12_type_fracture
     - km_B_prior_covid_infection_postest
     - km_B_prior_covid_infection_covidemergency
     - km_B_prior_covid_infection_covidadmitted
     - km_B_prior_covid_infection_covidcritcare
     - km_B_prior_covid_infection_coviddeath
     - km_B_prior_covid_infection_noncoviddeath
+    - km_B_prior_covid_infection_fracture
     - km_B_age65plus_postest
     - km_B_age65plus_covidemergency
     - km_B_age65plus_covidadmitted
     - km_B_age65plus_covidcritcare
     - km_B_age65plus_coviddeath
     - km_B_age65plus_noncoviddeath
+    - km_B_age65plus_fracture
     - km_B_ageband_postest
     - km_B_ageband_covidemergency
     - km_B_ageband_covidadmitted
     - km_B_ageband_covidcritcare
     - km_B_ageband_coviddeath
     - km_B_ageband_noncoviddeath
+    - km_B_ageband_fracture
     - km_B_cev_cv_postest
     - km_B_cev_cv_covidemergency
     - km_B_cev_cv_covidadmitted
     - km_B_cev_cv_covidcritcare
     - km_B_cev_cv_coviddeath
     - km_B_cev_cv_noncoviddeath
+    - km_B_cev_cv_fracture
+    - km_B_cv_postest
+    - km_B_cv_covidemergency
+    - km_B_cv_covidadmitted
+    - km_B_cv_covidcritcare
+    - km_B_cv_coviddeath
+    - km_B_cv_noncoviddeath
+    - km_B_cv_fracture
     - km_B_variantera_postest
     - km_B_variantera_covidemergency
     - km_B_variantera_covidadmitted
     - km_B_variantera_covidcritcare
     - km_B_variantera_coviddeath
     - km_B_variantera_noncoviddeath
+    - km_B_variantera_fracture
     - delayedentry_B_all_postest
     - delayedentry_B_all_covidemergency
     - delayedentry_B_all_covidadmitted
     - delayedentry_B_all_covidcritcare
     - delayedentry_B_all_coviddeath
     - delayedentry_B_all_noncoviddeath
+    - delayedentry_B_all_fracture
     - eventcounts_B
     outputs:
       moderately_sensitive:
