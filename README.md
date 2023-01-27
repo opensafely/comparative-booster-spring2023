@@ -1,6 +1,29 @@
-# Comparative effectiveness of BNT162b2 versus Moderna COVID-19 booster doses
+# comparative-booster
 
-This study estimates the comparative effectiveness of the two major vaccines used for boosting in England; BNT162b2 (Pfizer-BioNTech) and mRNA-1273 (Moderna).
+[View on OpenSAFELY](https://jobs.opensafely.org/repo/https%253A%252F%252Fgithub.com%252Fopensafely%252Fcomparative-booster)
+
+Details of the purpose and any published outputs from this project can be found at the link above.
+
+The contents of this repository MUST NOT be considered an accurate or valid representation of the study or its purpose. 
+This repository may reflect an incomplete or incorrect analysis with no further ongoing work.
+The content has ONLY been made public to support the OpenSAFELY [open science and transparency principles](https://www.opensafely.org/about/#contributing-to-best-practice-around-open-science) and to support the sharing of re-usable code for other subsequent users.
+No clinical, policy or safety conclusions must be drawn from the contents of this repository.
+
+# About the OpenSAFELY framework
+
+The OpenSAFELY framework is a Trusted Research Environment (TRE) for electronic
+health records research in the NHS, with a focus on public accountability and
+research quality.
+
+Read more at [OpenSAFELY.org](https://opensafely.org).
+
+# Licences
+As standard, research projects have a MIT license. 
+
+
+# Study details
+
+*Comparative effectiveness of BNT162b2 versus Moderna COVID-19 booster doses* This study estimates the comparative effectiveness of the two major vaccines used for boosting in England; BNT162b2 (Pfizer-BioNTech) and mRNA-1273 (Moderna).
 
 Recipients of each brand are matched on date of receipt, region, first and second dose type, and other key characteristics likely to influence the type of booster dose received. 
 
@@ -18,9 +41,6 @@ Recipients of each brand are matched on date of receipt, region, first and secon
 
 -   The [`project.yaml`](./project.yaml) defines run-order and dependencies for all the analysis scripts. **This file should *not* be edited directly**. To make changes to the yaml, edit and run the [`create-project.R`](./create-project.R) script instead.
 
--   You can run this project via [Gitpod](https://gitpod.io) in a web browser by clicking on this badge: [![Gitpod ready-to-code](https://img.shields.io/badge/Gitpod-ready--to--code-908a85?logo=gitpod)](https://gitpod.io/#https://github.com/opensafely/comparative-booster)
-
-
 ## R scripts
 
 #### Pre-server scripts
@@ -36,21 +56,13 @@ These scripts use data extracted from the OpenSAFELY-TPP server, after [`analysi
 -   [`match.R`](./analysis/match.R) runs the matching algorithm to pair BNT162b2 with Moderna booster recipients. It outputs a dataset given the matching status (TRUE/FALSE) of each candidate, and a matching ID.  and other matching diagnostics. The script takes one argument:
     -   `matchset`, the set of matching variables used to match, as defined in the [`design.R`](analysis/R/design.R) script.
 -   [`match_report.R`](./analysis/match_report.R) describes baseline information for the matched cohort, eg Table 1 type cohort characteristics, and an inclusion criteria flowchart. The script also uses the `matchset` argument to pick up the matching data from the previous script.
--   [`ci.R`](./analysis/ci.R) derives Kaplan-Meier survival estimates for the treatment groups and calculates relative risk and risk differences. The script takes three arguments:
+-   [`km.R`](./analysis/km.R) derives Kaplan-Meier survival estimates for the treatment groups and calculates relative risk and risk differences. The script takes three arguments:
     -  `matchset`, as before.
     -   `subgroup` to choose which subgroup to run the analysis within. Choose _all_ for no subgroups (i.e., the main analysis). Choose _<variable>_ to select a specific variable to stratify on -- this variable must be exactly matched in the matching run. 
     -   `outcome` to choose the outcome of interest, for example _postest_ or _covidadmitted_.
--   [`ci_combine`](./analysis/ci_combine.R) collects data from the [`ci.R`](./analysis/ci.R) script and combines into one dataset.
+-   [`km_combine`](./analysis/km_combine.R) collects data from the [`km.R`](./analysis/km.R) script and combines into one dataset.
 -   [`release_objects`](./analysis/release_objects.R) collects files that are intended for release and puts them in a single directory to make releasing files easier. 
 
-#### Post-release scripts
-These scripts create html/pdf reports and other files that use file released from the server.
-
-Currently offline only.
-
-## Licences
-
-As standard, research projects have a MIT license. 
 
 ## Protocol
 
@@ -58,12 +70,5 @@ https://docs.google.com/document/d/1u2DpmuF2ND7N3pGsh86NBtTD5BlTpr_4jgNKfLnd2UU/
 
 ## Pre-print
 
-To follow
+On MedRxiv: https://doi.org/10.1101/2022.07.29.22278186 
 
-# About the OpenSAFELY framework
-
-The OpenSAFELY framework is a Trusted Research Environment (TRE) for electronic
-health records research in the NHS, with a focus on public accountability and
-research quality.
-
-Read more at [OpenSAFELY.org](https://opensafely.org).
