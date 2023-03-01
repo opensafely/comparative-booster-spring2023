@@ -68,7 +68,12 @@ These scripts use data extracted from the OpenSAFELY-TPP server, after [`analysi
 
 https://docs.google.com/document/d/1u2DpmuF2ND7N3pGsh86NBtTD5BlTpr_4jgNKfLnd2UU/edit?usp=sharing
 
+## Workspace
+
+https://jobs.opensafely.org/datalab/covid-19-vaccine-effectiveness/comparative-booster_main/
+
 ## Pre-print
 
 On MedRxiv: https://doi.org/10.1101/2022.07.29.22278186 
+
 
