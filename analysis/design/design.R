@@ -8,14 +8,15 @@
 ## Import libraries ----
 library('tidyverse')
 library('here')
+
 ## create output directories ----
-fs::dir_create(here("lib", "design"))
+fs::dir_create(here("analysis", "design"))
 
 
 
 # import globally defined repo variables
 study_dates <-
-  jsonlite::read_json(path=here("lib", "design", "study-dates.json")) %>%
+  jsonlite::read_json(path=here("analysis", "design", "study-dates.json")) %>%
   map(as.Date)
 
 # define outcomes ----
@@ -46,15 +47,43 @@ events_lookup <- tribble(
   "fracture", "fracture_date", "Fracture",
 )
 
+
+
+vax_product_lookup = c(
+  "pfizer"="COVID-19 mRNA Vaccine Comirnaty 30micrograms/0.3ml dose conc for susp for inj MDV (Pfizer)",
+  "az"="COVID-19 Vaccine Vaxzevria 0.5ml inj multidose vials (AstraZeneca)",
+  "moderna"="COVID-19 mRNA Vaccine Spikevax (nucleoside modified) 0.1mg/0.5mL dose disp for inj MDV (Moderna)",
+  "pfizerBA1"="Comirnaty Original/Omicron BA.1 COVID-19 Vacc md vials",
+  "pfizerBA45"="Comirnaty Original/Omicron BA.4-5 COVID-19 Vacc md vials",
+  "pfizerXBB15"="Comirnaty Omicron XBB.1.5 COVID-19 Vacc md vials",
+  "sanofi"="COVID-19 Vacc VidPrevtyn (B.1.351) 0.5ml inj multidose vials",
+  "modernaomicron"="COVID-19 Vac Spikevax (Zero)/(Omicron) inj md vials",
+  "pfizerchildren"="COVID-19 mRNA Vaccine Comirnaty Children 5-11yrs 10mcg/0.2ml dose conc for disp for inj MDV (Pfizer)",
+  "azhalf"="COVID-19 Vac AZD2816 (ChAdOx1 nCOV-19) 3.5x10*9 viral part/0.5ml dose sol for inj MDV (AstraZeneca)",
+  "modernaXBB15"="COVID-19 Vacc Spikevax (XBB.1.5) 0.1mg/1ml inj md vials"
+)
+
+# vax_type_lookup = c(
+#   "BNT162b2"="pfizer",
+#   "ChAdOx1"="az",
+#   "mRNA-1273"="moderna",
+#   "BNT162b2/BA.1"="pfizerBA1",
+#   "BNT162b2/BA.4-5"="pfizerBA45",
+#   "BNT162b2/XBB.1.5"="pfizerXBB15",
+#   "VidPrevtyn" = "sanofi",
+#   "mRNA-1273/omicron"="modernaomicron",
+#   "BNT162b2/children"="pfizerchildren",
+#   "ChAdOx1/2"="azhalf",
+#   "mRNA-1273/XBB.1.5"="modernaXBB15",
+#   "Other"="other"
+# )
+
+
 treatement_lookup <-
   tribble(
     ~treatment, ~treatment_descr,
-    "pfizer", "BNT162b2",
-    "az", "ChAdOx1-S",
-    "moderna", "mRNA-1273",
-    "pfizer-pfizer", "BNT162b2",
-    "az-az", "ChAdOx1-S",
-    "moderna-moderna", "mRNA-1273"
+    "pfizerBA45", "pfizer/BA.4-5",
+    "sanofi", "Sanofi",
   )
 
 # where to split follow-up time after recruitment
@@ -67,8 +96,7 @@ maxfup <- max(postbaselinecuts)
 
 # define calendar date cut points for calendar period specific analysis ----
 # used for variant era specific analyses
-calendarcuts <- c(study_dates$studystart_date, as.Date("2021-12-15"), study_dates$followupend_date+1)
-
+#calendarcuts <- c(study_dates$studystart_date, as.Date("2021-12-15"), study_dates$followupend_date+1)
 
 # redaction threshold
 threshold <- 6
@@ -76,25 +104,21 @@ threshold <- 6
 ## lookups to convert coded variables to full, descriptive variables ----
 
 recoder <-
-  list(
+  lst(
     subgroups = c(
       `Main` = "all",
-      `Primary vaccine course` = "vax12_type",
-      `Age` = "age65plus",
-      #`JCVI age-band` = "jcvi_ageband",
+      `Age` = "age75plus",
       `Age-band` = "ageband",
-      `Prior SARS-CoV-2 infection status` = "prior_covid_infection",
-      `Clinical vulnerability` = "cev_cv",
       `Clinically at-risk` = "cv",
-      `Variant era` = "variantera"
+      `Prior SARS-CoV-2 infection status` = "prior_covid_infection"
     ),
     status = c(
       `Unmatched`= "unmatched",
       `Matched` = "matched"
     ),
     treatment = c(
-      `BNT162b2` = "0",
-      `mRNA-1273` = "1"
+      `pfizer/BA.4-5` = "0",
+      `Sanofi` = "1"
     ),
     outcome = c(
       "Positive SARS-CoV-2 test"= "postest",
@@ -109,37 +133,17 @@ recoder <-
       "Fracture" = "fracture"
     ),
     all = c(` ` = "all"),
-    vax12_type = c(
-      `BNT162b2` = "pfizer-pfizer",
-      `ChAdOx1-S` = "az-az"
-    ),
-    age65plus = c(
-      `18-64` = "FALSE",
-      `65 and over` = "TRUE"
-    ),
-    jcvi_ageband = c(
-      "18-39", "40-49", "50-54", "55-59", "60-64", "65-69", "70-74", "75-79", "80+"
-    ) %>% {set_names(.,.)},
     ageband = c(
-      "18-39", "40-54", "55-64", "65-74", "75+"
-    ) %>% {set_names(.,.)},
-    cev_cv = c(
-      "Clinically extremely vulnerable",
-      "Clinically at-risk",
-      "Not clinically at-risk"
+      "16-49", "50-64", "65-74", "75-79", "80-84", "85+"
     ) %>% {set_names(.,.)},
     cv = c(
-      `Clinically extremely vulnerable or at-risk` = "TRUE",
+      `Clinically at-risk` = "TRUE",
       `Not clinically at-risk` = "FALSE"
     ),
     prior_covid_infection = c(
       `No prior SARS-CoV-2 infection` = "FALSE",
       `Prior SARS-CoV-2 infection` = "TRUE"
     ),
-    variantera = c(
-      `Delta (up to 14 December 2021)` = "Delta (up to 14 December 2021)",
-      `Omicron (15 December 2021 onwards)` = "Omicron (15 December 2021 onwards)"
-    )
   )
 
 ## model formulae ----
@@ -155,15 +159,12 @@ if(exists("matchset")){
 
     # matching set A
     exact <- c(
-
-      "vax3_date",
-      "jcvi_ageband",
-      "cev_cv",
+      "age75plus",
+      "ageband",
+      "cv",
       #"sex",
-      "vax12_type",
       #"region",
       #"imd_Q5",
-
 
       #"multimorb",
       "prior_covid_infection",
@@ -171,8 +172,9 @@ if(exists("matchset")){
     )
 
     caliper <- c(
+      boost_day = 3,
       age = 3,
-      vax23_interval = 7,
+      vax_interval_bigM = 14,
       #imd = 1000,
       NULL
     )
@@ -185,24 +187,24 @@ if(exists("matchset")){
     # matching set B
     exact <- c(
 
-      "vax3_date",
-      "jcvi_ageband",
-      "cev_cv",
+      "age75plus",
+      "ageband",
+      "cv",
       "sex",
-      "vax12_type",
-      "stp",
+      #"region",
       "imd_Q5",
-
+      "vax_previous_count",
 
       "multimorb",
       "prior_covid_infection",
-      #"immunosuppressed",
+      "immunosuppressed",
       NULL
     )
 
     caliper <- c(
+      boost_day = 3,
       age = 3,
-      vax23_interval = 7,
+      vax_interval_bigM = 14,
       NULL
     )
 
