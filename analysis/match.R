@@ -1,15 +1,21 @@
 
 # # # # # # # # # # # # # # # # # # # # #
-# Purpose: match pfizer recipients to moderna recipients
+# Purpose: match pfizer recipients to sanofi recipients
 # # # # # # # # # # # # # # # # # # # # #
 
 # Preliminaries ----
 
+## Import libraries ----
+library('tidyverse')
+library('here')
+library('glue')
+library('survival')
+library('MatchIt')
+library("doParallel")
 
-# import command-line arguments ----
+## import command-line arguments ----
 
 args <- commandArgs(trailingOnly=TRUE)
-
 
 if(length(args)==0){
   # use for interactive testing
@@ -21,26 +27,18 @@ if(length(args)==0){
 }
 
 
-
-## Import libraries ----
-library('tidyverse')
-library('here')
-library('glue')
-library('survival')
-library('MatchIt')
-
 ## Import custom user functions from lib
-source(here("lib", "functions", "utility.R"))
+source(here("analysis", "functions", "utility.R"))
 
 ## Import design elements
-source(here("lib", "design", "design.R"))
+source(here("analysis", "design", "design.R"))
 
-# create output directories ----
+## create output directories ----
 
 output_dir <- here("output", "match", matchset)
 fs::dir_create(output_dir)
 
-# Prepare data ----
+# Import and prepare data ----
 
 ## one pow per patient ----
 data_cohort <- read_rds(here("output", "data", "data_cohort.rds"))
@@ -58,43 +56,42 @@ data_matchingcandidates <-
   data_cohort %>%
   mutate(
     # create variable to parallelise on
-    thread_variable = jcvi_ageband,
+    thread_variable = ageband,
     thread_id = dense_rank(thread_variable)
   ) %>%
   select(
     thread_id,
     thread_variable,
     patient_id,
-    vax3_type,
+    boost_type,
+    treatment,
+    boost_date,
     all_of(matching_variables[[matchset]]$all),
-  ) %>%
-  mutate(
-    treatment = vax3_type=="moderna" # matchit needs a binary variables for matching; 0 = pfizer, 1 = moderna
   ) %>%
   arrange(patient_id)
 
+
+# Set up parallelisation and run matching ----
 
 # create function that catches errors in case no matches are found within a thread
 safely_matchit <- purrr::safely(matchit)
 
 ## parallelisation preliminaries ----
 
-library("doParallel")
-
 parallel::detectCores() # how many cores available?
-n_threads <- 8
+n_threads <- 2
 
 cluster <- parallel::makeCluster(
   n_threads,
   type = "PSOCK" # this should work across multi-core windows or linux machines
 )
 print(cluster)
+
 #register it to be used by %dopar%
 doParallel::registerDoParallel(cl = cluster)
 
-
 # create parallel matching streams
-matchthreads <- unique(as.character(data_matchingcandidates$thread_variable))
+matchthreads <- as.character(unique(sort(data_matchingcandidates$thread_variable)))
 
 table(data_matchingcandidates$thread_variable, useNA="ifany")
 
@@ -105,15 +102,15 @@ data_matchstatus <-
     .combine = 'bind_rows',
     .packages = c("dplyr", "MatchIt", "tibble", "lubridate")
   ) %dopar% {
-
   #for(matchthread in matchthreads){
+  #matchthread<-"85+"
 
     data_thread <- data_matchingcandidates %>% filter(thread_variable==matchthread)
-
 
     # run matching algorithm
     obj_matchit <-
       safely_matchit(
+      #matchit(
         formula = treatment ~ 1,
         data = data_thread,
         method = "nearest", distance = "glm", # these two options don't really do anything because we only want exact + caliper matching
@@ -137,12 +134,9 @@ data_matchstatus <-
           threadmatch_id = NA_integer_,
           treatment = data_thread$treatment,
           weight = 0,
-          vax3_date = data_thread$vax3_date
         )
       } else {
-        as.data.frame(obj_matchit$X) %>%
-        select(vax3_date) %>%
-        add_column(
+        tibble(
           patient_id = data_thread$patient_id,
           matched = !is.na(obj_matchit$subclass),
           thread_id = data_thread$thread_id,
@@ -153,12 +147,16 @@ data_matchstatus <-
         ) %>% as_tibble()
       }
 
-    data_matchstatus
-  }
+  data_matchstatus
+}
 
 parallel::stopCluster(cl = cluster)
 
-data_matchstatus <- data_matchstatus %>%
+# Summarise matched / unmatched patients and export ----
+
+data_matchstatus <-
+  data_matchstatus %>%
+  left_join(data_cohort %>% select(patient_id, boost_date), by="patient_id") %>%
   arrange(thread_id, threadmatch_id) %>%
   mutate(
     match_id = dense_rank(threadmatch_id * max(thread_id) + thread_id) # create unique match id across all threads
@@ -167,15 +165,13 @@ data_matchstatus <- data_matchstatus %>%
 write_rds(data_matchstatus, fs::path(output_dir, "data_matchstatus.rds"), compress="gz")
 
 data_matchstatus %>%
-  group_by(vax3_date, treatment, matched) %>%
+  group_by(treatment, matched) %>%
   summarise(
     n=n()
-  ) %>%
-  print(n=1000)
+  )
 
 
-
-## bootstrap sampling ----
+# bootstrap sampling ----
 
 ## bootstrap sample matched pairs and use this sampling throughout the analysis
 ## doing it here avoids repeating the sampling process in each individual outcome script
@@ -188,7 +184,7 @@ boot_id <- seq_len(boot_n)
 
 match_ids <- unique(data_matchstatus$match_id[!is.na(data_matchstatus$match_id)])
 
-set.seed(20220506)
+set.seed(20230401)
 
 boot_samples <-
   tibble(boot_id) %>%

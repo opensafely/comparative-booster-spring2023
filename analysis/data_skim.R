@@ -17,7 +17,7 @@
 library('tidyverse')
 library('here')
 
-source(here("lib", "functions", "redaction.R"))
+source(here("analysis", "functions", "redaction.R"))
 
 # import command-line arguments ----
 
@@ -39,7 +39,7 @@ filenamebase <- fs::path_ext_remove(fs::path_file(rds_file))
 
 # Import processed data ----
 
-data <- readr::read_rds(here(rds_file))
+source_data <- readr::read_rds(here(rds_file))
 
 # Output summary .txt ----
 
@@ -49,14 +49,14 @@ dir.create(here(output_dir), showWarnings = FALSE, recursive=TRUE)
 
 ## high-level variable overview ----
 capture.output(
-  skimr::skim_without_charts(data),
+  skimr::skim_without_charts(source_data),
   file = here(output_dir, paste0(filenamebase, "_skim", ".txt")),
   split=FALSE
 )
 
 ## list of column types ----
 capture.output(
-  lapply(data, class),
+  lapply(source_data, class),
   file = here(output_dir, paste0(filenamebase, "_coltypes", ".txt"))
 )
 
@@ -71,7 +71,7 @@ if(file.exists(here(output_dir, paste0(filenamebase, "_tabulate", ".txt")))){
 
 ### categorical and logical ----
 sumtabs_cat <-
-  data %>%
+  source_data %>%
   select(-ends_with("_id")) %>%
   select(where(is.character), where(is.logical), where(is.factor)) %>%
   map(redacted_summary_cat) %>%
@@ -86,7 +86,7 @@ capture.output(
 
 ### numeric ----
 sumtabs_num <-
-  data %>%
+  source_data %>%
   select(-ends_with("_id")) %>%
   select(where(~ {!is.logical(.x) & is.numeric(.x) & !is.Date(.x)})) %>%
   map(redacted_summary_num) %>%
@@ -101,7 +101,7 @@ capture.output(
 ### dates ----
 
 sumtabs_date <-
-  data %>%
+  source_data %>%
   select(-ends_with("_id")) %>%
   select(where(is.Date)) %>%
   map(redacted_summary_date) %>%

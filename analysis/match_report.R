@@ -13,10 +13,10 @@ library('gt')
 library('gtsummary')
 
 ## Import custom user functions from lib
-source(here("lib", "functions", "utility.R"))
+source(here("analysis", "functions", "utility.R"))
 
 ## Import design elements
-source(here("lib", "design", "design.R"))
+source(here("analysis", "design", "design.R"))
 
 
 # import command-line arguments ----
@@ -51,7 +51,7 @@ data_matchstatus <- read_rds(fs::path(here("output", "match", matchset), "data_m
 data_coverage <-
   data_matchstatus %>%
   mutate(eligible=1) %>%
-  group_by(treatment, vax3_date) %>%
+  group_by(treatment, boost_date) %>%
   summarise(
     n_eligible = sum(eligible, na.rm=TRUE),
     n_matched = sum(matched, na.rm=TRUE),
@@ -65,14 +65,14 @@ data_coverage <-
     names_prefix = "n_",
     values_to = "n"
   ) %>%
-  arrange(treatment, vax3_date, status) %>%
-  group_by(treatment, vax3_date, status) %>%
+  arrange(treatment, boost_date, status) %>%
+  group_by(treatment, boost_date, status) %>%
   summarise(
     n = sum(n),
   ) %>%
   group_by(treatment, status) %>%
   complete(
-    vax3_date = full_seq(.$vax3_date, 1), # go X days before to
+    boost_date = full_seq(.$boost_date, 1), # go X days before to
     fill = list(n=0)
   ) %>%
   mutate(
@@ -83,7 +83,7 @@ data_coverage <-
     status = factor(status, levels=c("unmatched", "matched")),
     status_descr = fct_recoderelevel(status, recoder$status)
   ) %>%
-  arrange(treatment, status_descr, vax3_date)
+  arrange(treatment, status_descr, boost_date)
 
 
 
@@ -102,8 +102,8 @@ write_csv(data_coverage_rounded, fs::path(output_dir, "data_coverage.csv"))
 
 ## plot matching coverage ----
 
-xmin <- min(data_coverage$vax3_date )
-xmax <- max(data_coverage$vax3_date )+1
+xmin <- min(data_coverage$boost_date )
+xmax <- max(data_coverage$boost_date )+1
 
 plot_coverage_n <-
   data_coverage %>%
@@ -114,7 +114,7 @@ plot_coverage_n <-
   ggplot()+
   geom_col(
     aes(
-      x=vax3_date+0.5,
+      x=boost_date+0.5,
       y=n,
       group=paste0(treatment,status),
       fill=treatment_descr,
@@ -128,7 +128,7 @@ plot_coverage_n <-
   #geom_rect(xmin=xmin, xmax= xmax+1, ymin=-6, ymax=6, fill="grey", colour="transparent")+
   geom_hline(yintercept = 0, colour="black")+
   scale_x_date(
-    breaks = unique(lubridate::ceiling_date(data_coverage$vax3_date, "1 month")),
+    breaks = unique(lubridate::ceiling_date(data_coverage$boost_date, "1 month")),
     limits = c(xmin-1, NA),
     labels = scales::label_date("%d/%m"),
     expand = expansion(add=1),
@@ -170,7 +170,7 @@ plot_coverage_cumuln <-
   ggplot()+
   geom_col(
     aes(
-      x=vax3_date+0.5,
+      x=boost_date+0.5,
       y=cumuln,
       group=paste0(treatment,status),
       fill=treatment_descr,
@@ -182,7 +182,7 @@ plot_coverage_cumuln <-
   )+
   geom_rect(xmin=xmin, xmax= xmax+1, ymin=-6, ymax=6, fill="grey", colour="transparent")+
   scale_x_date(
-    breaks = unique(lubridate::ceiling_date(data_coverage$vax3_date, "1 month")),
+    breaks = unique(lubridate::ceiling_date(data_coverage$boost_date, "1 month")),
     limits = c(xmin-1, NA),
     labels = scales::label_date("%d/%m"),
     expand = expansion(add=1),
@@ -224,15 +224,15 @@ ggsave(plot_coverage_cumuln, filename="coverage_stack.png", path=output_dir)
 var_labels <- list(
   N  ~ "Total N",
   treatment_descr ~ "Vaccine type",
-  vax12_type_descr ~ "Primary vaccine course",
-  vax23_interval ~ "Days between dose 2 and 3",
-  age ~ "Age",
-  jcvi_ageband ~ "Age band",
+  vax_interval ~ "Days since previous vaccine",
+  vax_previous_count ~ "Previous vaccine count",
+  age_july2023 ~ "Age",
+  ageband ~ "Age band",
   sex ~ "Sex",
-  ethnicity_combined ~ "Ethnicity",
+  ethnicity ~ "Ethnicity",
   imd_Q5 ~ "Deprivation",
   region ~ "Region",
-  cev_cv ~ "JCVI clinical risk group",
+  cv ~ "Clinically at-risk",
 
   sev_obesity ~ "Body Mass Index > 40 kg/m^2",
 
@@ -250,8 +250,7 @@ var_labels <- list(
   immuno_any ~ "Immunosuppressed (all)",
 
   asplenia ~ "Asplenia or poor spleen function",
-  cancer_nonhaem ~ "Cancer (excluding haem), within previous 3 years",
-  cancer_haem ~ "Haematological cancer, within previous 3 years",
+  cancer ~ "Cancer, within previous 3 years",
   solid_organ_transplant ~ "Solid organ transplant",
   immrx ~ "Immunosuppressive medications, within 6 months",
   hiv_aids ~ "HIV/AIDS",
@@ -293,8 +292,8 @@ tab_summary_baseline <-
     label = unname(var_labels[names(.)]),
     statistic = list(
       N = "{N}",
-      age="{mean} ({sd})",
-      vax23_interval="{mean} ({sd})"
+      age_july2023="{mean} ({sd})",
+      vax_interval="{mean} ({sd})"
     ),
   )
 
@@ -322,57 +321,57 @@ write_csv(raw_stats_redacted, fs::path(output_dir, "table1.csv"))
 
 
 # # love / smd plot ----
-#
-# data_smd <- tab_summary_baseline$meta_data %>%
-#   select(var_label, df_stats) %>%
-#   unnest(df_stats) %>%
-#   filter(
-#     variable != "N"
-#   ) %>%
-#   group_by(var_label, variable_levels) %>%
-#   mutate(
-#     mean = coalesce(mean,p),
-#     sd = coalesce(sd,sqrt(p*(1-p)))
-#   ) %>%
-#   summarise(
-#     diff = diff(mean),
-#     sd = sqrt(mean(sd^2)),
-#     smd = diff/sd,
-#   ) %>%
-#   ungroup() %>%
-#   mutate(
-#     variable = factor(var_label, levels=map_chr(var_labels[-c(1,2)], ~last(as.character(.)))),
-#     variable_card = as.numeric(variable)%%2,
-#     variable_levels = replace_na(as.character(variable_levels), ""),
-#   ) %>%
-#   arrange(variable) %>%
-#   mutate(
-#     level = fct_rev(fct_inorder(str_replace(paste(variable, variable_levels, sep=": "),  "\\:\\s$", ""))),
-#     cardn = row_number()
-#   )
-#
-# plot_smd <-
-#   ggplot(data_smd)+
-#   geom_point(aes(x=smd, y=level))+
-#   geom_rect(aes(alpha = variable_card, ymin = rev(cardn)-0.5, ymax =rev(cardn+0.5)), xmin = -Inf, xmax = Inf, fill='grey', colour="transparent") +
-#   scale_alpha_continuous(range=c(0,0.3), guide=FALSE)+
-#   labs(
-#     x="Standardised mean difference",
-#     y=NULL,
-#     alpha=NULL
-#   )+
-#   theme_minimal() +
-#   theme(
-#     strip.placement = "outside",
-#     strip.background = element_rect(fill="transparent", colour="transparent"),
-#     strip.text.y.left = element_text(angle = 0, hjust=1),
-#     panel.grid.major.y = element_blank(),
-#     panel.grid.minor.y = element_blank(),
-#     panel.spacing = unit(0, "lines")
-#   )
-#
-# write_csv(data_smd, fs::path(output_dir, "data_smd.csv"))
-# ggsave(plot_smd, filename="plot_smd.png", path=output_dir)
+
+data_smd <- tab_summary_baseline$meta_data %>%
+  select(var_label, df_stats) %>%
+  unnest(df_stats) %>%
+  filter(
+    variable != "N"
+  ) %>%
+  group_by(var_label, variable_levels) %>%
+  mutate(
+    mean = coalesce(mean,p),
+    sd = coalesce(sd,sqrt(p*(1-p)))
+  ) %>%
+  summarise(
+    diff = diff(mean),
+    sd = sqrt(mean(sd^2)),
+    smd = diff/sd,
+  ) %>%
+  ungroup() %>%
+  mutate(
+    variable = factor(var_label, levels=map_chr(var_labels[-c(1,2)], ~last(as.character(.)))),
+    variable_card = as.numeric(variable)%%2,
+    variable_levels = replace_na(as.character(variable_levels), ""),
+  ) %>%
+  arrange(variable) %>%
+  mutate(
+    level = fct_rev(fct_inorder(str_replace(paste(variable, variable_levels, sep=": "),  "\\:\\s$", ""))),
+    cardn = row_number()
+  )
+
+plot_smd <-
+  ggplot(data_smd)+
+  geom_point(aes(x=smd, y=level))+
+  geom_rect(aes(alpha = variable_card, ymin = rev(cardn)-0.5, ymax =rev(cardn+0.5)), xmin = -Inf, xmax = Inf, fill='grey', colour="transparent") +
+  scale_alpha_continuous(range=c(0,0.3), guide=FALSE)+
+  labs(
+    x="Standardised mean difference",
+    y=NULL,
+    alpha=NULL
+  )+
+  theme_minimal() +
+  theme(
+    strip.placement = "outside",
+    strip.background = element_rect(fill="transparent", colour="transparent"),
+    strip.text.y.left = element_text(angle = 0, hjust=1),
+    panel.grid.major.y = element_blank(),
+    panel.grid.minor.y = element_blank(),
+    panel.spacing = unit(0, "lines")
+  )
+
+write_csv(data_smd, fs::path(output_dir, "data_smd.csv"))
+ggsave(plot_smd, filename="plot_smd.png", path=output_dir)
 
 
 
@@ -389,16 +388,16 @@ data_flowchart_match <-
     c7 = c6 & matched,
   ) %>%
   select(-patient_id, -matched) %>%
-  group_by(vax3_type) %>%
+  group_by(boost_type) %>%
   summarise(
-    across(.fns=sum)
+    across(.cols=everything(), .fns=sum)
   ) %>%
   pivot_longer(
-    cols=-vax3_type,
+    cols=-boost_type,
     names_to="criteria",
     values_to="n"
   ) %>%
-  group_by(vax3_type) %>%
+  group_by(boost_type) %>%
   mutate(
     n_exclude = lag(n) - n,
     pct_exclude = n_exclude/lag(n),
@@ -406,9 +405,9 @@ data_flowchart_match <-
     pct_step = n / lag(n),
     crit = str_extract(criteria, "^c\\d+"),
     criteria = fct_case_when(
-      crit == "c0" ~ "Aged 18+ and received booster dose of BNT162b2 or mRNA-1273 between 29 October 2021 and 25 February 2022", # paste0("Aged 18+\n with 2 doses on or before ", format(study_dates$lastvax2_date, "%d %b %Y")),
-      crit == "c1" ~ "  with no missing demographic information",
-      crit == "c2" ~ "  with homologous primary vaccination course of BNT162b2 or ChAdOx1",
+      crit == "c0" ~ "Recieved booster dose of Pfizer or Sanofi between 1 April and 30 June 2023",
+      crit == "c1" ~ "  and clinically at-risk or aged 75+",
+      crit == "c2" ~ "  with no missing demographic information",
       crit == "c3" ~ "  and not a health and social care worker",
       crit == "c4" ~ "  and not a care/nursing home resident, end-of-life or housebound",
       crit == "c5" ~ "  and no COVID-19-related events within 28 days",
@@ -431,16 +430,16 @@ data_flowchart_match_rounded <-
     c7 = c6 & matched,
   ) %>%
   select(-patient_id, -matched) %>%
-  group_by(vax3_type) %>%
+  group_by(boost_type) %>%
   summarise(
-    across(.fns=~roundmid_any(sum(.), threshold))
+    across(.cols = everything(), .fns=~roundmid_any(sum(.), threshold))
   ) %>%
   pivot_longer(
-    cols=-vax3_type,
+    cols=-boost_type,
     names_to="criteria",
     values_to="n"
   ) %>%
-  group_by(vax3_type) %>%
+  group_by(boost_type) %>%
   mutate(
     n_exclude = lag(n) - n,
     pct_exclude = n_exclude/lag(n),
@@ -448,9 +447,9 @@ data_flowchart_match_rounded <-
     pct_step = n / lag(n),
     crit = str_extract(criteria, "^c\\d+"),
     criteria = fct_case_when(
-      crit == "c0" ~ "Aged 18+ and received booster dose of BNT162b2 or mRNA-1273 between 29 October 2021 and 31 January 2022", # paste0("Aged 18+\n with 2 doses on or before ", format(study_dates$lastvax2_date, "%d %b %Y")),
-      crit == "c1" ~ "  with no missing demographic information",
-      crit == "c2" ~ "  with homologous primary vaccination course of BNT162b2 or ChAdOx1",
+      crit == "c0" ~ "Recieved booster dose of Pfizer or Sanofi between 1 April and 30 June 2023",
+      crit == "c1" ~ "  and clinically at-risk or aged 75+",
+      crit == "c2" ~ "  with no missing demographic information",
       crit == "c3" ~ "  and not a health and social care worker",
       crit == "c4" ~ "  and not a care/nursing home resident, end-of-life or housebound",
       crit == "c5" ~ "  and no COVID-19-related events within 28 days",
@@ -462,37 +461,3 @@ data_flowchart_match_rounded <-
 
 write_csv(data_flowchart_match_rounded, fs::path(output_dir, "flowchart.csv"))
 
-
-
-
-## matching summary ----
-# FIXME -- need to import baseline variabels here
-
-# summary of trial participants, by treatment group
-# match_summary_treatment <-
-#   data_matchstatus %>%
-#   group_by(treatment) %>%
-#   summarise(
-#     n=n(),
-#     firstrecruitdate = min(vax3_date),
-#     lastrecruitdate = max(vax3_date),
-#     # fup_sum = sum(fup),
-#     # fup_years = sum(fup)/365.25,
-#     # fup_mean = mean(fup),
-#     # fup_median = median(fup),
-#
-#     n_12pfizer = sum(vax12_type=="pfizer-pfizer"),
-#     prop_12pfizer = n_12pfizer/n,
-#     n_12az = sum(vax12_type=="az-az"),
-#     prop_12az = n_12az/n,
-#     # n_12moderna = sum(vax12_type=="moderna-moderna"),
-#     # prop_12moderna = n_12moderna/n,
-#
-#     age_median = median(age),
-#     age_Q1 = quantile(age, 0.25),
-#     age_Q3 = quantile(age, 0.75),
-#     female = mean(sex=="Female"),
-#   )
-#
-# write_csv(match_summary_treated, fs::path(output_dir, "report_summary_treated.csv"))
-#
