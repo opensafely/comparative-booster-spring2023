@@ -79,7 +79,7 @@ safely_matchit <- purrr::safely(matchit)
 ## parallelisation preliminaries ----
 
 parallel::detectCores() # how many cores available?
-n_threads <- 2
+n_threads <- max(2, parallel::detectCores())
 
 cluster <- parallel::makeCluster(
   n_threads,
