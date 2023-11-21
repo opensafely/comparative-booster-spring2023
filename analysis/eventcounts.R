@@ -20,7 +20,7 @@ args <- commandArgs(trailingOnly=TRUE)
 if(length(args)==0){
   # use for interactive testing
   removeobjects <- FALSE
-  matchset <- "B"
+  matchset <- "A"
 } else {
   removeobjects <- TRUE
   matchset <- args[[1]]
@@ -34,11 +34,11 @@ library('glue')
 library('survival')
 
 ## Import custom user functions from lib
-source(here("lib", "functions", "utility.R"))
-source(here("lib", "functions", "survival.R"))
+source(here("analysis", "functions", "utility.R"))
+source(here("analysis", "functions", "survival.R"))
 
 ## Import design elements
-source(here("lib", "design", "design.R"))
+source(here("analysis", "design", "design.R"))
 
 
 
@@ -61,7 +61,6 @@ metaparams <-
   )
 
 
-
 data_matchstatus <- read_rds(here("output", "match", matchset, "data_matchstatus.rds"))
 
 ## import baseline data, restrict to matched individuals and derive time-to-event variables
@@ -70,23 +69,23 @@ data_matched <-
   mutate(all = "all") %>%
   select(
     # select only variables needed for models to save space
-    patient_id, vax3_date,
+    patient_id, boost_date,
     all_of(metaparams$subgroup),
     death_date,
-    ends_with("_count"),
+    covid_test_frequency
   ) %>%
   #filter(patient_id %in% data_matchstatus$patient_id[data_matchstatus$matched]) %>%
   left_join(
-    data_matchstatus %>% filter(matched) %>% select(-vax3_date),
+    data_matchstatus %>% filter(matched) %>% select(-boost_date),
     .,
     by= c("patient_id")
   ) %>%
   mutate(
     censor_date = pmin(
       death_date,
-      study_dates$postestfollowupend_date,
+      study_dates$followupend_date,
       na.rm = TRUE
-    ), # only use death and end of follow-up as these are the only things that can be used in a study definition currently
+    ), # only use death and end of follow-up
   )
 
 # report number of tests ----
@@ -102,11 +101,9 @@ data_counts <-
           group_by_(subgroup, "treatment") %>%
           summarise(
             n = roundmid_any(n(), threshold),
-            persontime = sum(as.numeric(censor_date - (vax3_date - 1))),
-            #test_count = sum(test_count),
-            test_rate = sum(test_count) / persontime,
-            #postest_count = sum(postest_count),
-            postest_rate = sum(postest_count) / persontime,
+            persontime = sum(as.numeric(censor_date - (boost_date - 1))),
+            test_count = sum(covid_test_frequency),
+            test_rate = sum(covid_test_frequency) / persontime,
           ) %>%
           ungroup() %>%
           add_column(

@@ -1,6 +1,6 @@
 
 # # # # # # # # # # # # # # # # # # # # #
-# Purpose: Get Kaplan-Meier estimates for specified outcome, and derive risk differences
+# Purpose: Get Kaplan-Meier estimates for specified outcome, and derive contrasts
 #  - import matched data
 #  - adds outcome variable and restricts follow-up
 #  - gets KM estimates
@@ -24,8 +24,8 @@ if(length(args)==0){
   removeobjects <- FALSE
   matchset <- "A"
   #subgroup <- "all"
-  subgroup <- "all"
-  outcome <- "postest"
+  subgroup <- "cv"
+  outcome <- "covidemergency"
 
 } else {
   removeobjects <- TRUE
@@ -43,19 +43,16 @@ library('glue')
 library('survival')
 
 ## Import custom user functions from lib
-source(here("lib", "functions", "utility.R"))
-source(here("lib", "functions", "survival.R"))
+source(here("analysis", "functions", "utility.R"))
+source(here("analysis", "functions", "survival.R"))
 
 ## Import design elements
-source(here("lib", "design", "design.R"))
+source(here("analysis", "design", "design.R"))
 
 
 # derive subgroup info
 
 subgroup_sym <- sym(subgroup)
-#subgroup_variable <-  str_split_fixed(subgroup,"-",2)[,1]
-#subgroup_level <- str_split_fixed(subgroup,"-",2)[,2]
-#subgroup_dummy <- paste(c(subgroup_variable,subgroup_level), collapse="_")
 
 # create output directories ----
 
@@ -70,42 +67,33 @@ data_matched <-
   read_rds(here("output", "data", "data_cohort.rds")) %>%
   select(
     # select only variables needed for models to save space
-    patient_id, vax3_date,
+    patient_id, boost_date,
     all_of(subgroup),
-    all_of(paste0(c(outcome, "death", "dereg", "coviddeath", "noncoviddeath", "vax4"), "_date")),
+    all_of(paste0(c(outcome, "death", "dereg", "coviddeath", "noncoviddeath"), "_date")),
   ) %>%
   #filter(patient_id %in% data_matchstatus$patient_id[data_matchstatus$matched]) %>%
   left_join(
-    data_matchstatus %>% filter(matched) %>% select(-vax3_date),
+    data_matchstatus %>% filter(matched) %>% select(-boost_date),
     .,
     by= c("patient_id")
   ) %>%
   mutate(
 
-    # put here until data_process is re-run
-    variantera = fct_case_when(
-      vax3_date < as.Date("2021-12-15") ~ "Delta (up to 14 December 2021)",
-      vax3_date >= as.Date("2021-12-15") ~ "Omicron (15 December 2021 onwards)",
-      TRUE ~ NA_character_
-    ),
-
-    treatment_date = vax3_date-1L, # -1 because we assume vax occurs at the start of the day, and so outcomes occurring on the same day as treatment are assumed "1 day" long
+    treatment_date = boost_date-1L, # -1 because we assume vax occurs at the start of the day, and so outcomes occurring on the same day as treatment are assumed "1 day" long
     outcome_date = .[[glue("{outcome}_date")]],
 
     # person-time is up to and including censor date
     censor_date = pmin(
       dereg_date,
-      #vax4_date-1, # -1 because we assume vax occurs at the start of the day
       death_date,
-      if(outcome=="postest") {study_dates$postestfollowupend_date} else {study_dates$followupend_date},
+      study_dates$followupend_date,
       treatment_date + maxfup,
       na.rm=TRUE
     ),
 
     noncompetingcensor_date = pmin(
       dereg_date,
-      #vax4_date-1, # -1 because we assume vax occurs at the start of the day
-      if(outcome=="postest") {study_dates$postestfollowupend_date} else {study_dates$followupend_date},
+      study_dates$followupend_date,
       treatment_date + maxfup,
       na.rm=TRUE
     ),
@@ -134,43 +122,6 @@ table(
 )
 # should be c(0, 0, nrow(data_matched))
 
-## pre-flight checks ----
-
-### event counts within each covariate level ----
-
-
-# tbltab0 <-
-#   data_matched %>%
-#   select(ind_outcome, treatment, subgroup, all_of(matching_variables[[matchset]]$all)) %>%
-#   mutate(
-#     across(
-#       where(~ !is.factor(.x)),
-#       ~as.character(.)
-#     ),
-#   )
-#
-# map(tbltab0, class)
-
-# event_counts <-
-#   tbltab0 %>%
-#   split(.["ind_outcome"]) %>%
-#   map(~select(., -ind_outcome)) %>%
-#   map(
-#     function(data){
-#       map(data, redacted_summary_cat, redaction_threshold=0) %>%
-#         bind_rows(.id="variable") %>%
-#         select(-redacted, -pct_nonmiss)
-#     }
-#   ) %>%
-#   bind_rows(.id = "event") %>%
-#   pivot_wider(
-#     id_cols=c(variable, .level),
-#     names_from = event,
-#     names_glue = "event{event}_{.value}",
-#     values_from = c(n, pct)
-#   )
-#
-# write_csv(event_counts, fs::path(output_dir, "model_preflight.csv"))
 
 ## cumulative risk differences ----
 
@@ -481,7 +432,6 @@ km_contrasts_rounded_daily <- kmcontrasts(data_surv_rounded, c(0,seq_len(max(pos
 km_contrasts_rounded_cuts <- kmcontrasts(data_surv_rounded, postbaselinecuts_data)
 km_contrasts_rounded_overall <- kmcontrasts(data_surv_rounded, c(0,max(postbaselinecuts_data)))
 km_contrasts_rounded_20 <- kmcontrasts(data_surv_rounded, c(0,20*7))
-
 
 
 ## Cox models ----

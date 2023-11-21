@@ -1,123 +1,63 @@
 ######################################
-
-# This script:
-# imports data extracted by the cohort extractor (or dummy data)
-# fills in unknown ethnicity from GP records with ethnicity from SUS (secondary care)
-# tidies missing values
+# Purpose: process (tidy, clean, reshape, derive) data extracted using ehrQL (or dummy data)
+#
 # standardises some variables (eg convert to factor) and derives some new ones
-# organises vaccination date data to "vax X type", "vax X date" (rather than "pfizer X date", "az X date", ...)
+# organises vaccination date data to "vax X type", "vax X date" in long format
 ######################################
 
+# Preliminaries ----
 
-
-
-# Import libraries ----
+## Import libraries ----
 library('tidyverse')
 library('lubridate')
 library('arrow')
 library('here')
 
-# Import custom user functions from lib
-source(here("lib", "functions", "utility.R"))
+## Import custom user functions from lib
+source(here("analysis", "functions", "utility.R"))
 
-# Import design elements
-source(here("lib", "design", "design.R"))
+## Import design elements
+source(here("analysis", "design", "design.R"))
 
-# output processed data to rds ----
-
+## create output directories for data
 fs::dir_create(here("output", "data"))
 
 
-# process ----
 
-# use externally created dummy data if not running in the server
-# check variables are as they should be
-if(Sys.getenv("OPENSAFELY_BACKEND") %in% c("", "expectations")){
+# Import and process data ----
 
-  # ideally in future this will check column existence and types from metadata,
-  # rather than from a cohort-extractor-generated dummy data
-
-  data_studydef_dummy <- read_feather(here("output", "input.feather")) %>%
-    # because date types are not returned consistently by cohort extractor
-    mutate(across(ends_with("_date"), ~ as.Date(.))) %>%
-    mutate(patient_id = as.integer(patient_id))
-
-  data_custom_dummy <- read_feather(here("lib", "dummydata", "dummyinput.feather")) %>%
-    mutate(
-      msoa = sample(factor(c("1", "2")), size=n(), replace=TRUE), # override msoa so matching success more likely
-      stp = sample(factor(c("1", "2")), size=n(), replace=TRUE), # override stp so matching success more likely
-      imd = sample(factor((1:10)*3284), size=n(), replace=TRUE), # override imd so matching success more likely
-    )
+## Import extracted dataset ----
+data_extract <- read_feather(here("output", "extracts", "extract.arrow"))
 
 
-  not_in_studydef <- names(data_custom_dummy)[!( names(data_custom_dummy) %in% names(data_studydef_dummy) )]
-  not_in_custom  <- names(data_studydef_dummy)[!( names(data_studydef_dummy) %in% names(data_custom_dummy) )]
-
-
-  if(length(not_in_custom)!=0) stop(
-    paste(
-      "These variables are in studydef but not in custom: ",
-      paste(not_in_custom, collapse=", ")
-    )
-  )
-
-  if(length(not_in_studydef)!=0) stop(
-    paste(
-      "These variables are in custom but not in studydef: ",
-      paste(not_in_studydef, collapse=", ")
-    )
-  )
-
-  # reorder columns
-  data_studydef_dummy <- data_studydef_dummy[,names(data_custom_dummy)]
-
-  unmatched_types <- cbind(
-    map_chr(data_studydef_dummy, ~paste(class(.), collapse=", ")),
-    map_chr(data_custom_dummy, ~paste(class(.), collapse=", "))
-  )[ (map_chr(data_studydef_dummy, ~paste(class(.), collapse=", ")) != map_chr(data_custom_dummy, ~paste(class(.), collapse=", ")) ), ] %>%
-    as.data.frame() %>% rownames_to_column()
-
-
-  if(nrow(unmatched_types)>0) stop(
-    #unmatched_types
-    "inconsistent typing in studydef : dummy dataset\n",
-    apply(unmatched_types, 1, function(row) paste(paste(row, collapse=" : "), "\n"))
-  )
-
-  data_extract <- data_custom_dummy
-} else {
-  data_extract <- read_feather(here("output", "input.feather")) %>%
-    #because date types are not returned consistently by cohort extractor
-    mutate(across(ends_with("_date"),  as.Date))
-}
-
-
+## Process extracted dataset ----
 data_processed <- data_extract %>%
   mutate(
 
+    # binary variable for the exposure
+    # helpful for various downstream matching / plotting / table functions
+    treatment = case_when(
+      boost_type=="pfizerBA45" ~ 0L,
+      boost_type=="sanofi" ~ 1L,
+      TRUE ~ NA_integer_
+    ),
+
+    # boost date represented as an integer, using for matching instead of date-formatted variable to avoid issues
+    boost_day = as.integer(boost_date - study_dates$studystart_date),
+
     ageband = cut(
-      age,
-      breaks=c(-Inf, 18, 40, 55, 65, 75, Inf),
-      labels=c("under 18", "18-39", "40-54", "55-64", "65-74", "75+"),
+      age_july2023, # use fixed date to ascertain age so that age bands align with eligibility. because age and vax date are closely matched, this doesn't cause any problems
+      breaks=c(-Inf, 16, 50, 65, 75, 80, 85, Inf),
+      labels=c("under 16", "16-49", "50-64", "65-74", "75-79", "80-84", "85+"),
       right=FALSE
     ),
 
-    sex = fct_case_when(
-      sex == "F" ~ "Female",
-      sex == "M" ~ "Male",
-      #sex == "I" ~ "Inter-sex",
-      #sex == "U" ~ "Unknown",
-      TRUE ~ NA_character_
-    ),
-
-    ethnicity_combined = if_else(is.na(ethnicity), ethnicity_6_sus, ethnicity),
-
-    ethnicity_combined = fct_case_when(
-      ethnicity_combined == "1" ~ "White",
-      ethnicity_combined == "4" ~ "Black",
-      ethnicity_combined == "3" ~ "South Asian",
-      ethnicity_combined == "2" ~ "Mixed",
-      ethnicity_combined == "5" ~ "Other",
+    ethnicity = fct_case_when(
+      ethnicity == "1" ~ "White",
+      ethnicity == "4" ~ "Black",
+      ethnicity == "3" ~ "South Asian",
+      ethnicity == "2" ~ "Mixed",
+      ethnicity == "5" ~ "Other",
       TRUE ~ "Unknown"
     ),
 
@@ -132,18 +72,26 @@ data_processed <- data_extract %>%
       `South West` = "South West"
     ),
 
-    imd_Q5 = factor(imd_Q5, levels = c("1 (most deprived)", "2", "3", "4", "5 (least deprived)", "Unknown")),
+  #  imd_Q5 = factor(imd_Q5, levels = c("1 (most deprived)", "2", "3", "4", "5 (least deprived)", "Unknown")),
 
     # imd = as.integer(as.character(imd)), # imd is a factor, so convert to character then integer to get underlying values
     # imd = if_else((imd < -0.1) | (msoa==""), NA_integer_, imd),
-    # imd_Q5 = fct_case_when(
-    #   (imd >= -0.1) & (imd < 32844*1/5) ~ "1 most deprived",
-    #   (imd >= 32844*1/5) & (imd < 32844*2/5) ~ "2",
-    #   (imd >= 32844*2/5) & (imd < 32844*3/5) ~ "3",
-    #   (imd >= 32844*3/5) & (imd < 32844*4/5) ~ "4",
-    #   (imd >= 32844*4/5) ~ "5 least deprived",
-    #   TRUE ~ NA_character_
-    # ),
+    imd_Q5 = fct_case_when(
+      (imd >= -0.1) & (imd < 32844*1/5) ~ "1 most deprived",
+      (imd >= 32844*1/5) & (imd < 32844*2/5) ~ "2",
+      (imd >= 32844*2/5) & (imd < 32844*3/5) ~ "3",
+      (imd >= 32844*3/5) & (imd < 32844*4/5) ~ "4",
+      (imd >= 32844*4/5) ~ "5 least deprived",
+      TRUE ~ NA_character_
+    ),
+
+    imd_Q5 <- cut(
+      imd,
+      breaks = (32844/5)*c(-0.1,1,2,3,4,5),
+      labels = c("1 most deprived", "2", "3", "4", "5 least deprived"),
+      include.lowest = TRUE,
+      right = FALSE
+    ),
 
     rural_urban_group = fct_case_when(
       rural_urban %in% c(1,2) ~ "Urban conurbation",
@@ -154,8 +102,13 @@ data_processed <- data_extract %>%
 
     care_home_combined = care_home_tpp | care_home_code, # any carehome flag
 
-    immuno_any = immunosuppressed | asplenia | cancer_haem | cancer_nonhaem | solid_organ_transplant |  hiv_aids,
 
+
+    immuno_any = immunosuppressed | asplenia | cancer | solid_organ_transplant |  hiv_aids,
+
+    # clinically at-risk group
+    cv = immuno_any | chronic_kidney_disease | chronic_resp_disease | diabetes | chronic_liver_disease |
+      chronic_neuro_disease | chronic_heart_disease | learndis | sev_mental,
 
     multimorb =
       (sev_obesity) +
@@ -165,84 +118,31 @@ data_processed <- data_extract %>%
       (chronic_liver_disease)+
       (chronic_resp_disease)+
       (chronic_neuro_disease)+
-      (cancer_haem | cancer_nonhaem)+
+      (cancer)+
       #(learndis)+
       #(sev_mental),
       0,
     multimorb = cut(multimorb, breaks = c(0, 1, 2, Inf), labels=c("0", "1", "2+"), right=FALSE),
 
-    # clinically at-risk group
-    cv = cev | immuno_any | chronic_kidney_disease | chronic_resp_disease | diabetes | chronic_liver_disease |
-      chronic_neuro_disease | chronic_heart_disease | learndis | sev_mental,
+    ## define additional subgroups used for subgroup analyses
 
-    cev_cv = fct_case_when(
-      cev ~ "Clinically extremely vulnerable",
-      cv ~ "Clinically at-risk",
-      TRUE ~ "Not clinically at-risk"
-    ) %>% fct_rev(),
-
-    # original priority groups https://assets.publishing.service.gov.uk/government/uploads/system/uploads/attachment_data/file/1007737/Greenbook_chapter_14a_30July2021.pdf#page=15
-    # new priority groups https://www.england.nhs.uk/coronavirus/wp-content/uploads/sites/52/2021/07/C1327-covid-19-vaccination-autumn-winter-phase-3-planning.pdf
-    # group 10 split into 16-39 and 40-49 because of earlier roll-out in 40+ from 15 Nov https://www.gov.uk/government/news/jcvi-issues-advice-on-covid-19-booster-vaccines-for-those-aged-40-to-49-and-second-doses-for-16-to-17-year-olds
-
-    jcvi_ageband = cut(
-      age_august2021,
-      breaks=c(-Inf, 18, 40, 50, 55, 60, 65, 70, 75, 80, Inf),
-      labels=c("under 18", "18-39", "40-49", "50-54", "55-59", "60-64", "65-69", "70-74", "75-79", "80+"),
-      right=FALSE
-    ),
-
-
-    jcvi_group = fct_case_when(
-      care_home_combined | hscworker  ~ "1",
-      age_august2021>=80 ~ "2",
-      age_august2021>=75 ~ "3",
-      age_august2021>=70 | (cev & (age_august2021>=16)) ~ "4",
-      age_august2021>=65 ~ "5",
-      between(age_august2021, 16, 64.999) & cv ~ "6",
-      age_august2021>=60 ~ "7",
-      age_august2021>=55 ~ "8",
-      age_august2021>=50 ~ "9",
-      age_august2021>=40 ~ "10a",
-      TRUE ~ "10b"
-    ),
-
-    jcvi_group_descr = fct_recode(
-      jcvi_group,
-      "Care home residents and health and social care workers"="1",
-      "80+ years"="2",
-      "75-79 years"="3",
-      "70-74 years or clinically extremely vulnerable"="4",
-      "65-69 years"="5",
-      "16-64 years or clinically at-risk"="6",
-      "60-64 years"="7",
-      "55-59 years"="8",
-      "50-54 years"="9",
-      "40-49 years"="10a",
-      "16-39 years"="10b"
-    ),
-
-    # subgroups
     all=factor("all"),
-    age65plus = age>=65,
-    variantera = fct_case_when(
-      anycovidvax_3_date < as.Date("2021-12-15") ~ "Delta (up to 14 December 2021)",
-      anycovidvax_3_date >= as.Date("2021-12-15") ~ "Omicron (15 December 2021 onwards)",
-      TRUE ~ NA_character_
-    ),
+    age75plus = age_july2023>=75,
 
     prior_tests_cat = cut(prior_covid_test_frequency, breaks=c(0, 1, 2, 3, Inf), labels=c("0", "1", "2", "3+"), right=FALSE),
 
     prior_covid_infection = (!is.na(postest_0_date))  | (!is.na(covidemergency_0_date)) | (!is.na(covidadmitted_0_date)) | (!is.na(primary_care_covid_case_0_date)),
+
+
+    ## process outcomes data
 
     covidemergency_date = pmin(covidemergency_date, covidadmitted_date, na.rm=TRUE),
 
     # latest covid event before study start
     anycovid_0_date = pmax(postest_0_date, covidemergency_0_date, covidadmitted_0_date, na.rm=TRUE),
 
-    covidadmittedproxy1_date = covidemergencyhosp_date,
-    covidadmittedproxy2_date = if_else((postest_date<=anycovidvax_3_date) & (postest_date>=anycovidvax_3_date-14), emergencyhosp_date, as.Date(NA)),
-    #covidadmittedproxy3_date = if_else((postest_date<=anycovidvax_3_date) & (postest_date>=anycovidvax_3_date-14), respemergencyhosp_date, as.Date(NA)),
+    coviddeath_date = if_else(death_cause_covid, death_date, NA_Date_),
+    fracturedeath_date = if_else(death_cause_fracture, death_date, NA_Date_),
 
     # earliest covid event after study start
     anycovid_date = pmin(postest_date, covidemergency_date, covidadmitted_date, coviddeath_date, na.rm=TRUE),
@@ -251,10 +151,15 @@ data_processed <- data_extract %>%
 
     noncoviddeath_date = if_else(!is.na(death_date) & is.na(coviddeath_date), death_date, as.Date(NA_character_)),
 
+    # cause_of_death = fct_case_when(
+    #   !is.na(coviddeath_date) ~ "covid-related",
+    #   !is.na(death_date) ~ "not covid-related",
+    #   TRUE ~ NA_character_
+    # ),
 
     cause_of_death = fct_case_when(
-      !is.na(coviddeath_date) ~ "covid-related",
-      !is.na(death_date) ~ "not covid-related",
+      death_cause_covid ~ "covid-related",
+      !death_cause_covid ~ "not covid-related",
       TRUE ~ NA_character_
     ),
 
@@ -262,129 +167,85 @@ data_processed <- data_extract %>%
 
   )
 
-# reshape vaccination data ----
+# Process vaccination dates ----
 
-data_vax <- local({
+## Reshape vaccination data from wide to long ----
+data_vax <-
+  data_processed %>%
+  select(
+    patient_id,
+    matches("covid_vax\\_\\d+\\_date"),
+    matches("covid_vax_type_\\d+"),
+  ) %>%
+  pivot_longer(
+    cols = -patient_id,
+    names_to = c(".value", "vax_index"),
+    names_pattern = "^(.*)_(\\d+)",
+    values_drop_na = TRUE,
+    names_transform = list(vax_index = as.integer)
+  ) %>%
+  rename(
+    vax_date = covid_vax,
+    vax_type = covid_vax_type,
+  ) %>%
+  # relabel vaccination codes from long ttp product names to short readable names
+  mutate(
+    vax_type = fct_recode(factor(vax_type, vax_product_lookup), !!!vax_product_lookup) %>% fct_explicit_na("other")
+  ) %>%
 
-  # data_vax_all <- data_processed %>%
-  #   select(patient_id, matches("covid\\_vax\\_\\d+\\_date")) %>%
-  #   pivot_longer(
-  #     cols = -patient_id,
-  #     names_to = c(NA, "vax_index"),
-  #     names_pattern = "^(.*)_(\\d+)_date",
-  #     values_to = "date",
-  #     values_drop_na = TRUE
-  #   ) %>%
-  #   arrange(patient_id, date)
+  # calculate time between vaccine intervals
+  arrange(patient_id, vax_date) %>%
+  group_by(patient_id) %>%
+  mutate(
+    vax_interval = as.integer(vax_date - lag(vax_date,1)),
+    duplicate = vax_interval==0
+  ) %>%
+  ungroup() %>%
 
-  data_vax_pfizer <- data_processed %>%
-    select(patient_id, matches("covid\\_vax\\_pfizer\\_\\d+\\_date")) %>%
-    pivot_longer(
-      cols = -patient_id,
-      names_to = c(NA, "vax_pfizer_index"),
-      names_pattern = "^(.*)_(\\d+)_date",
-      values_to = "date",
-      values_drop_na = TRUE
-    ) %>%
-    arrange(patient_id, date)
-
-  data_vax_az <- data_processed %>%
-    select(patient_id, matches("covid\\_vax\\_az\\_\\d+\\_date")) %>%
-    pivot_longer(
-      cols = -patient_id,
-      names_to = c(NA, "vax_az_index"),
-      names_pattern = "^(.*)_(\\d+)_date",
-      values_to = "date",
-      values_drop_na = TRUE
-    ) %>%
-    arrange(patient_id, date)
-
-  data_vax_moderna <- data_processed %>%
-    select(patient_id, matches("covid\\_vax\\_moderna\\_\\d+\\_date")) %>%
-    pivot_longer(
-      cols = -patient_id,
-      names_to = c(NA, "vax_moderna_index"),
-      names_pattern = "^(.*)_(\\d+)_date",
-      values_to = "date",
-      values_drop_na = TRUE
-    ) %>%
-    arrange(patient_id, date)
-
-
-  data_vax <-
-    data_vax_pfizer %>%
-    full_join(data_vax_az, by=c("patient_id", "date")) %>%
-    full_join(data_vax_moderna, by=c("patient_id", "date")) %>%
-    mutate(
-      type = fct_case_when(
-        (!is.na(vax_az_index)) & is.na(vax_pfizer_index) & is.na(vax_moderna_index) ~ "az",
-        is.na(vax_az_index) & (!is.na(vax_pfizer_index)) & is.na(vax_moderna_index) ~ "pfizer",
-        is.na(vax_az_index) & is.na(vax_pfizer_index) & (!is.na(vax_moderna_index)) ~ "moderna",
-        (!is.na(vax_az_index)) + (!is.na(vax_pfizer_index)) + (!is.na(vax_moderna_index)) > 1 ~ "duplicate",
-        TRUE ~ NA_character_
-      )
-    ) %>%
-    arrange(patient_id, date) %>%
-    group_by(patient_id) %>%
-    mutate(
-      vax_index=row_number()
-    ) %>%
-    ungroup()
-
-  data_vax
-
-})
+  # remove vaccinations that occur after booster date
+  left_join(
+    data_processed %>% select(patient_id, boost_date), by = "patient_id"
+  ) %>%
+  filter(
+    vax_date<=boost_date
+  )
 
 write_rds(data_vax, here("output", "data", "data_vaxlong.rds"), compress="gz")
 
-data_vax_wide = data_vax %>%
-  pivot_wider(
-    id_cols= patient_id,
-    names_from = c("vax_index"),
-    values_from = c("date", "type"),
-    names_glue = "vax{vax_index}_{.value}"
+## Summarise vaccination history to one-row-per-patient info ----
+data_vax_history <- data_vax %>%
+  group_by(patient_id) %>%
+  summarise(
+    vax_count = n(),
+    vax_previous_count = last(vax_index)-1,
+    vax_interval = last(vax_interval),
+    vax_intervals_atleast14days = all(vax_interval[-1]>=14),
+    vax_dates_possible = first(vax_date)>=as.Date("2020-06-01"), # earlier than 2020-12-08 to include trial participants, but excludes "unknowns" coded as eg 1900-01-01
+    vaxhist_pfizer = "pfizer" %in% (vax_type[-vax_count]),
+    vaxhist_az = "az" %in% (vax_type[-vax_count]),
+    vaxhist_moderna = "moderna" %in% (vax_type[-vax_count]),
+    vaxhist_pfizerBA1 = "pfizerBA1" %in% (vax_type[-vax_count]),
+    vaxhist_pfizerBA45 = "pfizerBA45" %in% (vax_type[-vax_count]),
+    vaxhist_pfizerXBB15 = "pfizerXBB15" %in% (vax_type[-vax_count]),
+    vaxhist_sanofi = "sanofi" %in% (vax_type[-vax_count]),
+    vaxhist_modernaomicron = "modernaomicron" %in% (vax_type[-vax_count]),
+    vaxhist_modernaXBB15 = "modernaXBB15" %in% (vax_type[-vax_count]),
+  ) %>%
+  ungroup() %>%
+  mutate(
+    vax_interval_bigM = if_else(vax_previous_count==0, 365L*5L, vax_interval) #if spring "booster" is first recorded vaccine, then set vax_interval to be very large
   )
 
+stopifnot("vax_count should be equal to vax_previous_count+1" = all(data_vax_history$vax_count == data_vax_history$vax_previous_count+1))
+stopifnot("nobody should have had sanofi before" = !any(data_vax_history$vaxhist_sanofi))
+stopifnot("nobody should have had pfizerBA45 before" = !any(data_vax_history$vaxhist_pfizerBA45))
+
+# Combine and output ----
+
 data_processed <- data_processed %>%
-  left_join(data_vax_wide, by ="patient_id") %>%
-  mutate(
-
-    vax12_type = paste0(vax1_type, "-", vax2_type),
-
-    vax1_type_descr = fct_case_when(
-      vax1_type == "pfizer" ~ "BNT162b2",
-      vax1_type == "az" ~ "ChAdOx1",
-      vax1_type == "moderna" ~ "Moderna",
-      TRUE ~ NA_character_
-    ),
-    vax2_type_descr = fct_case_when(
-      vax2_type == "pfizer" ~ "BNT162b2",
-      vax2_type == "az" ~ "ChAdOx1",
-      vax2_type == "moderna" ~ "Moderna",
-      TRUE ~ NA_character_
-    ),
-    vax3_type_descr = fct_case_when(
-      vax3_type == "pfizer" ~ "BNT162b2",
-      vax3_type == "az" ~ "ChAdOx1",
-      vax3_type == "moderna" ~ "Moderna",
-      TRUE ~ NA_character_
-    ),
-    vax4_type_descr = fct_case_when(
-      vax4_type == "pfizer" ~ "BNT162b2",
-      vax4_type == "az" ~ "ChAdOx1",
-      vax4_type == "moderna" ~ "Moderna",
-      TRUE ~ NA_character_
-    ),
-
-    vax12_type_descr = paste0(vax1_type_descr, "-", vax2_type_descr),
-
-    vax23_interval = as.integer(vax3_date - vax2_date)
-
-) %>%
-select(
-  -starts_with("covid_vax_"),
-)
-
+  left_join(data_vax_history, by ="patient_id") %>%
+  select(-starts_with("covid_vax_"))
 
 write_rds(data_processed, here("output", "data", "data_processed.rds"), compress="gz")
+
 
