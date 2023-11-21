@@ -1,12 +1,6 @@
 
 # # # # # # # # # # # # # # # # # # # # #
 # Purpose: Combine ci estimates from different outcomes
-#  - import matched data
-#  - adds outcome variable and restricts follow-up
-#  - gets CI estimates
-#  - The script must be accompanied by two arguments:
-#    `matchset` - the matching set used for matching
-#    `subgroup` - the subgroup variable, which is used to stratify CI estimates
 # # # # # # # # # # # # # # # # # # # # #
 
 # Preliminaries ----
