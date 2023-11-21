@@ -19,12 +19,12 @@ actions:
   ## # # # # # # # # # # # # # # # # # # # 
 
   extract:
-    run: cohortextractor:latest generate_cohort --study-definition study_definition
-      --output-format feather
+    run: ehrql:v0 generate-dataset analysis/dataset_definition.py --output output/extracts/extract.arrow
+      --dummy-data-file analysis/dummydata/dummyextract.arrow
     needs: []
     outputs:
       highly_sensitive:
-        cohort: output/input.feather
+        cohort: output/extracts/extract.arrow
 
   data_process:
     run: r:latest analysis/data_process.R
@@ -49,7 +49,6 @@ actions:
     - data_process
     outputs:
       highly_sensitive:
-        feather: output/data/*.feather
         rds: output/data/*.rds
       moderately_sensitive:
         csv: output/prematch/*.csv
@@ -95,24 +94,15 @@ actions:
 
   ## ### Overall models (''all'') 
 
-  km_A_all_postest:
-    run: r:latest analysis/km.R A all postest
-    needs:
-    - match_A
-    - data_selection
-    outputs:
-      moderately_sensitive:
-        rds: output/match/A/km/all/postest/*.rds
-        png: output/match/A/km/all/postest/*.png
-
   km_A_all_covidemergency:
     run: r:latest analysis/km.R A all covidemergency
     needs:
     - match_A
     - data_selection
     outputs:
-      moderately_sensitive:
+      highly_sensitive:
         rds: output/match/A/km/all/covidemergency/*.rds
+      moderately_sensitive:
         png: output/match/A/km/all/covidemergency/*.png
 
   km_A_all_covidadmitted:
@@ -121,8 +111,9 @@ actions:
     - match_A
     - data_selection
     outputs:
-      moderately_sensitive:
+      highly_sensitive:
         rds: output/match/A/km/all/covidadmitted/*.rds
+      moderately_sensitive:
         png: output/match/A/km/all/covidadmitted/*.png
 
   km_A_all_covidcritcare:
@@ -131,8 +122,9 @@ actions:
     - match_A
     - data_selection
     outputs:
-      moderately_sensitive:
+      highly_sensitive:
         rds: output/match/A/km/all/covidcritcare/*.rds
+      moderately_sensitive:
         png: output/match/A/km/all/covidcritcare/*.png
 
   km_A_all_coviddeath:
@@ -141,8 +133,9 @@ actions:
     - match_A
     - data_selection
     outputs:
-      moderately_sensitive:
+      highly_sensitive:
         rds: output/match/A/km/all/coviddeath/*.rds
+      moderately_sensitive:
         png: output/match/A/km/all/coviddeath/*.png
 
   km_A_all_noncoviddeath:
@@ -151,8 +144,9 @@ actions:
     - match_A
     - data_selection
     outputs:
-      moderately_sensitive:
+      highly_sensitive:
         rds: output/match/A/km/all/noncoviddeath/*.rds
+      moderately_sensitive:
         png: output/match/A/km/all/noncoviddeath/*.png
 
   km_A_all_fracture:
@@ -161,449 +155,80 @@ actions:
     - match_A
     - data_selection
     outputs:
-      moderately_sensitive:
+      highly_sensitive:
         rds: output/match/A/km/all/fracture/*.rds
+      moderately_sensitive:
         png: output/match/A/km/all/fracture/*.png
 
-  delayedentry_A_all_postest:
-    run: r:latest analysis/delayedentry.R A all postest
+  ## ### Models by age (''age75plus'') 
+
+  km_A_age75plus_covidemergency:
+    run: r:latest analysis/km.R A age75plus covidemergency
     needs:
     - match_A
     - data_selection
     outputs:
+      highly_sensitive:
+        rds: output/match/A/km/age75plus/covidemergency/*.rds
       moderately_sensitive:
-        rds: output/match/A/delayedentry/all/postest/*.rds
-        png: output/match/A/delayedentry/all/postest/*.png
+        png: output/match/A/km/age75plus/covidemergency/*.png
 
-  delayedentry_A_all_covidemergency:
-    run: r:latest analysis/delayedentry.R A all covidemergency
+  km_A_age75plus_covidadmitted:
+    run: r:latest analysis/km.R A age75plus covidadmitted
     needs:
     - match_A
     - data_selection
     outputs:
+      highly_sensitive:
+        rds: output/match/A/km/age75plus/covidadmitted/*.rds
       moderately_sensitive:
-        rds: output/match/A/delayedentry/all/covidemergency/*.rds
-        png: output/match/A/delayedentry/all/covidemergency/*.png
+        png: output/match/A/km/age75plus/covidadmitted/*.png
 
-  delayedentry_A_all_covidadmitted:
-    run: r:latest analysis/delayedentry.R A all covidadmitted
+  km_A_age75plus_covidcritcare:
+    run: r:latest analysis/km.R A age75plus covidcritcare
     needs:
     - match_A
     - data_selection
     outputs:
+      highly_sensitive:
+        rds: output/match/A/km/age75plus/covidcritcare/*.rds
       moderately_sensitive:
-        rds: output/match/A/delayedentry/all/covidadmitted/*.rds
-        png: output/match/A/delayedentry/all/covidadmitted/*.png
+        png: output/match/A/km/age75plus/covidcritcare/*.png
 
-  delayedentry_A_all_covidcritcare:
-    run: r:latest analysis/delayedentry.R A all covidcritcare
+  km_A_age75plus_coviddeath:
+    run: r:latest analysis/km.R A age75plus coviddeath
     needs:
     - match_A
     - data_selection
     outputs:
+      highly_sensitive:
+        rds: output/match/A/km/age75plus/coviddeath/*.rds
       moderately_sensitive:
-        rds: output/match/A/delayedentry/all/covidcritcare/*.rds
-        png: output/match/A/delayedentry/all/covidcritcare/*.png
+        png: output/match/A/km/age75plus/coviddeath/*.png
 
-  delayedentry_A_all_coviddeath:
-    run: r:latest analysis/delayedentry.R A all coviddeath
+  km_A_age75plus_noncoviddeath:
+    run: r:latest analysis/km.R A age75plus noncoviddeath
     needs:
     - match_A
     - data_selection
     outputs:
+      highly_sensitive:
+        rds: output/match/A/km/age75plus/noncoviddeath/*.rds
       moderately_sensitive:
-        rds: output/match/A/delayedentry/all/coviddeath/*.rds
-        png: output/match/A/delayedentry/all/coviddeath/*.png
+        png: output/match/A/km/age75plus/noncoviddeath/*.png
 
-  delayedentry_A_all_noncoviddeath:
-    run: r:latest analysis/delayedentry.R A all noncoviddeath
+  km_A_age75plus_fracture:
+    run: r:latest analysis/km.R A age75plus fracture
     needs:
     - match_A
     - data_selection
     outputs:
+      highly_sensitive:
+        rds: output/match/A/km/age75plus/fracture/*.rds
       moderately_sensitive:
-        rds: output/match/A/delayedentry/all/noncoviddeath/*.rds
-        png: output/match/A/delayedentry/all/noncoviddeath/*.png
-
-  delayedentry_A_all_fracture:
-    run: r:latest analysis/delayedentry.R A all fracture
-    needs:
-    - match_A
-    - data_selection
-    outputs:
-      moderately_sensitive:
-        rds: output/match/A/delayedentry/all/fracture/*.rds
-        png: output/match/A/delayedentry/all/fracture/*.png
-
-  ## ### Models by primary course (''vax12_type'') 
-
-  km_A_vax12_type_postest:
-    run: r:latest analysis/km.R A vax12_type postest
-    needs:
-    - match_A
-    - data_selection
-    outputs:
-      moderately_sensitive:
-        rds: output/match/A/km/vax12_type/postest/*.rds
-        png: output/match/A/km/vax12_type/postest/*.png
-
-  km_A_vax12_type_covidemergency:
-    run: r:latest analysis/km.R A vax12_type covidemergency
-    needs:
-    - match_A
-    - data_selection
-    outputs:
-      moderately_sensitive:
-        rds: output/match/A/km/vax12_type/covidemergency/*.rds
-        png: output/match/A/km/vax12_type/covidemergency/*.png
-
-  km_A_vax12_type_covidadmitted:
-    run: r:latest analysis/km.R A vax12_type covidadmitted
-    needs:
-    - match_A
-    - data_selection
-    outputs:
-      moderately_sensitive:
-        rds: output/match/A/km/vax12_type/covidadmitted/*.rds
-        png: output/match/A/km/vax12_type/covidadmitted/*.png
-
-  km_A_vax12_type_covidcritcare:
-    run: r:latest analysis/km.R A vax12_type covidcritcare
-    needs:
-    - match_A
-    - data_selection
-    outputs:
-      moderately_sensitive:
-        rds: output/match/A/km/vax12_type/covidcritcare/*.rds
-        png: output/match/A/km/vax12_type/covidcritcare/*.png
-
-  km_A_vax12_type_coviddeath:
-    run: r:latest analysis/km.R A vax12_type coviddeath
-    needs:
-    - match_A
-    - data_selection
-    outputs:
-      moderately_sensitive:
-        rds: output/match/A/km/vax12_type/coviddeath/*.rds
-        png: output/match/A/km/vax12_type/coviddeath/*.png
-
-  km_A_vax12_type_noncoviddeath:
-    run: r:latest analysis/km.R A vax12_type noncoviddeath
-    needs:
-    - match_A
-    - data_selection
-    outputs:
-      moderately_sensitive:
-        rds: output/match/A/km/vax12_type/noncoviddeath/*.rds
-        png: output/match/A/km/vax12_type/noncoviddeath/*.png
-
-  km_A_vax12_type_fracture:
-    run: r:latest analysis/km.R A vax12_type fracture
-    needs:
-    - match_A
-    - data_selection
-    outputs:
-      moderately_sensitive:
-        rds: output/match/A/km/vax12_type/fracture/*.rds
-        png: output/match/A/km/vax12_type/fracture/*.png
-
-  ## ### Models by clinically vulnerable group (''cev_cv'' or ''cv'') 
-
-  km_A_cev_cv_postest:
-    run: r:latest analysis/km.R A cev_cv postest
-    needs:
-    - match_A
-    - data_selection
-    outputs:
-      moderately_sensitive:
-        rds: output/match/A/km/cev_cv/postest/*.rds
-        png: output/match/A/km/cev_cv/postest/*.png
-
-  km_A_cev_cv_covidemergency:
-    run: r:latest analysis/km.R A cev_cv covidemergency
-    needs:
-    - match_A
-    - data_selection
-    outputs:
-      moderately_sensitive:
-        rds: output/match/A/km/cev_cv/covidemergency/*.rds
-        png: output/match/A/km/cev_cv/covidemergency/*.png
-
-  km_A_cev_cv_covidadmitted:
-    run: r:latest analysis/km.R A cev_cv covidadmitted
-    needs:
-    - match_A
-    - data_selection
-    outputs:
-      moderately_sensitive:
-        rds: output/match/A/km/cev_cv/covidadmitted/*.rds
-        png: output/match/A/km/cev_cv/covidadmitted/*.png
-
-  km_A_cev_cv_covidcritcare:
-    run: r:latest analysis/km.R A cev_cv covidcritcare
-    needs:
-    - match_A
-    - data_selection
-    outputs:
-      moderately_sensitive:
-        rds: output/match/A/km/cev_cv/covidcritcare/*.rds
-        png: output/match/A/km/cev_cv/covidcritcare/*.png
-
-  km_A_cev_cv_coviddeath:
-    run: r:latest analysis/km.R A cev_cv coviddeath
-    needs:
-    - match_A
-    - data_selection
-    outputs:
-      moderately_sensitive:
-        rds: output/match/A/km/cev_cv/coviddeath/*.rds
-        png: output/match/A/km/cev_cv/coviddeath/*.png
-
-  km_A_cev_cv_noncoviddeath:
-    run: r:latest analysis/km.R A cev_cv noncoviddeath
-    needs:
-    - match_A
-    - data_selection
-    outputs:
-      moderately_sensitive:
-        rds: output/match/A/km/cev_cv/noncoviddeath/*.rds
-        png: output/match/A/km/cev_cv/noncoviddeath/*.png
-
-  km_A_cev_cv_fracture:
-    run: r:latest analysis/km.R A cev_cv fracture
-    needs:
-    - match_A
-    - data_selection
-    outputs:
-      moderately_sensitive:
-        rds: output/match/A/km/cev_cv/fracture/*.rds
-        png: output/match/A/km/cev_cv/fracture/*.png
-
-  km_A_cv_postest:
-    run: r:latest analysis/km.R A cv postest
-    needs:
-    - match_A
-    - data_selection
-    outputs:
-      moderately_sensitive:
-        rds: output/match/A/km/cv/postest/*.rds
-        png: output/match/A/km/cv/postest/*.png
-
-  km_A_cv_covidemergency:
-    run: r:latest analysis/km.R A cv covidemergency
-    needs:
-    - match_A
-    - data_selection
-    outputs:
-      moderately_sensitive:
-        rds: output/match/A/km/cv/covidemergency/*.rds
-        png: output/match/A/km/cv/covidemergency/*.png
-
-  km_A_cv_covidadmitted:
-    run: r:latest analysis/km.R A cv covidadmitted
-    needs:
-    - match_A
-    - data_selection
-    outputs:
-      moderately_sensitive:
-        rds: output/match/A/km/cv/covidadmitted/*.rds
-        png: output/match/A/km/cv/covidadmitted/*.png
-
-  km_A_cv_covidcritcare:
-    run: r:latest analysis/km.R A cv covidcritcare
-    needs:
-    - match_A
-    - data_selection
-    outputs:
-      moderately_sensitive:
-        rds: output/match/A/km/cv/covidcritcare/*.rds
-        png: output/match/A/km/cv/covidcritcare/*.png
-
-  km_A_cv_coviddeath:
-    run: r:latest analysis/km.R A cv coviddeath
-    needs:
-    - match_A
-    - data_selection
-    outputs:
-      moderately_sensitive:
-        rds: output/match/A/km/cv/coviddeath/*.rds
-        png: output/match/A/km/cv/coviddeath/*.png
-
-  km_A_cv_noncoviddeath:
-    run: r:latest analysis/km.R A cv noncoviddeath
-    needs:
-    - match_A
-    - data_selection
-    outputs:
-      moderately_sensitive:
-        rds: output/match/A/km/cv/noncoviddeath/*.rds
-        png: output/match/A/km/cv/noncoviddeath/*.png
-
-  km_A_cv_fracture:
-    run: r:latest analysis/km.R A cv fracture
-    needs:
-    - match_A
-    - data_selection
-    outputs:
-      moderately_sensitive:
-        rds: output/match/A/km/cv/fracture/*.rds
-        png: output/match/A/km/cv/fracture/*.png
-
-  ## ### Models by prior infection (''prior_covid_infection'') 
-
-  km_A_prior_covid_infection_postest:
-    run: r:latest analysis/km.R A prior_covid_infection postest
-    needs:
-    - match_A
-    - data_selection
-    outputs:
-      moderately_sensitive:
-        rds: output/match/A/km/prior_covid_infection/postest/*.rds
-        png: output/match/A/km/prior_covid_infection/postest/*.png
-
-  km_A_prior_covid_infection_covidemergency:
-    run: r:latest analysis/km.R A prior_covid_infection covidemergency
-    needs:
-    - match_A
-    - data_selection
-    outputs:
-      moderately_sensitive:
-        rds: output/match/A/km/prior_covid_infection/covidemergency/*.rds
-        png: output/match/A/km/prior_covid_infection/covidemergency/*.png
-
-  km_A_prior_covid_infection_covidadmitted:
-    run: r:latest analysis/km.R A prior_covid_infection covidadmitted
-    needs:
-    - match_A
-    - data_selection
-    outputs:
-      moderately_sensitive:
-        rds: output/match/A/km/prior_covid_infection/covidadmitted/*.rds
-        png: output/match/A/km/prior_covid_infection/covidadmitted/*.png
-
-  km_A_prior_covid_infection_covidcritcare:
-    run: r:latest analysis/km.R A prior_covid_infection covidcritcare
-    needs:
-    - match_A
-    - data_selection
-    outputs:
-      moderately_sensitive:
-        rds: output/match/A/km/prior_covid_infection/covidcritcare/*.rds
-        png: output/match/A/km/prior_covid_infection/covidcritcare/*.png
-
-  km_A_prior_covid_infection_coviddeath:
-    run: r:latest analysis/km.R A prior_covid_infection coviddeath
-    needs:
-    - match_A
-    - data_selection
-    outputs:
-      moderately_sensitive:
-        rds: output/match/A/km/prior_covid_infection/coviddeath/*.rds
-        png: output/match/A/km/prior_covid_infection/coviddeath/*.png
-
-  km_A_prior_covid_infection_noncoviddeath:
-    run: r:latest analysis/km.R A prior_covid_infection noncoviddeath
-    needs:
-    - match_A
-    - data_selection
-    outputs:
-      moderately_sensitive:
-        rds: output/match/A/km/prior_covid_infection/noncoviddeath/*.rds
-        png: output/match/A/km/prior_covid_infection/noncoviddeath/*.png
-
-  km_A_prior_covid_infection_fracture:
-    run: r:latest analysis/km.R A prior_covid_infection fracture
-    needs:
-    - match_A
-    - data_selection
-    outputs:
-      moderately_sensitive:
-        rds: output/match/A/km/prior_covid_infection/fracture/*.rds
-        png: output/match/A/km/prior_covid_infection/fracture/*.png
-
-  ## ### Models by age (''age65plus'') 
-
-  km_A_age65plus_postest:
-    run: r:latest analysis/km.R A age65plus postest
-    needs:
-    - match_A
-    - data_selection
-    outputs:
-      moderately_sensitive:
-        rds: output/match/A/km/age65plus/postest/*.rds
-        png: output/match/A/km/age65plus/postest/*.png
-
-  km_A_age65plus_covidemergency:
-    run: r:latest analysis/km.R A age65plus covidemergency
-    needs:
-    - match_A
-    - data_selection
-    outputs:
-      moderately_sensitive:
-        rds: output/match/A/km/age65plus/covidemergency/*.rds
-        png: output/match/A/km/age65plus/covidemergency/*.png
-
-  km_A_age65plus_covidadmitted:
-    run: r:latest analysis/km.R A age65plus covidadmitted
-    needs:
-    - match_A
-    - data_selection
-    outputs:
-      moderately_sensitive:
-        rds: output/match/A/km/age65plus/covidadmitted/*.rds
-        png: output/match/A/km/age65plus/covidadmitted/*.png
-
-  km_A_age65plus_covidcritcare:
-    run: r:latest analysis/km.R A age65plus covidcritcare
-    needs:
-    - match_A
-    - data_selection
-    outputs:
-      moderately_sensitive:
-        rds: output/match/A/km/age65plus/covidcritcare/*.rds
-        png: output/match/A/km/age65plus/covidcritcare/*.png
-
-  km_A_age65plus_coviddeath:
-    run: r:latest analysis/km.R A age65plus coviddeath
-    needs:
-    - match_A
-    - data_selection
-    outputs:
-      moderately_sensitive:
-        rds: output/match/A/km/age65plus/coviddeath/*.rds
-        png: output/match/A/km/age65plus/coviddeath/*.png
-
-  km_A_age65plus_noncoviddeath:
-    run: r:latest analysis/km.R A age65plus noncoviddeath
-    needs:
-    - match_A
-    - data_selection
-    outputs:
-      moderately_sensitive:
-        rds: output/match/A/km/age65plus/noncoviddeath/*.rds
-        png: output/match/A/km/age65plus/noncoviddeath/*.png
-
-  km_A_age65plus_fracture:
-    run: r:latest analysis/km.R A age65plus fracture
-    needs:
-    - match_A
-    - data_selection
-    outputs:
-      moderately_sensitive:
-        rds: output/match/A/km/age65plus/fracture/*.rds
-        png: output/match/A/km/age65plus/fracture/*.png
+        png: output/match/A/km/age75plus/fracture/*.png
 
   ## ### Models by age-band (''ageband'') 
-
-  km_A_ageband_postest:
-    run: r:latest analysis/km.R A ageband postest
-    needs:
-    - match_A
-    - data_selection
-    outputs:
-      moderately_sensitive:
-        rds: output/match/A/km/ageband/postest/*.rds
-        png: output/match/A/km/ageband/postest/*.png
 
   km_A_ageband_covidemergency:
     run: r:latest analysis/km.R A ageband covidemergency
@@ -611,8 +236,9 @@ actions:
     - match_A
     - data_selection
     outputs:
-      moderately_sensitive:
+      highly_sensitive:
         rds: output/match/A/km/ageband/covidemergency/*.rds
+      moderately_sensitive:
         png: output/match/A/km/ageband/covidemergency/*.png
 
   km_A_ageband_covidadmitted:
@@ -621,8 +247,9 @@ actions:
     - match_A
     - data_selection
     outputs:
-      moderately_sensitive:
+      highly_sensitive:
         rds: output/match/A/km/ageband/covidadmitted/*.rds
+      moderately_sensitive:
         png: output/match/A/km/ageband/covidadmitted/*.png
 
   km_A_ageband_covidcritcare:
@@ -631,8 +258,9 @@ actions:
     - match_A
     - data_selection
     outputs:
-      moderately_sensitive:
+      highly_sensitive:
         rds: output/match/A/km/ageband/covidcritcare/*.rds
+      moderately_sensitive:
         png: output/match/A/km/ageband/covidcritcare/*.png
 
   km_A_ageband_coviddeath:
@@ -641,8 +269,9 @@ actions:
     - match_A
     - data_selection
     outputs:
-      moderately_sensitive:
+      highly_sensitive:
         rds: output/match/A/km/ageband/coviddeath/*.rds
+      moderately_sensitive:
         png: output/match/A/km/ageband/coviddeath/*.png
 
   km_A_ageband_noncoviddeath:
@@ -651,8 +280,9 @@ actions:
     - match_A
     - data_selection
     outputs:
-      moderately_sensitive:
+      highly_sensitive:
         rds: output/match/A/km/ageband/noncoviddeath/*.rds
+      moderately_sensitive:
         png: output/match/A/km/ageband/noncoviddeath/*.png
 
   km_A_ageband_fracture:
@@ -661,81 +291,214 @@ actions:
     - match_A
     - data_selection
     outputs:
-      moderately_sensitive:
+      highly_sensitive:
         rds: output/match/A/km/ageband/fracture/*.rds
+      moderately_sensitive:
         png: output/match/A/km/ageband/fracture/*.png
 
-  ## ### Models by variant era (''variantera'') 
+  ## ### Models by clinically vulnerable group (''cv'') 
 
-  km_A_variantera_postest:
-    run: r:latest analysis/km.R A variantera postest
+  km_A_cv_covidemergency:
+    run: r:latest analysis/km.R A cv covidemergency
     needs:
     - match_A
     - data_selection
     outputs:
+      highly_sensitive:
+        rds: output/match/A/km/cv/covidemergency/*.rds
       moderately_sensitive:
-        rds: output/match/A/km/variantera/postest/*.rds
-        png: output/match/A/km/variantera/postest/*.png
+        png: output/match/A/km/cv/covidemergency/*.png
 
-  km_A_variantera_covidemergency:
-    run: r:latest analysis/km.R A variantera covidemergency
+  km_A_cv_covidadmitted:
+    run: r:latest analysis/km.R A cv covidadmitted
     needs:
     - match_A
     - data_selection
     outputs:
+      highly_sensitive:
+        rds: output/match/A/km/cv/covidadmitted/*.rds
       moderately_sensitive:
-        rds: output/match/A/km/variantera/covidemergency/*.rds
-        png: output/match/A/km/variantera/covidemergency/*.png
+        png: output/match/A/km/cv/covidadmitted/*.png
 
-  km_A_variantera_covidadmitted:
-    run: r:latest analysis/km.R A variantera covidadmitted
+  km_A_cv_covidcritcare:
+    run: r:latest analysis/km.R A cv covidcritcare
     needs:
     - match_A
     - data_selection
     outputs:
+      highly_sensitive:
+        rds: output/match/A/km/cv/covidcritcare/*.rds
       moderately_sensitive:
-        rds: output/match/A/km/variantera/covidadmitted/*.rds
-        png: output/match/A/km/variantera/covidadmitted/*.png
+        png: output/match/A/km/cv/covidcritcare/*.png
 
-  km_A_variantera_covidcritcare:
-    run: r:latest analysis/km.R A variantera covidcritcare
+  km_A_cv_coviddeath:
+    run: r:latest analysis/km.R A cv coviddeath
     needs:
     - match_A
     - data_selection
     outputs:
+      highly_sensitive:
+        rds: output/match/A/km/cv/coviddeath/*.rds
       moderately_sensitive:
-        rds: output/match/A/km/variantera/covidcritcare/*.rds
-        png: output/match/A/km/variantera/covidcritcare/*.png
+        png: output/match/A/km/cv/coviddeath/*.png
 
-  km_A_variantera_coviddeath:
-    run: r:latest analysis/km.R A variantera coviddeath
+  km_A_cv_noncoviddeath:
+    run: r:latest analysis/km.R A cv noncoviddeath
     needs:
     - match_A
     - data_selection
     outputs:
+      highly_sensitive:
+        rds: output/match/A/km/cv/noncoviddeath/*.rds
       moderately_sensitive:
-        rds: output/match/A/km/variantera/coviddeath/*.rds
-        png: output/match/A/km/variantera/coviddeath/*.png
+        png: output/match/A/km/cv/noncoviddeath/*.png
 
-  km_A_variantera_noncoviddeath:
-    run: r:latest analysis/km.R A variantera noncoviddeath
+  km_A_cv_fracture:
+    run: r:latest analysis/km.R A cv fracture
     needs:
     - match_A
     - data_selection
     outputs:
+      highly_sensitive:
+        rds: output/match/A/km/cv/fracture/*.rds
       moderately_sensitive:
-        rds: output/match/A/km/variantera/noncoviddeath/*.rds
-        png: output/match/A/km/variantera/noncoviddeath/*.png
+        png: output/match/A/km/cv/fracture/*.png
 
-  km_A_variantera_fracture:
-    run: r:latest analysis/km.R A variantera fracture
+  ## ### Models by prior infection (''prior_covid_infection'') 
+
+  km_A_prior_covid_infection_covidemergency:
+    run: r:latest analysis/km.R A prior_covid_infection covidemergency
     needs:
     - match_A
     - data_selection
     outputs:
+      highly_sensitive:
+        rds: output/match/A/km/prior_covid_infection/covidemergency/*.rds
       moderately_sensitive:
-        rds: output/match/A/km/variantera/fracture/*.rds
-        png: output/match/A/km/variantera/fracture/*.png
+        png: output/match/A/km/prior_covid_infection/covidemergency/*.png
+
+  km_A_prior_covid_infection_covidadmitted:
+    run: r:latest analysis/km.R A prior_covid_infection covidadmitted
+    needs:
+    - match_A
+    - data_selection
+    outputs:
+      highly_sensitive:
+        rds: output/match/A/km/prior_covid_infection/covidadmitted/*.rds
+      moderately_sensitive:
+        png: output/match/A/km/prior_covid_infection/covidadmitted/*.png
+
+  km_A_prior_covid_infection_covidcritcare:
+    run: r:latest analysis/km.R A prior_covid_infection covidcritcare
+    needs:
+    - match_A
+    - data_selection
+    outputs:
+      highly_sensitive:
+        rds: output/match/A/km/prior_covid_infection/covidcritcare/*.rds
+      moderately_sensitive:
+        png: output/match/A/km/prior_covid_infection/covidcritcare/*.png
+
+  km_A_prior_covid_infection_coviddeath:
+    run: r:latest analysis/km.R A prior_covid_infection coviddeath
+    needs:
+    - match_A
+    - data_selection
+    outputs:
+      highly_sensitive:
+        rds: output/match/A/km/prior_covid_infection/coviddeath/*.rds
+      moderately_sensitive:
+        png: output/match/A/km/prior_covid_infection/coviddeath/*.png
+
+  km_A_prior_covid_infection_noncoviddeath:
+    run: r:latest analysis/km.R A prior_covid_infection noncoviddeath
+    needs:
+    - match_A
+    - data_selection
+    outputs:
+      highly_sensitive:
+        rds: output/match/A/km/prior_covid_infection/noncoviddeath/*.rds
+      moderately_sensitive:
+        png: output/match/A/km/prior_covid_infection/noncoviddeath/*.png
+
+  km_A_prior_covid_infection_fracture:
+    run: r:latest analysis/km.R A prior_covid_infection fracture
+    needs:
+    - match_A
+    - data_selection
+    outputs:
+      highly_sensitive:
+        rds: output/match/A/km/prior_covid_infection/fracture/*.rds
+      moderately_sensitive:
+        png: output/match/A/km/prior_covid_infection/fracture/*.png
+
+  ## ### Models by vax history (''vax_previous_count'') 
+
+  km_A_vax_previous_count_covidemergency:
+    run: r:latest analysis/km.R A vax_previous_count covidemergency
+    needs:
+    - match_A
+    - data_selection
+    outputs:
+      highly_sensitive:
+        rds: output/match/A/km/vax_previous_count/covidemergency/*.rds
+      moderately_sensitive:
+        png: output/match/A/km/vax_previous_count/covidemergency/*.png
+
+  km_A_vax_previous_count_covidadmitted:
+    run: r:latest analysis/km.R A vax_previous_count covidadmitted
+    needs:
+    - match_A
+    - data_selection
+    outputs:
+      highly_sensitive:
+        rds: output/match/A/km/vax_previous_count/covidadmitted/*.rds
+      moderately_sensitive:
+        png: output/match/A/km/vax_previous_count/covidadmitted/*.png
+
+  km_A_vax_previous_count_covidcritcare:
+    run: r:latest analysis/km.R A vax_previous_count covidcritcare
+    needs:
+    - match_A
+    - data_selection
+    outputs:
+      highly_sensitive:
+        rds: output/match/A/km/vax_previous_count/covidcritcare/*.rds
+      moderately_sensitive:
+        png: output/match/A/km/vax_previous_count/covidcritcare/*.png
+
+  km_A_vax_previous_count_coviddeath:
+    run: r:latest analysis/km.R A vax_previous_count coviddeath
+    needs:
+    - match_A
+    - data_selection
+    outputs:
+      highly_sensitive:
+        rds: output/match/A/km/vax_previous_count/coviddeath/*.rds
+      moderately_sensitive:
+        png: output/match/A/km/vax_previous_count/coviddeath/*.png
+
+  km_A_vax_previous_count_noncoviddeath:
+    run: r:latest analysis/km.R A vax_previous_count noncoviddeath
+    needs:
+    - match_A
+    - data_selection
+    outputs:
+      highly_sensitive:
+        rds: output/match/A/km/vax_previous_count/noncoviddeath/*.rds
+      moderately_sensitive:
+        png: output/match/A/km/vax_previous_count/noncoviddeath/*.png
+
+  km_A_vax_previous_count_fracture:
+    run: r:latest analysis/km.R A vax_previous_count fracture
+    needs:
+    - match_A
+    - data_selection
+    outputs:
+      highly_sensitive:
+        rds: output/match/A/km/vax_previous_count/fracture/*.rds
+      moderately_sensitive:
+        png: output/match/A/km/vax_previous_count/fracture/*.png
 
   ## # # # # # # # # # # # # # # # # # # # 
   ## matching set B 
@@ -761,24 +524,15 @@ actions:
 
   ## ### Overall models (''all'') 
 
-  km_B_all_postest:
-    run: r:latest analysis/km.R B all postest
-    needs:
-    - match_B
-    - data_selection
-    outputs:
-      moderately_sensitive:
-        rds: output/match/B/km/all/postest/*.rds
-        png: output/match/B/km/all/postest/*.png
-
   km_B_all_covidemergency:
     run: r:latest analysis/km.R B all covidemergency
     needs:
     - match_B
     - data_selection
     outputs:
-      moderately_sensitive:
+      highly_sensitive:
         rds: output/match/B/km/all/covidemergency/*.rds
+      moderately_sensitive:
         png: output/match/B/km/all/covidemergency/*.png
 
   km_B_all_covidadmitted:
@@ -787,8 +541,9 @@ actions:
     - match_B
     - data_selection
     outputs:
-      moderately_sensitive:
+      highly_sensitive:
         rds: output/match/B/km/all/covidadmitted/*.rds
+      moderately_sensitive:
         png: output/match/B/km/all/covidadmitted/*.png
 
   km_B_all_covidcritcare:
@@ -797,8 +552,9 @@ actions:
     - match_B
     - data_selection
     outputs:
-      moderately_sensitive:
+      highly_sensitive:
         rds: output/match/B/km/all/covidcritcare/*.rds
+      moderately_sensitive:
         png: output/match/B/km/all/covidcritcare/*.png
 
   km_B_all_coviddeath:
@@ -807,8 +563,9 @@ actions:
     - match_B
     - data_selection
     outputs:
-      moderately_sensitive:
+      highly_sensitive:
         rds: output/match/B/km/all/coviddeath/*.rds
+      moderately_sensitive:
         png: output/match/B/km/all/coviddeath/*.png
 
   km_B_all_noncoviddeath:
@@ -817,8 +574,9 @@ actions:
     - match_B
     - data_selection
     outputs:
-      moderately_sensitive:
+      highly_sensitive:
         rds: output/match/B/km/all/noncoviddeath/*.rds
+      moderately_sensitive:
         png: output/match/B/km/all/noncoviddeath/*.png
 
   km_B_all_fracture:
@@ -827,449 +585,80 @@ actions:
     - match_B
     - data_selection
     outputs:
-      moderately_sensitive:
+      highly_sensitive:
         rds: output/match/B/km/all/fracture/*.rds
+      moderately_sensitive:
         png: output/match/B/km/all/fracture/*.png
 
-  delayedentry_B_all_postest:
-    run: r:latest analysis/delayedentry.R B all postest
+  ## ### Models by age (''age75plus'') 
+
+  km_B_age75plus_covidemergency:
+    run: r:latest analysis/km.R B age75plus covidemergency
     needs:
     - match_B
     - data_selection
     outputs:
+      highly_sensitive:
+        rds: output/match/B/km/age75plus/covidemergency/*.rds
       moderately_sensitive:
-        rds: output/match/B/delayedentry/all/postest/*.rds
-        png: output/match/B/delayedentry/all/postest/*.png
+        png: output/match/B/km/age75plus/covidemergency/*.png
 
-  delayedentry_B_all_covidemergency:
-    run: r:latest analysis/delayedentry.R B all covidemergency
+  km_B_age75plus_covidadmitted:
+    run: r:latest analysis/km.R B age75plus covidadmitted
     needs:
     - match_B
     - data_selection
     outputs:
+      highly_sensitive:
+        rds: output/match/B/km/age75plus/covidadmitted/*.rds
       moderately_sensitive:
-        rds: output/match/B/delayedentry/all/covidemergency/*.rds
-        png: output/match/B/delayedentry/all/covidemergency/*.png
+        png: output/match/B/km/age75plus/covidadmitted/*.png
 
-  delayedentry_B_all_covidadmitted:
-    run: r:latest analysis/delayedentry.R B all covidadmitted
+  km_B_age75plus_covidcritcare:
+    run: r:latest analysis/km.R B age75plus covidcritcare
     needs:
     - match_B
     - data_selection
     outputs:
+      highly_sensitive:
+        rds: output/match/B/km/age75plus/covidcritcare/*.rds
       moderately_sensitive:
-        rds: output/match/B/delayedentry/all/covidadmitted/*.rds
-        png: output/match/B/delayedentry/all/covidadmitted/*.png
+        png: output/match/B/km/age75plus/covidcritcare/*.png
 
-  delayedentry_B_all_covidcritcare:
-    run: r:latest analysis/delayedentry.R B all covidcritcare
+  km_B_age75plus_coviddeath:
+    run: r:latest analysis/km.R B age75plus coviddeath
     needs:
     - match_B
     - data_selection
     outputs:
+      highly_sensitive:
+        rds: output/match/B/km/age75plus/coviddeath/*.rds
       moderately_sensitive:
-        rds: output/match/B/delayedentry/all/covidcritcare/*.rds
-        png: output/match/B/delayedentry/all/covidcritcare/*.png
+        png: output/match/B/km/age75plus/coviddeath/*.png
 
-  delayedentry_B_all_coviddeath:
-    run: r:latest analysis/delayedentry.R B all coviddeath
+  km_B_age75plus_noncoviddeath:
+    run: r:latest analysis/km.R B age75plus noncoviddeath
     needs:
     - match_B
     - data_selection
     outputs:
+      highly_sensitive:
+        rds: output/match/B/km/age75plus/noncoviddeath/*.rds
       moderately_sensitive:
-        rds: output/match/B/delayedentry/all/coviddeath/*.rds
-        png: output/match/B/delayedentry/all/coviddeath/*.png
+        png: output/match/B/km/age75plus/noncoviddeath/*.png
 
-  delayedentry_B_all_noncoviddeath:
-    run: r:latest analysis/delayedentry.R B all noncoviddeath
+  km_B_age75plus_fracture:
+    run: r:latest analysis/km.R B age75plus fracture
     needs:
     - match_B
     - data_selection
     outputs:
+      highly_sensitive:
+        rds: output/match/B/km/age75plus/fracture/*.rds
       moderately_sensitive:
-        rds: output/match/B/delayedentry/all/noncoviddeath/*.rds
-        png: output/match/B/delayedentry/all/noncoviddeath/*.png
-
-  delayedentry_B_all_fracture:
-    run: r:latest analysis/delayedentry.R B all fracture
-    needs:
-    - match_B
-    - data_selection
-    outputs:
-      moderately_sensitive:
-        rds: output/match/B/delayedentry/all/fracture/*.rds
-        png: output/match/B/delayedentry/all/fracture/*.png
-
-  ## ### Models by primary course (''vax12_type'') 
-
-  km_B_vax12_type_postest:
-    run: r:latest analysis/km.R B vax12_type postest
-    needs:
-    - match_B
-    - data_selection
-    outputs:
-      moderately_sensitive:
-        rds: output/match/B/km/vax12_type/postest/*.rds
-        png: output/match/B/km/vax12_type/postest/*.png
-
-  km_B_vax12_type_covidemergency:
-    run: r:latest analysis/km.R B vax12_type covidemergency
-    needs:
-    - match_B
-    - data_selection
-    outputs:
-      moderately_sensitive:
-        rds: output/match/B/km/vax12_type/covidemergency/*.rds
-        png: output/match/B/km/vax12_type/covidemergency/*.png
-
-  km_B_vax12_type_covidadmitted:
-    run: r:latest analysis/km.R B vax12_type covidadmitted
-    needs:
-    - match_B
-    - data_selection
-    outputs:
-      moderately_sensitive:
-        rds: output/match/B/km/vax12_type/covidadmitted/*.rds
-        png: output/match/B/km/vax12_type/covidadmitted/*.png
-
-  km_B_vax12_type_covidcritcare:
-    run: r:latest analysis/km.R B vax12_type covidcritcare
-    needs:
-    - match_B
-    - data_selection
-    outputs:
-      moderately_sensitive:
-        rds: output/match/B/km/vax12_type/covidcritcare/*.rds
-        png: output/match/B/km/vax12_type/covidcritcare/*.png
-
-  km_B_vax12_type_coviddeath:
-    run: r:latest analysis/km.R B vax12_type coviddeath
-    needs:
-    - match_B
-    - data_selection
-    outputs:
-      moderately_sensitive:
-        rds: output/match/B/km/vax12_type/coviddeath/*.rds
-        png: output/match/B/km/vax12_type/coviddeath/*.png
-
-  km_B_vax12_type_noncoviddeath:
-    run: r:latest analysis/km.R B vax12_type noncoviddeath
-    needs:
-    - match_B
-    - data_selection
-    outputs:
-      moderately_sensitive:
-        rds: output/match/B/km/vax12_type/noncoviddeath/*.rds
-        png: output/match/B/km/vax12_type/noncoviddeath/*.png
-
-  km_B_vax12_type_fracture:
-    run: r:latest analysis/km.R B vax12_type fracture
-    needs:
-    - match_B
-    - data_selection
-    outputs:
-      moderately_sensitive:
-        rds: output/match/B/km/vax12_type/fracture/*.rds
-        png: output/match/B/km/vax12_type/fracture/*.png
-
-  ## ### Models by clinically vulnerable group (''cev_cv'' or ''cv'') 
-
-  km_B_cev_cv_postest:
-    run: r:latest analysis/km.R B cev_cv postest
-    needs:
-    - match_B
-    - data_selection
-    outputs:
-      moderately_sensitive:
-        rds: output/match/B/km/cev_cv/postest/*.rds
-        png: output/match/B/km/cev_cv/postest/*.png
-
-  km_B_cev_cv_covidemergency:
-    run: r:latest analysis/km.R B cev_cv covidemergency
-    needs:
-    - match_B
-    - data_selection
-    outputs:
-      moderately_sensitive:
-        rds: output/match/B/km/cev_cv/covidemergency/*.rds
-        png: output/match/B/km/cev_cv/covidemergency/*.png
-
-  km_B_cev_cv_covidadmitted:
-    run: r:latest analysis/km.R B cev_cv covidadmitted
-    needs:
-    - match_B
-    - data_selection
-    outputs:
-      moderately_sensitive:
-        rds: output/match/B/km/cev_cv/covidadmitted/*.rds
-        png: output/match/B/km/cev_cv/covidadmitted/*.png
-
-  km_B_cev_cv_covidcritcare:
-    run: r:latest analysis/km.R B cev_cv covidcritcare
-    needs:
-    - match_B
-    - data_selection
-    outputs:
-      moderately_sensitive:
-        rds: output/match/B/km/cev_cv/covidcritcare/*.rds
-        png: output/match/B/km/cev_cv/covidcritcare/*.png
-
-  km_B_cev_cv_coviddeath:
-    run: r:latest analysis/km.R B cev_cv coviddeath
-    needs:
-    - match_B
-    - data_selection
-    outputs:
-      moderately_sensitive:
-        rds: output/match/B/km/cev_cv/coviddeath/*.rds
-        png: output/match/B/km/cev_cv/coviddeath/*.png
-
-  km_B_cev_cv_noncoviddeath:
-    run: r:latest analysis/km.R B cev_cv noncoviddeath
-    needs:
-    - match_B
-    - data_selection
-    outputs:
-      moderately_sensitive:
-        rds: output/match/B/km/cev_cv/noncoviddeath/*.rds
-        png: output/match/B/km/cev_cv/noncoviddeath/*.png
-
-  km_B_cev_cv_fracture:
-    run: r:latest analysis/km.R B cev_cv fracture
-    needs:
-    - match_B
-    - data_selection
-    outputs:
-      moderately_sensitive:
-        rds: output/match/B/km/cev_cv/fracture/*.rds
-        png: output/match/B/km/cev_cv/fracture/*.png
-
-  km_B_cv_postest:
-    run: r:latest analysis/km.R B cv postest
-    needs:
-    - match_B
-    - data_selection
-    outputs:
-      moderately_sensitive:
-        rds: output/match/B/km/cv/postest/*.rds
-        png: output/match/B/km/cv/postest/*.png
-
-  km_B_cv_covidemergency:
-    run: r:latest analysis/km.R B cv covidemergency
-    needs:
-    - match_B
-    - data_selection
-    outputs:
-      moderately_sensitive:
-        rds: output/match/B/km/cv/covidemergency/*.rds
-        png: output/match/B/km/cv/covidemergency/*.png
-
-  km_B_cv_covidadmitted:
-    run: r:latest analysis/km.R B cv covidadmitted
-    needs:
-    - match_B
-    - data_selection
-    outputs:
-      moderately_sensitive:
-        rds: output/match/B/km/cv/covidadmitted/*.rds
-        png: output/match/B/km/cv/covidadmitted/*.png
-
-  km_B_cv_covidcritcare:
-    run: r:latest analysis/km.R B cv covidcritcare
-    needs:
-    - match_B
-    - data_selection
-    outputs:
-      moderately_sensitive:
-        rds: output/match/B/km/cv/covidcritcare/*.rds
-        png: output/match/B/km/cv/covidcritcare/*.png
-
-  km_B_cv_coviddeath:
-    run: r:latest analysis/km.R B cv coviddeath
-    needs:
-    - match_B
-    - data_selection
-    outputs:
-      moderately_sensitive:
-        rds: output/match/B/km/cv/coviddeath/*.rds
-        png: output/match/B/km/cv/coviddeath/*.png
-
-  km_B_cv_noncoviddeath:
-    run: r:latest analysis/km.R B cv noncoviddeath
-    needs:
-    - match_B
-    - data_selection
-    outputs:
-      moderately_sensitive:
-        rds: output/match/B/km/cv/noncoviddeath/*.rds
-        png: output/match/B/km/cv/noncoviddeath/*.png
-
-  km_B_cv_fracture:
-    run: r:latest analysis/km.R B cv fracture
-    needs:
-    - match_B
-    - data_selection
-    outputs:
-      moderately_sensitive:
-        rds: output/match/B/km/cv/fracture/*.rds
-        png: output/match/B/km/cv/fracture/*.png
-
-  ## ### Models by prior infection (''prior_covid_infection'') 
-
-  km_B_prior_covid_infection_postest:
-    run: r:latest analysis/km.R B prior_covid_infection postest
-    needs:
-    - match_B
-    - data_selection
-    outputs:
-      moderately_sensitive:
-        rds: output/match/B/km/prior_covid_infection/postest/*.rds
-        png: output/match/B/km/prior_covid_infection/postest/*.png
-
-  km_B_prior_covid_infection_covidemergency:
-    run: r:latest analysis/km.R B prior_covid_infection covidemergency
-    needs:
-    - match_B
-    - data_selection
-    outputs:
-      moderately_sensitive:
-        rds: output/match/B/km/prior_covid_infection/covidemergency/*.rds
-        png: output/match/B/km/prior_covid_infection/covidemergency/*.png
-
-  km_B_prior_covid_infection_covidadmitted:
-    run: r:latest analysis/km.R B prior_covid_infection covidadmitted
-    needs:
-    - match_B
-    - data_selection
-    outputs:
-      moderately_sensitive:
-        rds: output/match/B/km/prior_covid_infection/covidadmitted/*.rds
-        png: output/match/B/km/prior_covid_infection/covidadmitted/*.png
-
-  km_B_prior_covid_infection_covidcritcare:
-    run: r:latest analysis/km.R B prior_covid_infection covidcritcare
-    needs:
-    - match_B
-    - data_selection
-    outputs:
-      moderately_sensitive:
-        rds: output/match/B/km/prior_covid_infection/covidcritcare/*.rds
-        png: output/match/B/km/prior_covid_infection/covidcritcare/*.png
-
-  km_B_prior_covid_infection_coviddeath:
-    run: r:latest analysis/km.R B prior_covid_infection coviddeath
-    needs:
-    - match_B
-    - data_selection
-    outputs:
-      moderately_sensitive:
-        rds: output/match/B/km/prior_covid_infection/coviddeath/*.rds
-        png: output/match/B/km/prior_covid_infection/coviddeath/*.png
-
-  km_B_prior_covid_infection_noncoviddeath:
-    run: r:latest analysis/km.R B prior_covid_infection noncoviddeath
-    needs:
-    - match_B
-    - data_selection
-    outputs:
-      moderately_sensitive:
-        rds: output/match/B/km/prior_covid_infection/noncoviddeath/*.rds
-        png: output/match/B/km/prior_covid_infection/noncoviddeath/*.png
-
-  km_B_prior_covid_infection_fracture:
-    run: r:latest analysis/km.R B prior_covid_infection fracture
-    needs:
-    - match_B
-    - data_selection
-    outputs:
-      moderately_sensitive:
-        rds: output/match/B/km/prior_covid_infection/fracture/*.rds
-        png: output/match/B/km/prior_covid_infection/fracture/*.png
-
-  ## ### Models by age (''age65plus'') 
-
-  km_B_age65plus_postest:
-    run: r:latest analysis/km.R B age65plus postest
-    needs:
-    - match_B
-    - data_selection
-    outputs:
-      moderately_sensitive:
-        rds: output/match/B/km/age65plus/postest/*.rds
-        png: output/match/B/km/age65plus/postest/*.png
-
-  km_B_age65plus_covidemergency:
-    run: r:latest analysis/km.R B age65plus covidemergency
-    needs:
-    - match_B
-    - data_selection
-    outputs:
-      moderately_sensitive:
-        rds: output/match/B/km/age65plus/covidemergency/*.rds
-        png: output/match/B/km/age65plus/covidemergency/*.png
-
-  km_B_age65plus_covidadmitted:
-    run: r:latest analysis/km.R B age65plus covidadmitted
-    needs:
-    - match_B
-    - data_selection
-    outputs:
-      moderately_sensitive:
-        rds: output/match/B/km/age65plus/covidadmitted/*.rds
-        png: output/match/B/km/age65plus/covidadmitted/*.png
-
-  km_B_age65plus_covidcritcare:
-    run: r:latest analysis/km.R B age65plus covidcritcare
-    needs:
-    - match_B
-    - data_selection
-    outputs:
-      moderately_sensitive:
-        rds: output/match/B/km/age65plus/covidcritcare/*.rds
-        png: output/match/B/km/age65plus/covidcritcare/*.png
-
-  km_B_age65plus_coviddeath:
-    run: r:latest analysis/km.R B age65plus coviddeath
-    needs:
-    - match_B
-    - data_selection
-    outputs:
-      moderately_sensitive:
-        rds: output/match/B/km/age65plus/coviddeath/*.rds
-        png: output/match/B/km/age65plus/coviddeath/*.png
-
-  km_B_age65plus_noncoviddeath:
-    run: r:latest analysis/km.R B age65plus noncoviddeath
-    needs:
-    - match_B
-    - data_selection
-    outputs:
-      moderately_sensitive:
-        rds: output/match/B/km/age65plus/noncoviddeath/*.rds
-        png: output/match/B/km/age65plus/noncoviddeath/*.png
-
-  km_B_age65plus_fracture:
-    run: r:latest analysis/km.R B age65plus fracture
-    needs:
-    - match_B
-    - data_selection
-    outputs:
-      moderately_sensitive:
-        rds: output/match/B/km/age65plus/fracture/*.rds
-        png: output/match/B/km/age65plus/fracture/*.png
+        png: output/match/B/km/age75plus/fracture/*.png
 
   ## ### Models by age-band (''ageband'') 
-
-  km_B_ageband_postest:
-    run: r:latest analysis/km.R B ageband postest
-    needs:
-    - match_B
-    - data_selection
-    outputs:
-      moderately_sensitive:
-        rds: output/match/B/km/ageband/postest/*.rds
-        png: output/match/B/km/ageband/postest/*.png
 
   km_B_ageband_covidemergency:
     run: r:latest analysis/km.R B ageband covidemergency
@@ -1277,8 +666,9 @@ actions:
     - match_B
     - data_selection
     outputs:
-      moderately_sensitive:
+      highly_sensitive:
         rds: output/match/B/km/ageband/covidemergency/*.rds
+      moderately_sensitive:
         png: output/match/B/km/ageband/covidemergency/*.png
 
   km_B_ageband_covidadmitted:
@@ -1287,8 +677,9 @@ actions:
     - match_B
     - data_selection
     outputs:
-      moderately_sensitive:
+      highly_sensitive:
         rds: output/match/B/km/ageband/covidadmitted/*.rds
+      moderately_sensitive:
         png: output/match/B/km/ageband/covidadmitted/*.png
 
   km_B_ageband_covidcritcare:
@@ -1297,8 +688,9 @@ actions:
     - match_B
     - data_selection
     outputs:
-      moderately_sensitive:
+      highly_sensitive:
         rds: output/match/B/km/ageband/covidcritcare/*.rds
+      moderately_sensitive:
         png: output/match/B/km/ageband/covidcritcare/*.png
 
   km_B_ageband_coviddeath:
@@ -1307,8 +699,9 @@ actions:
     - match_B
     - data_selection
     outputs:
-      moderately_sensitive:
+      highly_sensitive:
         rds: output/match/B/km/ageband/coviddeath/*.rds
+      moderately_sensitive:
         png: output/match/B/km/ageband/coviddeath/*.png
 
   km_B_ageband_noncoviddeath:
@@ -1317,8 +710,9 @@ actions:
     - match_B
     - data_selection
     outputs:
-      moderately_sensitive:
+      highly_sensitive:
         rds: output/match/B/km/ageband/noncoviddeath/*.rds
+      moderately_sensitive:
         png: output/match/B/km/ageband/noncoviddeath/*.png
 
   km_B_ageband_fracture:
@@ -1327,81 +721,214 @@ actions:
     - match_B
     - data_selection
     outputs:
-      moderately_sensitive:
+      highly_sensitive:
         rds: output/match/B/km/ageband/fracture/*.rds
+      moderately_sensitive:
         png: output/match/B/km/ageband/fracture/*.png
 
-  ## ### Models by variant era (''variantera'') 
+  ## ### Models by clinically vulnerable group (''cv'') 
 
-  km_B_variantera_postest:
-    run: r:latest analysis/km.R B variantera postest
+  km_B_cv_covidemergency:
+    run: r:latest analysis/km.R B cv covidemergency
     needs:
     - match_B
     - data_selection
     outputs:
+      highly_sensitive:
+        rds: output/match/B/km/cv/covidemergency/*.rds
       moderately_sensitive:
-        rds: output/match/B/km/variantera/postest/*.rds
-        png: output/match/B/km/variantera/postest/*.png
+        png: output/match/B/km/cv/covidemergency/*.png
 
-  km_B_variantera_covidemergency:
-    run: r:latest analysis/km.R B variantera covidemergency
+  km_B_cv_covidadmitted:
+    run: r:latest analysis/km.R B cv covidadmitted
     needs:
     - match_B
     - data_selection
     outputs:
+      highly_sensitive:
+        rds: output/match/B/km/cv/covidadmitted/*.rds
       moderately_sensitive:
-        rds: output/match/B/km/variantera/covidemergency/*.rds
-        png: output/match/B/km/variantera/covidemergency/*.png
+        png: output/match/B/km/cv/covidadmitted/*.png
 
-  km_B_variantera_covidadmitted:
-    run: r:latest analysis/km.R B variantera covidadmitted
+  km_B_cv_covidcritcare:
+    run: r:latest analysis/km.R B cv covidcritcare
     needs:
     - match_B
     - data_selection
     outputs:
+      highly_sensitive:
+        rds: output/match/B/km/cv/covidcritcare/*.rds
       moderately_sensitive:
-        rds: output/match/B/km/variantera/covidadmitted/*.rds
-        png: output/match/B/km/variantera/covidadmitted/*.png
+        png: output/match/B/km/cv/covidcritcare/*.png
 
-  km_B_variantera_covidcritcare:
-    run: r:latest analysis/km.R B variantera covidcritcare
+  km_B_cv_coviddeath:
+    run: r:latest analysis/km.R B cv coviddeath
     needs:
     - match_B
     - data_selection
     outputs:
+      highly_sensitive:
+        rds: output/match/B/km/cv/coviddeath/*.rds
       moderately_sensitive:
-        rds: output/match/B/km/variantera/covidcritcare/*.rds
-        png: output/match/B/km/variantera/covidcritcare/*.png
+        png: output/match/B/km/cv/coviddeath/*.png
 
-  km_B_variantera_coviddeath:
-    run: r:latest analysis/km.R B variantera coviddeath
+  km_B_cv_noncoviddeath:
+    run: r:latest analysis/km.R B cv noncoviddeath
     needs:
     - match_B
     - data_selection
     outputs:
+      highly_sensitive:
+        rds: output/match/B/km/cv/noncoviddeath/*.rds
       moderately_sensitive:
-        rds: output/match/B/km/variantera/coviddeath/*.rds
-        png: output/match/B/km/variantera/coviddeath/*.png
+        png: output/match/B/km/cv/noncoviddeath/*.png
 
-  km_B_variantera_noncoviddeath:
-    run: r:latest analysis/km.R B variantera noncoviddeath
+  km_B_cv_fracture:
+    run: r:latest analysis/km.R B cv fracture
     needs:
     - match_B
     - data_selection
     outputs:
+      highly_sensitive:
+        rds: output/match/B/km/cv/fracture/*.rds
       moderately_sensitive:
-        rds: output/match/B/km/variantera/noncoviddeath/*.rds
-        png: output/match/B/km/variantera/noncoviddeath/*.png
+        png: output/match/B/km/cv/fracture/*.png
 
-  km_B_variantera_fracture:
-    run: r:latest analysis/km.R B variantera fracture
+  ## ### Models by vax history (''vax_previous_count'') 
+
+  km_B_vax_previous_count_covidemergency:
+    run: r:latest analysis/km.R B vax_previous_count covidemergency
     needs:
     - match_B
     - data_selection
     outputs:
+      highly_sensitive:
+        rds: output/match/B/km/vax_previous_count/covidemergency/*.rds
       moderately_sensitive:
-        rds: output/match/B/km/variantera/fracture/*.rds
-        png: output/match/B/km/variantera/fracture/*.png
+        png: output/match/B/km/vax_previous_count/covidemergency/*.png
+
+  km_B_vax_previous_count_covidadmitted:
+    run: r:latest analysis/km.R B vax_previous_count covidadmitted
+    needs:
+    - match_B
+    - data_selection
+    outputs:
+      highly_sensitive:
+        rds: output/match/B/km/vax_previous_count/covidadmitted/*.rds
+      moderately_sensitive:
+        png: output/match/B/km/vax_previous_count/covidadmitted/*.png
+
+  km_B_vax_previous_count_covidcritcare:
+    run: r:latest analysis/km.R B vax_previous_count covidcritcare
+    needs:
+    - match_B
+    - data_selection
+    outputs:
+      highly_sensitive:
+        rds: output/match/B/km/vax_previous_count/covidcritcare/*.rds
+      moderately_sensitive:
+        png: output/match/B/km/vax_previous_count/covidcritcare/*.png
+
+  km_B_vax_previous_count_coviddeath:
+    run: r:latest analysis/km.R B vax_previous_count coviddeath
+    needs:
+    - match_B
+    - data_selection
+    outputs:
+      highly_sensitive:
+        rds: output/match/B/km/vax_previous_count/coviddeath/*.rds
+      moderately_sensitive:
+        png: output/match/B/km/vax_previous_count/coviddeath/*.png
+
+  km_B_vax_previous_count_noncoviddeath:
+    run: r:latest analysis/km.R B vax_previous_count noncoviddeath
+    needs:
+    - match_B
+    - data_selection
+    outputs:
+      highly_sensitive:
+        rds: output/match/B/km/vax_previous_count/noncoviddeath/*.rds
+      moderately_sensitive:
+        png: output/match/B/km/vax_previous_count/noncoviddeath/*.png
+
+  km_B_vax_previous_count_fracture:
+    run: r:latest analysis/km.R B vax_previous_count fracture
+    needs:
+    - match_B
+    - data_selection
+    outputs:
+      highly_sensitive:
+        rds: output/match/B/km/vax_previous_count/fracture/*.rds
+      moderately_sensitive:
+        png: output/match/B/km/vax_previous_count/fracture/*.png
+
+  ## ### Models by prior infection (''prior_covid_infection'') 
+
+  km_B_prior_covid_infection_covidemergency:
+    run: r:latest analysis/km.R B prior_covid_infection covidemergency
+    needs:
+    - match_B
+    - data_selection
+    outputs:
+      highly_sensitive:
+        rds: output/match/B/km/prior_covid_infection/covidemergency/*.rds
+      moderately_sensitive:
+        png: output/match/B/km/prior_covid_infection/covidemergency/*.png
+
+  km_B_prior_covid_infection_covidadmitted:
+    run: r:latest analysis/km.R B prior_covid_infection covidadmitted
+    needs:
+    - match_B
+    - data_selection
+    outputs:
+      highly_sensitive:
+        rds: output/match/B/km/prior_covid_infection/covidadmitted/*.rds
+      moderately_sensitive:
+        png: output/match/B/km/prior_covid_infection/covidadmitted/*.png
+
+  km_B_prior_covid_infection_covidcritcare:
+    run: r:latest analysis/km.R B prior_covid_infection covidcritcare
+    needs:
+    - match_B
+    - data_selection
+    outputs:
+      highly_sensitive:
+        rds: output/match/B/km/prior_covid_infection/covidcritcare/*.rds
+      moderately_sensitive:
+        png: output/match/B/km/prior_covid_infection/covidcritcare/*.png
+
+  km_B_prior_covid_infection_coviddeath:
+    run: r:latest analysis/km.R B prior_covid_infection coviddeath
+    needs:
+    - match_B
+    - data_selection
+    outputs:
+      highly_sensitive:
+        rds: output/match/B/km/prior_covid_infection/coviddeath/*.rds
+      moderately_sensitive:
+        png: output/match/B/km/prior_covid_infection/coviddeath/*.png
+
+  km_B_prior_covid_infection_noncoviddeath:
+    run: r:latest analysis/km.R B prior_covid_infection noncoviddeath
+    needs:
+    - match_B
+    - data_selection
+    outputs:
+      highly_sensitive:
+        rds: output/match/B/km/prior_covid_infection/noncoviddeath/*.rds
+      moderately_sensitive:
+        png: output/match/B/km/prior_covid_infection/noncoviddeath/*.png
+
+  km_B_prior_covid_infection_fracture:
+    run: r:latest analysis/km.R B prior_covid_infection fracture
+    needs:
+    - match_B
+    - data_selection
+    outputs:
+      highly_sensitive:
+        rds: output/match/B/km/prior_covid_infection/fracture/*.rds
+      moderately_sensitive:
+        png: output/match/B/km/prior_covid_infection/fracture/*.png
 
   eventcounts_A:
     run: r:latest analysis/eventcounts.R A
@@ -1409,7 +936,7 @@ actions:
     - match_A
     - data_selection
     outputs:
-      moderately_sensitive:
+      highly_sensitive:
         rds: output/match/A/eventcounts/*.rds
 
   eventcounts_B:
@@ -1418,79 +945,52 @@ actions:
     - match_B
     - data_selection
     outputs:
-      moderately_sensitive:
+      highly_sensitive:
         rds: output/match/B/eventcounts/*.rds
 
   ## # # # # # # # # # # # # # # # # # # # 
-  ## Combine KM / CI estimates across outcomes and subgroups 
+  ## Combine estimates across outcomes and subgroups 
   ## # # # # # # # # # # # # # # # # # # # 
 
   contrasts_combine_A:
     run: r:latest analysis/contrasts_combine.R A
     needs:
-    - km_A_all_postest
     - km_A_all_covidemergency
     - km_A_all_covidadmitted
     - km_A_all_covidcritcare
     - km_A_all_coviddeath
     - km_A_all_noncoviddeath
     - km_A_all_fracture
-    - km_A_vax12_type_postest
-    - km_A_vax12_type_covidemergency
-    - km_A_vax12_type_covidadmitted
-    - km_A_vax12_type_covidcritcare
-    - km_A_vax12_type_coviddeath
-    - km_A_vax12_type_noncoviddeath
-    - km_A_vax12_type_fracture
-    - km_A_prior_covid_infection_postest
-    - km_A_prior_covid_infection_covidemergency
-    - km_A_prior_covid_infection_covidadmitted
-    - km_A_prior_covid_infection_covidcritcare
-    - km_A_prior_covid_infection_coviddeath
-    - km_A_prior_covid_infection_noncoviddeath
-    - km_A_prior_covid_infection_fracture
-    - km_A_age65plus_postest
-    - km_A_age65plus_covidemergency
-    - km_A_age65plus_covidadmitted
-    - km_A_age65plus_covidcritcare
-    - km_A_age65plus_coviddeath
-    - km_A_age65plus_noncoviddeath
-    - km_A_age65plus_fracture
-    - km_A_ageband_postest
+    - km_A_age75plus_covidemergency
+    - km_A_age75plus_covidadmitted
+    - km_A_age75plus_covidcritcare
+    - km_A_age75plus_coviddeath
+    - km_A_age75plus_noncoviddeath
+    - km_A_age75plus_fracture
     - km_A_ageband_covidemergency
     - km_A_ageband_covidadmitted
     - km_A_ageband_covidcritcare
     - km_A_ageband_coviddeath
     - km_A_ageband_noncoviddeath
     - km_A_ageband_fracture
-    - km_A_cev_cv_postest
-    - km_A_cev_cv_covidemergency
-    - km_A_cev_cv_covidadmitted
-    - km_A_cev_cv_covidcritcare
-    - km_A_cev_cv_coviddeath
-    - km_A_cev_cv_noncoviddeath
-    - km_A_cev_cv_fracture
-    - km_A_cv_postest
     - km_A_cv_covidemergency
     - km_A_cv_covidadmitted
     - km_A_cv_covidcritcare
     - km_A_cv_coviddeath
     - km_A_cv_noncoviddeath
     - km_A_cv_fracture
-    - km_A_variantera_postest
-    - km_A_variantera_covidemergency
-    - km_A_variantera_covidadmitted
-    - km_A_variantera_covidcritcare
-    - km_A_variantera_coviddeath
-    - km_A_variantera_noncoviddeath
-    - km_A_variantera_fracture
-    - delayedentry_A_all_postest
-    - delayedentry_A_all_covidemergency
-    - delayedentry_A_all_covidadmitted
-    - delayedentry_A_all_covidcritcare
-    - delayedentry_A_all_coviddeath
-    - delayedentry_A_all_noncoviddeath
-    - delayedentry_A_all_fracture
+    - km_A_vax_previous_count_covidemergency
+    - km_A_vax_previous_count_covidadmitted
+    - km_A_vax_previous_count_covidcritcare
+    - km_A_vax_previous_count_coviddeath
+    - km_A_vax_previous_count_noncoviddeath
+    - km_A_vax_previous_count_fracture
+    - km_A_prior_covid_infection_covidemergency
+    - km_A_prior_covid_infection_covidadmitted
+    - km_A_prior_covid_infection_covidcritcare
+    - km_A_prior_covid_infection_coviddeath
+    - km_A_prior_covid_infection_noncoviddeath
+    - km_A_prior_covid_infection_fracture
     - eventcounts_A
     outputs:
       moderately_sensitive:
@@ -1500,69 +1000,42 @@ actions:
   contrasts_combine_B:
     run: r:latest analysis/contrasts_combine.R B
     needs:
-    - km_B_all_postest
     - km_B_all_covidemergency
     - km_B_all_covidadmitted
     - km_B_all_covidcritcare
     - km_B_all_coviddeath
     - km_B_all_noncoviddeath
     - km_B_all_fracture
-    - km_B_vax12_type_postest
-    - km_B_vax12_type_covidemergency
-    - km_B_vax12_type_covidadmitted
-    - km_B_vax12_type_covidcritcare
-    - km_B_vax12_type_coviddeath
-    - km_B_vax12_type_noncoviddeath
-    - km_B_vax12_type_fracture
-    - km_B_prior_covid_infection_postest
-    - km_B_prior_covid_infection_covidemergency
-    - km_B_prior_covid_infection_covidadmitted
-    - km_B_prior_covid_infection_covidcritcare
-    - km_B_prior_covid_infection_coviddeath
-    - km_B_prior_covid_infection_noncoviddeath
-    - km_B_prior_covid_infection_fracture
-    - km_B_age65plus_postest
-    - km_B_age65plus_covidemergency
-    - km_B_age65plus_covidadmitted
-    - km_B_age65plus_covidcritcare
-    - km_B_age65plus_coviddeath
-    - km_B_age65plus_noncoviddeath
-    - km_B_age65plus_fracture
-    - km_B_ageband_postest
+    - km_B_age75plus_covidemergency
+    - km_B_age75plus_covidadmitted
+    - km_B_age75plus_covidcritcare
+    - km_B_age75plus_coviddeath
+    - km_B_age75plus_noncoviddeath
+    - km_B_age75plus_fracture
     - km_B_ageband_covidemergency
     - km_B_ageband_covidadmitted
     - km_B_ageband_covidcritcare
     - km_B_ageband_coviddeath
     - km_B_ageband_noncoviddeath
     - km_B_ageband_fracture
-    - km_B_cev_cv_postest
-    - km_B_cev_cv_covidemergency
-    - km_B_cev_cv_covidadmitted
-    - km_B_cev_cv_covidcritcare
-    - km_B_cev_cv_coviddeath
-    - km_B_cev_cv_noncoviddeath
-    - km_B_cev_cv_fracture
-    - km_B_cv_postest
     - km_B_cv_covidemergency
     - km_B_cv_covidadmitted
     - km_B_cv_covidcritcare
     - km_B_cv_coviddeath
     - km_B_cv_noncoviddeath
     - km_B_cv_fracture
-    - km_B_variantera_postest
-    - km_B_variantera_covidemergency
-    - km_B_variantera_covidadmitted
-    - km_B_variantera_covidcritcare
-    - km_B_variantera_coviddeath
-    - km_B_variantera_noncoviddeath
-    - km_B_variantera_fracture
-    - delayedentry_B_all_postest
-    - delayedentry_B_all_covidemergency
-    - delayedentry_B_all_covidadmitted
-    - delayedentry_B_all_covidcritcare
-    - delayedentry_B_all_coviddeath
-    - delayedentry_B_all_noncoviddeath
-    - delayedentry_B_all_fracture
+    - km_B_vax_previous_count_covidemergency
+    - km_B_vax_previous_count_covidadmitted
+    - km_B_vax_previous_count_covidcritcare
+    - km_B_vax_previous_count_coviddeath
+    - km_B_vax_previous_count_noncoviddeath
+    - km_B_vax_previous_count_fracture
+    - km_B_prior_covid_infection_covidemergency
+    - km_B_prior_covid_infection_covidadmitted
+    - km_B_prior_covid_infection_covidcritcare
+    - km_B_prior_covid_infection_coviddeath
+    - km_B_prior_covid_infection_noncoviddeath
+    - km_B_prior_covid_infection_fracture
     - eventcounts_B
     outputs:
       moderately_sensitive:
@@ -1586,26 +1059,6 @@ actions:
         releaselist: output/files-for-release.txt
         command: output/osrelease-command.txt
         csv: output/release-objects/*/*.csv
-
-  ## # # # # # # # # # # # # # # # # # # # 
-  ## ICD10 check 
-  ## # # # # # # # # # # # # # # # # # # # 
-
-  extract_ICD10check:
-    run: cohortextractor:latest generate_cohort --study-definition study_definition_ICD10check
-      --output-format feather
-    needs: []
-    outputs:
-      highly_sensitive:
-        cohort: output/input_ICD10check.feather
-
-  report_ICD10check:
-    run: r:latest analysis/report_ICD10check.R
-    needs:
-    - extract_ICD10check
-    outputs:
-      moderately_sensitive:
-        png: output/ICD10check/*.png
 
   ## # # # # # # # # # # # # # # # # # # # 
   ## End 
