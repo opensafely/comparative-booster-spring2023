@@ -175,7 +175,6 @@ if(exists("matchset")){
       boost_day = 3,
       age = 3,
       vax_interval_bigM = 14,
-      #imd = 1000,
       NULL
     )
 
@@ -188,7 +187,7 @@ if(exists("matchset")){
     exact <- c(
 
       "age75plus",
-      "ageband",
+      #"ageband",
       "cv",
       "sex",
       #"region",
@@ -205,6 +204,7 @@ if(exists("matchset")){
       boost_day = 3,
       age = 3,
       vax_interval_bigM = 14,
+      #imd = 1000,
       NULL
     )
 
