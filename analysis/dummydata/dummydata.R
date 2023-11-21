@@ -9,7 +9,7 @@ remotes::install_github("https://github.com/wjchulme/dd4d")
 library('dd4d')
 
 
-population_size <- 500000
+population_size <- 100000
 
 # get nth largest value from list
 nthmax <- function(x, n=1){
