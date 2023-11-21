@@ -1,5 +1,5 @@
 # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
-# Purpose: To assess geograhpcial distribution of moderna / pfizer booster vaccines
+# Purpose: To assess geograhpcial distribution of sanofi / pfizer booster vaccines
 ## by region, STP, MSOA
 # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
 
@@ -11,10 +11,10 @@ library('glue')
 library('here')
 
 # Import custom user functions from lib
-source(here("lib", "functions", "utility.R"))
+source(here("analysis", "functions", "utility.R"))
 
 # Import design elements
-source(here("lib", "design", "design.R"))
+source(here("analysis", "design", "design.R"))
 
 # output processed data to rds ----
 output_dir <- here("output", "geography")
@@ -29,30 +29,28 @@ data_processed <- read_rds(here("output", "data", "data_processed.rds"))
 
 data_regional <-
   data_processed %>%
-  filter(vax3_type %in% c("pfizer", "moderna")) %>%
+  filter(boost_type %in% c("pfizerBA45", "sanofi")) %>%
   mutate(
-    treatment=vax3_type=="moderna",
-    vax3_week = floor_date(vax3_date, "weeks", week_start = 5) # start on friday as this was first day moderna was used
+    boost_week = floor_date(boost_date, "weeks", week_start = 6) # start on saturday as this is 1 april when study starts
   )
-
 
 
 summary <-
   data_regional %>%
   group_by(
-    treatment, region, vax3_week
+    treatment, region, boost_week
   ) %>%
   summarise(
     n=n()
   ) %>%
   ungroup() %>%
-  complete(treatment, region, vax3_week, fill = list(n = 0)) %>%
-  group_by(region, vax3_week) %>%
+  complete(treatment, region, boost_week, fill = list(n = 0)) %>%
+  group_by(region, boost_week) %>%
   mutate(
     N = sum(n),
     pct=n/N,
   ) %>%
-  filter(treatment)
+  filter(treatment==1L)
 
 
 regional <- function(data, region, period, region_name = "geography", period_name="Period", suppress_region_label=FALSE){
@@ -78,7 +76,7 @@ regional <- function(data, region, period, region_name = "geography", period_nam
 
   write_csv(summary, fs::path(output_dir, glue("{region_var}_proportions.csv")))
 
-  summary <- summary %>% filter(treatment)
+  summary <- summary %>% filter(treatment==1L)
 
   summary_noregion <-
     data %>%
@@ -95,7 +93,7 @@ regional <- function(data, region, period, region_name = "geography", period_nam
       N = sum(n),
       pct = n/N,
     ) %>%
-    filter(treatment)
+    filter(treatment==1L)
 
   #background_summary <- summary %>% ungroup() %>% select(-{{period}})
 
@@ -129,7 +127,7 @@ regional <- function(data, region, period, region_name = "geography", period_nam
     scale_colour_viridis_d()+
     scale_y_date(date_breaks="4 weeks")+
     labs(
-      x="Moderna, proportion",
+      x="Sanofi, proportion",
       y=period_name,
       colour=period_name
     )+
@@ -160,7 +158,7 @@ regional <- function(data, region, period, region_name = "geography", period_nam
     facet_grid(cols=vars({{period}}), switch="y")+
     scale_fill_viridis_d()+
     labs(
-      x="Moderna, proportion",
+      x="Sanofi, proportion",
       y=NULL,
       fill=period_name
     )+
@@ -198,7 +196,7 @@ regional <- function(data, region, period, region_name = "geography", period_nam
     geom_hline(yintercept=1, colour="darkgrey")+
     labs(
       x=period_name,
-      y="Moderna, proportion"
+      y="Sanofi, proportion"
     )+
     theme_minimal()
 
@@ -226,7 +224,7 @@ regional <- function(data, region, period, region_name = "geography", period_nam
     scale_colour_viridis_d()+
     labs(
       x="Doses, N",
-      y="Moderna, proportion",
+      y="Sanofi, proportion",
       colour=period_name
     )+
     theme_minimal() +
@@ -264,7 +262,7 @@ regional <- function(data, region, period, region_name = "geography", period_nam
 
 }
 
-regional(data_regional, region, vax3_week, "NHS region", "Calendar week", suppress_region_label=FALSE)
-regional(data_regional, stp, vax3_week, "STP", "Calendar week", suppress_region_label=TRUE)
-regional(data_regional, msoa, vax3_week, "MSOA", "Calendar week", suppress_region_label=TRUE)
+regional(data_regional, region, boost_week, "NHS region", "Calendar week", suppress_region_label=FALSE)
+regional(data_regional, stp, boost_week, "STP", "Calendar week", suppress_region_label=TRUE)
+#regional(data_regional, msoa, vax3_week, "MSOA", "Calendar week", suppress_region_label=TRUE)
 

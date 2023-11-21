@@ -1,12 +1,6 @@
 
 # # # # # # # # # # # # # # # # # # # # #
 # Purpose: Combine ci estimates from different outcomes
-#  - import matched data
-#  - adds outcome variable and restricts follow-up
-#  - gets CI estimates
-#  - The script must be accompanied by two arguments:
-#    `matchset` - the matching set used for matching
-#    `subgroup` - the subgroup variable, which is used to stratify CI estimates
 # # # # # # # # # # # # # # # # # # # # #
 
 # Preliminaries ----
@@ -32,10 +26,10 @@ library('glue')
 library('survival')
 
 ## Import custom user functions from lib
-source(here("lib", "functions", "utility.R"))
+source(here("analysis", "functions", "utility.R"))
 
 ## Import design elements
-source(here("lib", "design", "design.R"))
+source(here("analysis", "design", "design.R"))
 
 
 output_dir <- here("output", "match", matchset, "combined")
@@ -43,10 +37,10 @@ fs::dir_create(output_dir)
 
 metaparams <-
   expand_grid(
-    outcome = factor(c("postest", "covidemergency", "covidadmitted", "covidcritcare", "coviddeath", "noncoviddeath", "fracture")),
+    outcome = factor(c("covidemergency", "covidadmitted", "covidcritcare", "coviddeath", "noncoviddeath", "fracture")),
     subgroup = factor(recoder$subgroups),
     #outcome = factor("covidadmitted"),
-    #subgroup = factor(c("all", "jcvi_ageband")),
+    #subgroup = factor(c("all", "ageband")),
   ) %>%
   mutate(
     outcome_descr = fct_recoderelevel(outcome,  recoder$outcome),
@@ -159,118 +153,6 @@ write_csv(contrasts_20, fs::path(output_dir, "contrasts_20_rounded.csv"))
 
 
 
-## delayed entry KM estimates ----
-
-delayedentry_estimates <- metaparams %>%
-  filter(subgroup=="all") %>%
-  mutate(
-    data = pmap(list(matchset, subgroup, outcome), function(matchset, subgroup, outcome) {
-      subgroup <- as.character(subgroup)
-      dat <- read_rds(here("output", "match", matchset, "delayedentry", subgroup, outcome, "km_estimates_rounded.rds"))
-      dat %>%
-        ungroup() %>%
-        add_column(
-          subgroup_level = as.character(.[[subgroup]]),
-          subgroup_level_descr = fct_recoderelevel(.[[subgroup]], recoder[[subgroup]]),
-          .before=1
-        ) %>%
-        select(-all_of(subgroup))
-    })
-  ) %>%
-  unnest(data)
-
-write_csv(delayedentry_estimates, fs::path(output_dir, "km_era_estimates_rounded.csv"))
-
-
-delayedentry_contrasts_daily <- metaparams %>%
-  filter(subgroup=="all") %>%
-  mutate(
-    data = pmap(list(matchset, outcome, subgroup), function(matchset, outcome, subgroup){
-      subgroup <- as.character(subgroup)
-      dat <- read_rds(here("output", "match", matchset, "delayedentry", subgroup, outcome, "contrasts_daily_rounded.rds"))
-      dat %>%
-        ungroup() %>%
-        add_column(
-          subgroup_level = as.character(.[[subgroup]]),
-          subgroup_level_descr = fct_recoderelevel(.[[subgroup]], recoder[[subgroup]]),
-          .before=1
-        ) %>%
-        select(-all_of(subgroup))
-    }
-    )
-  ) %>%
-  unnest(data)
-
-write_csv(delayedentry_contrasts_daily, fs::path(output_dir, "contrasts_era_daily_rounded.csv"))
-
-
-delayedentry_contrasts_cuts <- metaparams %>%
-  filter(subgroup=="all") %>%
-  mutate(
-    data = pmap(list(matchset, outcome, subgroup), function(matchset, outcome, subgroup){
-      subgroup <- as.character(subgroup)
-      dat <- read_rds(here("output", "match", matchset, "delayedentry", subgroup, outcome, "contrasts_cuts_rounded.rds"))
-      dat %>%
-        ungroup() %>%
-        add_column(
-          subgroup_level = as.character(.[[subgroup]]),
-          subgroup_level_descr = fct_recoderelevel(.[[subgroup]], recoder[[subgroup]]),
-          .before=1
-        ) %>%
-        select(-all_of(subgroup))
-    }
-    )
-  ) %>%
-  unnest(data)
-
-write_csv(delayedentry_contrasts_cuts, fs::path(output_dir, "contrasts_era_cuts_rounded.csv"))
-
-
-delayedentry_contrasts_overall <- metaparams %>%
-  filter(subgroup=="all") %>%
-  mutate(
-    data = pmap(list(matchset, outcome, subgroup), function(matchset, outcome, subgroup) {
-      subgroup <- as.character(subgroup)
-      dat <- read_rds(here("output", "match", matchset, "delayedentry", subgroup, outcome, "contrasts_overall_rounded.rds"))
-      dat %>%
-        ungroup() %>%
-        add_column(
-          subgroup_level = as.character(.[[subgroup]]),
-          subgroup_level_descr = fct_recoderelevel(.[[subgroup]], recoder[[subgroup]]),
-          .before=1
-        ) %>%
-        select(-all_of(subgroup))
-    }
-    )
-  ) %>%
-  unnest(data)
-
-write_csv(delayedentry_contrasts_overall, fs::path(output_dir, "contrasts_era_overall_rounded.csv"))
-
-
-delayedentry_contrasts_20 <- metaparams %>%
-  filter(subgroup=="all") %>%
-  mutate(
-    data = pmap(list(matchset, outcome, subgroup), function(matchset, outcome, subgroup) {
-      subgroup <- as.character(subgroup)
-      dat <- read_rds(here("output", "match", matchset, "delayedentry", subgroup, outcome, "contrasts_20_rounded.rds"))
-      dat %>%
-        ungroup() %>%
-        add_column(
-          subgroup_level = as.character(.[[subgroup]]),
-          subgroup_level_descr = fct_recoderelevel(.[[subgroup]], recoder[[subgroup]]),
-          .before=1
-        ) %>%
-        select(-all_of(subgroup))
-    }
-    )
-  ) %>%
-  unnest(data)
-
-write_csv(delayedentry_contrasts_20, fs::path(output_dir, "contrasts_era_20_rounded.csv"))
-
-
-
 ## move km plots to single folder ----
 fs::dir_create(here("output", "match", matchset, "combined", "plots"))
 
@@ -290,7 +172,6 @@ metaparams %>%
 
 
 ## plot overall estimates for inspection ----
-
 
 plot_estimates <- function(estimate, estimate.ll, estimate.ul, name){
 
