@@ -1,7 +1,7 @@
 import json
 from pathlib import Path
 
-from ehrql import Dataset , case, days, when
+from ehrql import Dataset , case, days, when, minimum_of
 from ehrql.tables.beta.tpp import (
   patients, 
   practice_registrations, 
@@ -514,6 +514,8 @@ dataset.covidadmitted_0_date = (
 # Post-baseline variables (outcomes)
 #######################################################################################
 
+
+
 # Positive case identification after study start date
 dataset.primary_care_covid_case_date = (
     primary_care_covid_events.where(events.date.is_on_or_after(boost_date))
@@ -608,6 +610,17 @@ dataset.fractureadmitted_date = post_baseline_admission_date(
 # fracture-related death (stated anywhere on death certificate)
 #dataset.fracturedeath_date = death_cause_matches(codelists.fractures_icd10).date
 dataset.death_cause_fracture = cause_of_death_matches(codelists.fractures_icd10)
+
+
+
+# censor date (minimum of deregistration or death or 20 weeks after baseline)
+#dataset.censor_date = minimum_of(dataset.death_date, dataset.dereg_date, boost_date + days(7*26), followupend_date)
+
+# number of covid tests up to 26 weeks after baseline or until end of follow-up
+dataset.covid_test_frequency = post_baseline_tests.where(
+    post_baseline_tests.specimen_taken_date.is_before(minimum_of(boost_date + days(7*26), followupend_date))
+).count_for_patient()
+
 
 # #######################################################################################
 # # Population
