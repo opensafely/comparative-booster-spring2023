@@ -330,16 +330,20 @@ sev_obesity_event = last_prior_event(
 )
 bmi_event = last_prior_event(codelists.bmi, where=(events.numeric_value != 0.0))
 
-dataset.sev_obesity = (sev_obesity_event.date > bmi_event.date) | (
-    bmi_event.numeric_value >= 40.0
+dataset.sev_obesity = case(
+    when(sev_obesity_event.date > bmi_event.date).then(True),
+    when(bmi_event.numeric_value >= 40.0).then(True),
+    default=False
 )
 
 # Diabetes
 diab_date = last_prior_event(codelists.diab).date
 dmres_date = last_prior_event(codelists.dmres).date
 
-dataset.diabetes = (dmres_date < diab_date) | (
-    diab_date.is_not_null() & dmres_date.is_null()
+dataset.diabetes = case(
+    when(dmres_date < diab_date).then(True),
+    when(diab_date.is_not_null() & dmres_date.is_null()).then(True),
+    default=False
 )
 
 # Severe Mental Illness codes
@@ -347,8 +351,10 @@ sev_mental_date = last_prior_event(codelists.sev_mental).date
 # Remission codes relating to Severe Mental Illness
 smhres_date = last_prior_event(codelists.smhres).date
 
-dataset.sev_mental = (smhres_date < sev_mental_date) | (
-    sev_mental_date.is_not_null() & smhres_date.is_null()
+dataset.sev_mental = case(
+    when(smhres_date < sev_mental_date).then(True),
+    when(sev_mental_date.is_not_null() & smhres_date.is_null()).then(True),
+    default=False
 )
 
 # Chronic heart disease codes
@@ -362,7 +368,12 @@ ckd15_date = last_prior_event(codelists.ckd15).date
 # Chronic kidney disease codes-stages 3 - 5
 ckd35_date = last_prior_event(codelists.ckd35).date
 
-dataset.chronic_kidney_disease = ckd | (ckd35_date >= ckd15_date)
+dataset.chronic_kidney_disease = case(
+    when(ckd).then(True),
+    when((ckd35_date >= ckd15_date)).then(True),
+    default=False
+)
+
 
 # Chronic Liver disease codes
 dataset.chronic_liver_disease = has_prior_event(codelists.cld)
