@@ -59,6 +59,8 @@ data_criteria <- data_processed %>%
     isnot_carehomeresident = !care_home_combined,
     isnot_endoflife = !endoflife,
     isnot_housebound = !housebound,
+    no_prior_pfizerBA45 = !vaxhist_pfizerBA45,
+    no_prior_sanofi = !vaxhist_sanofi,
     vax_dates_possible,
     vax_intervals_atleast14days,
     vax_type_pfixer_or_sanofi = boost_type %in% c("pfizerBA45", "sanofi"),
@@ -67,7 +69,7 @@ data_criteria <- data_processed %>%
 
     include = (
       vax_dates_possible &
-      vax_intervals_atleast14days & vax_type_pfixer_or_sanofi &
+      vax_intervals_atleast14days & vax_type_pfixer_or_sanofi & no_prior_pfizerBA45 & no_prior_sanofi &
       has_age & has_sex & has_imd & has_region & #has_ethnicity &
       is_eligible &
       isnot_hscworker &
@@ -90,7 +92,7 @@ data_inclusioncriteria <- data_criteria %>%
   transmute(
     patient_id,
     boost_type,
-    c0 = vax_dates_possible & vax_intervals_atleast14days & vax_type_pfixer_or_sanofi,
+    c0 = vax_dates_possible & vax_intervals_atleast14days & vax_type_pfixer_or_sanofi & no_prior_pfizerBA45 & no_prior_sanofi,
     c1 = c0 & (is_eligible),
     c2 = c1 & (has_age & has_sex & has_imd & has_region),
     c3 = c2 & (isnot_hscworker),
@@ -125,7 +127,7 @@ data_flowchart <-
     pct_step = n / lag(n),
     crit = str_extract(criteria, "^c\\d+"),
     criteria = fct_case_when(
-      crit == "c0" ~ "Recieved booster dose of Pfizer or Sanofi between 1 April and 30 June 2023", # paste0("Aged 18+\n with 2 doses on or before ", format(study_dates$lastvax2_date, "%d %b %Y")),
+      crit == "c0" ~ "Recieved booster dose of PfizerBA45 or Sanofi between 1 April and 30 June 2023", # paste0("Aged 18+\n with 2 doses on or before ", format(study_dates$lastvax2_date, "%d %b %Y")),
       crit == "c1" ~ "  and clinically at-risk or aged 75+",
       crit == "c2" ~ "  with no missing demographic information",
       crit == "c3" ~ "  and not a health and social care worker",
@@ -160,7 +162,7 @@ data_flowchart_rounded <-
     pct_step = n / lag(n),
     crit = str_extract(criteria, "^c\\d+"),
     criteria = fct_case_when(
-      crit == "c0" ~ "Recieved booster dose of Pfizer or Sanofi between 1 April and 30 June 2023", # paste0("Aged 18+\n with 2 doses on or before ", format(study_dates$lastvax2_date, "%d %b %Y")),
+      crit == "c0" ~ "Recieved booster dose of PfizerBA45 or Sanofi between 1 April and 30 June 2023", # paste0("Aged 18+\n with 2 doses on or before ", format(study_dates$lastvax2_date, "%d %b %Y")),
       crit == "c1" ~ "  and clinically at-risk or aged 75+",
       crit == "c2" ~ "  with no missing demographic information",
       crit == "c3" ~ "  and not a health and social care worker",

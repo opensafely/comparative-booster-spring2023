@@ -203,6 +203,7 @@ data_vax <-
   ungroup() %>%
 
   # remove vaccinations that occur after booster date
+  # boost_date, as per dataset_definition, is the first vaccination to occur between 1 April and 30 June 2023
   left_join(
     data_processed %>% select(patient_id, boost_date), by = "patient_id"
   ) %>%
@@ -237,8 +238,8 @@ data_vax_history <- data_vax %>%
   )
 
 stopifnot("vax_count should be equal to vax_previous_count+1" = all(data_vax_history$vax_count == data_vax_history$vax_previous_count+1))
-stopifnot("nobody should have had sanofi before" = !any(data_vax_history$vaxhist_sanofi))
-stopifnot("nobody should have had pfizerBA45 before" = !any(data_vax_history$vaxhist_pfizerBA45))
+table(data_vax_history$vaxhist_sanofi)
+table(data_vax_history$vaxhist_pfizerBA45)
 
 # Combine and output ----
 
