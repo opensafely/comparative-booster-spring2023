@@ -171,15 +171,13 @@ data_flowchart_rounded <-
       crit == "c6" ~ "  and not admitted in hospital at time of booster",
       TRUE ~ NA_character_
     )
-  ) #
+  )
 write_csv(data_flowchart_rounded, fs::path(output_dir, "flowchart.csv"))
 
 
 
 
 # table 1 style baseline characteristics amongst those eligible for matching ----
-
-
 
 var_labels <- list(
   N  ~ "Total N",

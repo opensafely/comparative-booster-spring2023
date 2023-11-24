@@ -34,6 +34,9 @@ data_extract <- read_feather(here("output", "extracts", "extract.arrow"))
 data_processed <- data_extract %>%
   mutate(
 
+    # use short product names
+    boost_type = factor(boost_type, vax_product_lookup, names(vax_product_lookup)) %>% fct_explicit_na("other"),
+
     # binary variable for the exposure
     # helpful for various downstream matching / plotting / table functions
     treatment = case_when(
@@ -72,20 +75,7 @@ data_processed <- data_extract %>%
       `South West` = "South West"
     ),
 
-  #  imd_Q5 = factor(imd_Q5, levels = c("1 (most deprived)", "2", "3", "4", "5 (least deprived)", "Unknown")),
-
-    # imd = as.integer(as.character(imd)), # imd is a factor, so convert to character then integer to get underlying values
-    # imd = if_else((imd < -0.1) | (msoa==""), NA_integer_, imd),
-    imd_Q5 = fct_case_when(
-      (imd >= -0.1) & (imd < 32844*1/5) ~ "1 most deprived",
-      (imd >= 32844*1/5) & (imd < 32844*2/5) ~ "2",
-      (imd >= 32844*2/5) & (imd < 32844*3/5) ~ "3",
-      (imd >= 32844*3/5) & (imd < 32844*4/5) ~ "4",
-      (imd >= 32844*4/5) ~ "5 least deprived",
-      TRUE ~ NA_character_
-    ),
-
-    imd_Q5 <- cut(
+    imd_Q5 = cut(
       imd,
       breaks = (32844/5)*c(-0.1,1,2,3,4,5),
       labels = c("1 most deprived", "2", "3", "4", "5 least deprived"),
