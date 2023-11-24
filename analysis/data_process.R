@@ -30,9 +30,8 @@ fs::dir_create(here("output", "data"))
 data_extract <- read_feather(here("output", "extracts", "extract.arrow"))
 
 boolfactor2bool <- function(x){
-  if_else(x=="TRUE", TRUE, FALSE, NA_integer_)
+  if_else(x=="TRUE", TRUE, FALSE, NA)
 }
-
 
 ## Process extracted dataset ----
 data_processed <- data_extract %>%
