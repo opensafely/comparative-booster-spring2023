@@ -363,14 +363,12 @@ set.seed(10)
 
 dummydata <-bn_simulate(bn, pop_size = population_size, keep_all = FALSE, .id="patient_id")
 
-
-vax_product_lookup_inv <- setNames(names(vax_product_lookup), vax_product_lookup)
-
 dummydata_processed <- dummydata %>%
   #convert integer days to dates since index date and rename vars
   mutate(across(ends_with("_day"), ~ as.Date(as.character(index_date + .)))) %>%
   # rename covid vaccine products to tpp names
-  mutate(across(starts_with("covid_vax_type_"), ~fct_recode(factor(., vax_product_lookup_inv), !!!vax_product_lookup_inv))) %>%
+  mutate(across(starts_with("covid_vax_type_"), ~factor(., names(vax_product_lookup), vax_product_lookup))) %>%
+  mutate(boost_type = factor(boost_type, names(vax_product_lookup), vax_product_lookup)) %>%
   rename_with(~str_replace(., "_day", "_date"), ends_with("_day"))
 
 
