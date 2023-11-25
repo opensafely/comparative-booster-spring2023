@@ -62,7 +62,6 @@ spring2023_boosters = covid_vaccinations.where(
 boost_date = spring2023_boosters.date
 
 # We define baseline variables on the day _before_ the study date 
-# (start date = day of first possible booster vaccination)
 baseline_date = boost_date - days(1)
 
 # address info as at booster date
@@ -654,5 +653,6 @@ dataset.define_population(
   spring2023_boosters.exists_for_patient() & 
   (dataset.age_july2023 >= 16) &
   #(dataset.age_july2023 >= 75) | cv) &
-  (registered.exists_for_patient())
+  (registered.exists_for_patient()) & 
+  ((dataset.death_date >= dataset.boost_date) | dataset.death_date.is_null())
 )
