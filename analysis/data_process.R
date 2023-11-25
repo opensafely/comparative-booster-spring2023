@@ -133,20 +133,19 @@ data_processed <- data_extract %>%
 
     ## process outcomes data
 
-    covidemergency_date = pmin(covidemergency_date, covidadmitted_date, na.rm=TRUE),
-
     # latest covid event before study start
     anycovid_0_date = pmax(postest_0_date, covidemergency_0_date, covidadmitted_0_date, na.rm=TRUE),
 
     coviddeath_date = if_else(death_cause_covid, death_date, NA_Date_),
-    fracturedeath_date = if_else(death_cause_fracture, death_date, NA_Date_),
+    noncoviddeath_date = if_else(!is.na(death_date) & is.na(coviddeath_date), death_date, as.Date(NA_character_)),
+
+    # replace events dates with more severe dates if the precede less severe dates
+    #covidemergency_date = pmin(covidemergency_date, covidadmitted_date, covidcritcare_date, coviddeath_date, na.rm=TRUE),
+    #covidadmitted_date = pmin(covidadmitted_date, covidcritcare_date, coviddeath_date, na.rm=TRUE),
+    #covidcritcare_date = pmin(covidcritcare_date, coviddeath_date, na.rm=TRUE),
 
     # earliest covid event after study start
     anycovid_date = pmin(postest_date, covidemergency_date, covidadmitted_date, coviddeath_date, na.rm=TRUE),
-
-    covidcritcare_date = pmin(covidcritcare_date, coviddeath_date, na.rm=TRUE),
-
-    noncoviddeath_date = if_else(!is.na(death_date) & is.na(coviddeath_date), death_date, as.Date(NA_character_)),
 
     # cause_of_death = fct_case_when(
     #   !is.na(coviddeath_date) ~ "covid-related",
@@ -160,6 +159,7 @@ data_processed <- data_extract %>%
       TRUE ~ NA_character_
     ),
 
+    fracturedeath_date = if_else(death_cause_fracture, death_date, NA_Date_),
     fracture_date = pmin(fractureemergency_date, fractureadmitted_date, fracturedeath_date, na.rm=TRUE),
 
   )
