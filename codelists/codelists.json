@@ -60,6 +60,12 @@
       "downloaded_at": "2022-04-13 08:55:39.644688Z",
       "sha": "3d2f3998b71863a80b24d60f6f4282e14191ae13"
     },
+    "opensafely-covid-19-ae-diagnosis-codes.csv": {
+      "id": "opensafely/covid-19-ae-diagnosis-codes/1df1c0b2",
+      "url": "https://www.opencodelists.org/codelist/opensafely/covid-19-ae-diagnosis-codes/1df1c0b2/",
+      "downloaded_at": "2023-11-26 18:06:06.510553Z",
+      "sha": "e948d6944aa5e2c5f36d92ba009077bc28fdcc31"
+    },
     "primis-covid19-vacc-uptake-longres.csv": {
       "id": "primis-covid19-vacc-uptake/longres/v1",
       "url": "https://www.opencodelists.org/codelist/primis-covid19-vacc-uptake/longres/v1/",

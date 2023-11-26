@@ -8,6 +8,7 @@ opensafely/covid-identification-in-primary-care-suspected-covid-isolation-code/2
 opensafely/covid-identification-in-primary-care-suspected-covid-nonspecific-clinical-assessment/2020-07-16
 opensafely/covid-identification-in-primary-care-exposure-to-disease/2020-06-23
 opensafely/ethnicity/2020-04-27
+opensafely/covid-19-ae-diagnosis-codes/1df1c0b2
 primis-covid19-vacc-uptake/longres/v1
 primis-covid19-vacc-uptake/shield/v1
 primis-covid19-vacc-uptake/nonshield/v1
