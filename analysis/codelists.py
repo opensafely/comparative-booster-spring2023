@@ -12,10 +12,10 @@ covid_icd10 = ["U071", "U072", "U109"]
 
 # covid_emergency = codelist_from_csv(
 #     "codelists-opensafely-covid-19-ae-diagnosis-codes.csv",
-#     column="CTV3ID",
+#     column="Code",
 # )
 # option without "post-covid syndrone" (> 3 months after infection)
-covid_emergency = [1240751000000100, 1325171000000109, 1325181000000106]
+covid_emergency = ["1240751000000100", "1325171000000109", "1325181000000106"]
 
 
 covid_primary_care_positive_test = codelist_from_csv(
