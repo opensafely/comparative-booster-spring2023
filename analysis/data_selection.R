@@ -23,12 +23,26 @@ source(here("analysis", "design", "design.R"))
 ## Import redaction functions
 source(here("analysis", "functions", "redaction.R"))
 
+
+## import command-line arguments ----
+
+args <- commandArgs(trailingOnly=TRUE)
+
+if(length(args)==0){
+  # use for interactive testing
+  removeobjects <- FALSE
+  cohort <- "age75plus" #currently `age75plus` or `cv`
+} else {
+  removeobjects <- TRUE
+  cohort <- args[[1]]
+}
+
+# derive subgroup info
+cohort_sym <- sym(cohort)
+
+
 ## create output directories for data ----
-fs::dir_create(here("output", "data"))
-
-## create output directories for tables/summaries ----
-
-output_dir <- here("output", "prematch")
+output_dir <- here("output", cohort)
 fs::dir_create(output_dir)
 
 
@@ -41,6 +55,7 @@ data_processed <- read_rds(here("output", "data", "data_processed.rds"))
 
 ## Define selection criteria ----
 data_criteria <- data_processed %>%
+  filter(!!cohort_sym) %>%
   transmute(
     patient_id,
     boost_date,
@@ -52,9 +67,6 @@ data_criteria <- data_processed %>%
     has_ethnicity = !is.na(ethnicity),
     has_region = !is.na(region),
     #has_msoa = !is.na(msoa),
-    is_75plus = age_july2023 >= 75,
-    is_cv = cv,
-    is_eligible = is_cv | is_75plus,
     isnot_hscworker = !hscworker,
     isnot_carehomeresident = !care_home_combined,
     isnot_endoflife = !endoflife,
@@ -71,7 +83,6 @@ data_criteria <- data_processed %>%
       vax_dates_possible &
       vax_intervals_atleast14days & vax_type_pfixer_or_sanofi & no_prior_pfizerBA45 & no_prior_sanofi &
       has_age & has_sex & has_imd & has_region & #has_ethnicity &
-      is_eligible &
       isnot_hscworker &
       isnot_carehomeresident & isnot_endoflife & isnot_housebound &
       has_norecentcovid &
@@ -85,96 +96,92 @@ data_cohort <- data_criteria %>%
   left_join(data_processed, by="patient_id") %>%
   droplevels()
 
-write_rds(data_cohort, here("output", "data", "data_cohort.rds"), compress="gz")
-arrow::write_feather(data_cohort, here("output", "data", "data_cohort.arrow"))
+write_rds(data_cohort, fs::path(output_dir, "data_cohort.rds"), compress="gz")
+#arrow::write_feather(data_cohort, fs::path(output_dir, "data_cohort.arrow"))
 
 data_inclusioncriteria <- data_criteria %>%
   transmute(
     patient_id,
     boost_type,
-    c0 = vax_dates_possible & vax_intervals_atleast14days & vax_type_pfixer_or_sanofi & no_prior_pfizerBA45 & no_prior_sanofi,
-    c1 = c0 & (is_eligible),
-    c2 = c1 & (has_age & has_sex & has_imd & has_region),
-    c3 = c2 & (isnot_hscworker),
-    c4 = c3 & (isnot_carehomeresident & isnot_endoflife & isnot_housebound),
-    c5 = c4 & (has_norecentcovid),
-    c6 = c5 & (isnot_inhospital),
+    c0 = TRUE,
+    c1 = c0 & vax_type_pfixer_or_sanofi,
+    c2 = c1 & vax_dates_possible & vax_intervals_atleast14days & no_prior_pfizerBA45 & no_prior_sanofi,
+    c3_1 = c2 & (has_age & has_sex & has_imd & has_region),
+    c3_2 = c2 & (isnot_hscworker),
+    c3_3 = c2 & (isnot_carehomeresident & isnot_endoflife & isnot_housebound),
+    c3_4 = c2 & (has_norecentcovid),
+    c3_5 = c2 & (isnot_inhospital),
+    c3 = c3_1 & c3_2 & c3_3 & c3_4 & c3_5
   ) %>%
   filter(c0)
 
-write_rds(data_inclusioncriteria, here("output", "data", "data_inclusioncriteria.rds"), compress="gz")
+# remove large in-memory objects
+remove(data_criteria)
+
+write_rds(data_inclusioncriteria, fs::path(output_dir, "data_inclusioncriteria.rds"), compress="gz")
 
 
-## flowchart -- rounded so disclosure-safe ----
+## Create flowchart ----
 
-data_flowchart <-
-  data_inclusioncriteria %>%
-  select(-patient_id) %>%
-  group_by(boost_type) %>%
-  summarise(
-    across(.cols=everything(), .fns=sum)
-  ) %>%
-  pivot_longer(
-    cols=-boost_type,
-    names_to="criteria",
-    values_to="n"
-  ) %>%
-  group_by(boost_type) %>%
-  mutate(
-    n_exclude = lag(n) - n,
-    pct_exclude = n_exclude/lag(n),
-    pct_all = n / first(n),
-    pct_step = n / lag(n),
-    crit = str_extract(criteria, "^c\\d+"),
-    criteria = fct_case_when(
-      crit == "c0" ~ "Recieved booster dose of PfizerBA45 or Sanofi between 1 April and 30 June 2023", # paste0("Aged 18+\n with 2 doses on or before ", format(study_dates$lastvax2_date, "%d %b %Y")),
-      crit == "c1" ~ "  and clinically at-risk or aged 75+",
-      crit == "c2" ~ "  with no missing demographic information",
-      crit == "c3" ~ "  and not a health and social care worker",
-      crit == "c4" ~ "  and not a care/nursing home resident, end-of-life or housebound",
-      crit == "c5" ~ "  and no COVID-19-related events within 28 days",
-      crit == "c6" ~ "  and not admitted in hospital at time of booster",
-      TRUE ~ NA_character_
+create_flowchart <- function(round_level = 1){
+
+  flowchart_output <-
+    data_inclusioncriteria %>%
+    select(-patient_id) %>%
+    group_by(boost_type) %>%
+    summarise(
+      across(.cols=everything(), .fns=~ceiling_any(sum(.), round_level))
+    ) %>%
+    pivot_longer(
+      cols=-c(boost_type),
+      names_to="criteria",
+      values_to="n"
+    ) %>%
+    mutate(
+      level = if_else(str_detect(criteria, "c\\d+$"), 1, 2),
+      n_level1 = if_else(level==1, n, NA_real_),
+      n_level1_fill = n_level1
+    ) %>%
+    fill(n_level1_fill) %>%
+    group_by(boost_type) %>%
+    mutate(
+      n_exclude = lag(n_level1_fill) - n,
+      pct_exclude = n_exclude/lag(n_level1_fill),
+      pct_all = n_level1 / first(n),
+      pct_step = n_level1 / lag(n_level1_fill),
+      #crit = str_extract(criteria, "^c\\d+"),
+      crit = criteria,
+      criteria = fct_case_when(
+        crit == "c0" ~ "Received COVID-19 vaccination between 1 April and 30 June 2023", # paste0("Aged 18+\n with 2 doses on or before ", format(study_dates$lastvax2_date, "%d %b %Y")),
+        crit == "c1" ~ "  vaccine product was PfizerBA45 or Sanofi",
+        crit == "c2" ~ "  with no prior vaccination within 14 days, or with PfizerBA45 or Sanofi",
+        crit == "c3_1" ~ "    no missing demographic information",
+        crit == "c3_2" ~ "    not a health and social care worker",
+        crit == "c3_3" ~ "    not a care/nursing home resident, end-of-life or housebound",
+        crit == "c3_4" ~ "    no COVID-19-related events within 28 days",
+        crit == "c3_5" ~ "    not admitted in hospital at time of booster",
+        crit == "c3" ~ "  included in matching run",
+        TRUE ~ "NA_character_boop"
+      )
     )
-  ) #
+
+  return(flowchart_output)
+}
+
+
+## unrounded flowchart
+data_flowchart <- create_flowchart(1)
+write_rds(data_flowchart, fs::path(output_dir, "flowchart.rds"))
 #write_csv(data_flowchart, here("output", "data", "flowchart.csv"))
 
+## rounded flowchart
+data_flowchart_rounded <- create_flowchart(7)
+write_rds(data_flowchart_rounded, fs::path(output_dir, "flowchart_rounded.rds"))
+write_csv(data_flowchart_rounded, fs::path(output_dir, "flowchart_rounded.csv"))
 
 
-## flowchart -- rounded so disclosure-safe ----
-data_flowchart_rounded <-
-  data_inclusioncriteria %>%
-  select(-patient_id) %>%
-  group_by(boost_type) %>%
-  summarise(
-    across(.cols=everything(), .fns=~ceiling_any(sum(.), 7))
-  ) %>%
-  pivot_longer(
-    cols=-boost_type,
-    names_to="criteria",
-    values_to="n"
-  ) %>%
-  group_by(boost_type) %>%
-  mutate(
-    n_exclude = lag(n) - n,
-    pct_exclude = n_exclude/lag(n),
-    pct_all = n / first(n),
-    pct_step = n / lag(n),
-    crit = str_extract(criteria, "^c\\d+"),
-    criteria = fct_case_when(
-      crit == "c0" ~ "Recieved booster dose of PfizerBA45 or Sanofi between 1 April and 30 June 2023", # paste0("Aged 18+\n with 2 doses on or before ", format(study_dates$lastvax2_date, "%d %b %Y")),
-      crit == "c1" ~ "  and clinically at-risk or aged 75+",
-      crit == "c2" ~ "  with no missing demographic information",
-      crit == "c3" ~ "  and not a health and social care worker",
-      crit == "c4" ~ "  and not a care/nursing home resident, end-of-life or housebound",
-      crit == "c5" ~ "  and no COVID-19-related events within 28 days",
-      crit == "c6" ~ "  and not admitted in hospital at time of booster",
-      TRUE ~ NA_character_
-    )
-  )
-write_csv(data_flowchart_rounded, fs::path(output_dir, "flowchart.csv"))
-
-
+## remove large in-memory objects
+remove(data_inclusioncriteria)
 
 
 # table 1 style baseline characteristics amongst those eligible for matching ----

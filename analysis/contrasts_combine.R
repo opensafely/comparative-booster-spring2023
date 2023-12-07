@@ -5,19 +5,6 @@
 
 # Preliminaries ----
 
-## import command-line arguments ----
-
-args <- commandArgs(trailingOnly=TRUE)
-
-
-if(length(args)==0){
-  # use for interactive testing
-  matchset <- "A"
-
-} else {
-  matchset <- args[[1]]
-
-}
 
 ## Import libraries ----
 library('tidyverse')
@@ -31,14 +18,27 @@ source(here("analysis", "functions", "utility.R"))
 ## Import design elements
 source(here("analysis", "design", "design.R"))
 
+## import command-line arguments ----
 
-output_dir <- here("output", "match", matchset, "combined")
+args <- commandArgs(trailingOnly=TRUE)
+
+if(length(args)==0){
+  # use for interactive testing
+  cohort <- "age75plus"
+  matchset <- "A"
+
+} else {
+  cohort <- args[[1]]
+  matchset <- args[[2]]
+}
+
+output_dir <- here("output", cohort, matchset, "combined")
 fs::dir_create(output_dir)
 
 metaparams <-
   expand_grid(
     outcome = factor(c("covidemergency", "covidadmitted", "covidcritcare", "coviddeath", "noncoviddeath", "fracture")),
-    subgroup = factor(recoder$subgroups),
+    subgroup = if(cohort=="cv") factor(recoder$subgroups[recoder$subgroups!="cv"]) else factor(recoder$subgroups),
     #outcome = factor("covidadmitted"),
     #subgroup = factor(c("all", "ageband")),
   ) %>%
@@ -51,9 +51,9 @@ metaparams <-
 
 km_estimates <- metaparams %>%
   mutate(
-    data = pmap(list(matchset, subgroup, outcome), function(matchset, subgroup, outcome) {
+    data = pmap(list(cohort, matchset, subgroup, outcome), function(cohort, matchset, subgroup, outcome) {
       subgroup <- as.character(subgroup)
-      dat <- read_rds(here("output", "match", matchset, "km", subgroup, outcome, "km_estimates_rounded.rds"))
+      dat <- read_rds(here("output", cohort, matchset, "km", subgroup, outcome, "km_estimates_rounded.rds"))
       dat %>%
         ungroup() %>%
         add_column(
@@ -70,9 +70,9 @@ write_csv(km_estimates, fs::path(output_dir, "km_estimates_rounded.csv"))
 
 contrasts_daily <- metaparams %>%
   mutate(
-    data = pmap(list(matchset, outcome, subgroup), function(matchset, outcome, subgroup){
+    data = pmap(list(cohort, matchset, outcome, subgroup), function(cohort, matchset, outcome, subgroup){
       subgroup <- as.character(subgroup)
-      dat <- read_rds(here("output", "match", matchset, "km", subgroup, outcome, "contrasts_daily_rounded.rds"))
+      dat <- read_rds(here("output", cohort, matchset, "km", subgroup, outcome, "contrasts_daily_rounded.rds"))
       dat %>%
         ungroup() %>%
         add_column(
@@ -91,9 +91,9 @@ write_csv(contrasts_daily, fs::path(output_dir, "contrasts_daily_rounded.csv"))
 
 contrasts_cuts <- metaparams %>%
   mutate(
-    data = pmap(list(matchset, outcome, subgroup), function(matchset, outcome, subgroup){
+    data = pmap(list(cohort, matchset, outcome, subgroup), function(cohort, matchset, outcome, subgroup){
       subgroup <- as.character(subgroup)
-      dat <- read_rds(here("output", "match", matchset, "km", subgroup, outcome, "contrasts_cuts_rounded.rds"))
+      dat <- read_rds(here("output", cohort, matchset, "km", subgroup, outcome, "contrasts_cuts_rounded.rds"))
       dat %>%
         ungroup() %>%
         add_column(
@@ -112,9 +112,9 @@ write_csv(contrasts_cuts, fs::path(output_dir, "contrasts_cuts_rounded.csv"))
 
 contrasts_overall <- metaparams %>%
   mutate(
-    data = pmap(list(matchset, outcome, subgroup), function(matchset, outcome, subgroup) {
+    data = pmap(list(cohort, matchset, outcome, subgroup), function(cohort, matchset, outcome, subgroup) {
       subgroup <- as.character(subgroup)
-      dat <- read_rds(here("output", "match", matchset, "km", subgroup, outcome, "contrasts_overall_rounded.rds"))
+      dat <- read_rds(here("output", cohort, matchset, "km", subgroup, outcome, "contrasts_overall_rounded.rds"))
       dat %>%
         ungroup() %>%
         add_column(
@@ -131,42 +131,20 @@ contrasts_overall <- metaparams %>%
 write_csv(contrasts_overall, fs::path(output_dir, "contrasts_overall_rounded.csv"))
 
 
-contrasts_20 <- metaparams %>%
-  mutate(
-    data = pmap(list(matchset, outcome, subgroup), function(matchset, outcome, subgroup) {
-      subgroup <- as.character(subgroup)
-      dat <- read_rds(here("output", "match", matchset, "km", subgroup, outcome, "contrasts_20_rounded.rds"))
-      dat %>%
-        ungroup() %>%
-        add_column(
-          subgroup_level = as.character(.[[subgroup]]),
-          subgroup_level_descr = fct_recoderelevel(.[[subgroup]], recoder[[subgroup]]),
-          .before=1
-        ) %>%
-        select(-all_of(subgroup))
-    }
-    )
-  ) %>%
-  unnest(data)
-
-write_csv(contrasts_20, fs::path(output_dir, "contrasts_20_rounded.csv"))
-
-
-
 ## move km plots to single folder ----
-fs::dir_create(here("output", "match", matchset, "combined", "plots"))
+fs::dir_create(here("output", cohort, matchset, "combined", "plots"))
 
 metaparams %>%
   mutate(
-    kmplotdir = here("output", "match", matchset, "km", subgroup, outcome, "km_plot_unrounded.png"),
-    kmplotnewdir = here("output", "match", matchset, "combined", "plots", glue("km_plot_unrounded_{subgroup}_{outcome}.png")),
+    kmplotdir = here("output", cohort, matchset, "km", subgroup, outcome, "km_plot_unrounded.png"),
+    kmplotnewdir = here("output", cohort, matchset, "combined", "plots", glue("km_plot_unrounded_{subgroup}_{outcome}.png")),
   ) %>%
   {walk2(.$kmplotdir, .$kmplotnewdir, ~fs::file_copy(.x, .y, overwrite = TRUE))}
 
 metaparams %>%
   mutate(
-    kmplotdir = here("output", "match", matchset, "km", subgroup, outcome, "km_plot_rounded.png"),
-    kmplotnewdir = here("output", "match", matchset, "combined", "plots", glue("km_plot_rounded_{subgroup}_{outcome}.png")),
+    kmplotdir = here("output", cohort, matchset, "km", subgroup, outcome, "km_plot_rounded.png"),
+    kmplotnewdir = here("output", cohort, matchset, "combined", "plots", glue("km_plot_rounded_{subgroup}_{outcome}.png")),
   ) %>%
   {walk2(.$kmplotdir, .$kmplotnewdir, ~fs::file_copy(.x, .y, overwrite = TRUE))}
 
@@ -209,7 +187,7 @@ plot_estimates <- function(estimate, estimate.ll, estimate.ul, name){
 
   ggsave(
     filename=fs::path(
-      here("output", "match", matchset, "combined", "plots", glue("overall_plot_rounded_{name}.png"))
+      here("output", cohort, matchset, "combined", "plots", glue("overall_plot_rounded_{name}.png"))
     ),
     plot_temp,
     width=20, height=15, units="cm"
@@ -226,7 +204,7 @@ plot_estimates(irr, irr.ll, irr.ul, "irr")
 
 ## move event counts data ----
 
-eventcounts <- read_rds(here("output", "match", matchset, "eventcounts", "eventcounts.rds"))
+eventcounts <- read_rds(here("output", cohort, matchset, "eventcounts", "eventcounts.rds"))
 write_csv(eventcounts, fs::path(output_dir, "eventcounts.csv"))
 
 ## follow-up summary statistics ----
@@ -273,7 +251,7 @@ write_csv(followup, fs::path(output_dir, "followup_rounded.csv"))
 ## do not do era as this _must_ be done in delayedentry script, because we don't know from the km tables the individual entry and exit times for each person
 
 
-## keep incase need to use the entire lsit of follow-up times
+## keep incase need to use the entire list of follow-up times
 # followup_treatment <- km_estimates %>%
 #   group_by(
 #     outcome, outcome_descr, subgroup, subgroup_descr, subgroup_level, subgroup_level_descr, treatment

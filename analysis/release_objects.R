@@ -36,7 +36,6 @@ for(matchset in c("A", "B")){
   fs::file_copy(here("output", "match", matchset, "combined", "contrasts_daily_rounded.csv"), fs::path(output_dir, "contrasts_daily_rounded.csv"), overwrite = TRUE)
   fs::file_copy(here("output", "match", matchset, "combined", "contrasts_cuts_rounded.csv"), fs::path(output_dir, "contrasts_cuts_rounded.csv"), overwrite = TRUE)
   fs::file_copy(here("output", "match", matchset, "combined", "contrasts_overall_rounded.csv"), fs::path(output_dir, "contrasts_overall_rounded.csv"), overwrite = TRUE)
-  fs::file_copy(here("output", "match", matchset, "combined", "contrasts_20_rounded.csv"), fs::path(output_dir, "contrasts_20_rounded.csv"), overwrite = TRUE)
 
   fs::file_copy(here("output", "match", matchset, "combined", "eventcounts.csv"), fs::path(output_dir, "eventcounts.csv"), overwrite = TRUE)
   fs::file_copy(here("output", "match", matchset, "combined", "followup_rounded.csv"), fs::path(output_dir, "followup_rounded.csv"), overwrite = TRUE)
