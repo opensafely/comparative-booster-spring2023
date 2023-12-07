@@ -12,7 +12,7 @@ comment <- function(...){
   comments
 }
 
-splice(...) <- function(...) {list_flatten(lst(...))}
+#splice <- function(...) {list_flatten(lst(...))}
 
 ## create function to convert comment "actions" in a yaml string into proper comments
 convert_comment_actions <-function(yaml.txt){
@@ -55,30 +55,61 @@ action <- function(
 }
 
 
-## match action function ----
+## selection action function ----
 
-action_match <- function(matchset){
+action_selection <- function(cohort){
 
   splice(
 
     action(
-      name = glue("match_{matchset}"),
-      run = "r:latest analysis/match.R",
-      arguments = c(matchset),
-      needs = list("data_selection"),
+      name = glue("data_selection_{cohort}"),
+      run = "r:latest analysis/data_selection.R",
+      arguments = c(cohort),
+      needs = list("data_process"),
       highly_sensitive = lst(
-        rds = glue("output/match/{matchset}/*.rds")
+        rds = glue("output/{cohort}/*.rds"),
+      ),
+      moderately_sensitive = lst(
+        csv = glue("output/{cohort}/*.csv")
       )
     ),
 
     action(
-      name = glue("match_report_{matchset}"),
-      run = "r:latest analysis/match_report.R",
-      arguments = c(matchset),
-      needs = list("data_selection",  glue("match_{matchset}")),
+      name = glue("skim_selection_{cohort}"),
+      run = "r:latest analysis/data_skim.R",
+      arguments = c(glue("output/{cohort}/data_cohort.rds"), glue("output/{cohort}/skim")),
+      needs = list(glue("data_selection_{cohort}")),
       moderately_sensitive = lst(
-        csv = glue("output/match/{matchset}/report/*.csv"),
-        png = glue("output/match/{matchset}/report/*.png")
+        txt = glue("output/{cohort}/skim/*.txt")
+      )
+    )
+  )
+
+}
+
+## match actions function ----
+action_match <- function(cohort, matchset){
+
+  splice(
+
+    action(
+      name = glue("match_{cohort}_{matchset}"),
+      run = "r:latest analysis/match.R",
+      arguments = c(cohort, matchset),
+      needs = list(glue("data_selection_{cohort}")),
+      highly_sensitive = lst(
+        rds = glue("output/{cohort}/{matchset}/*.rds")
+      )
+    ),
+
+    action(
+      name = glue("match_report_{cohort}_{matchset}"),
+      run = "r:latest analysis/match_report.R",
+      arguments = c(cohort, matchset),
+      needs = list(glue("data_selection_{cohort}"),  glue("match_{cohort}_{matchset}")),
+      moderately_sensitive = lst(
+        csv = glue("output/{cohort}/{matchset}/report/*.csv"),
+        png = glue("output/{cohort}/{matchset}/report/*.png")
       )
     )
   )
@@ -88,39 +119,39 @@ action_match <- function(matchset){
 
 ## get km or ci actions function ----
 action_contrasts <- function(
-  matchset, subgroup, outcome
+  cohort, matchset, subgroup, outcome
 ){
 
     ## kaplan-meier action
     action(
-      name = glue("km_{matchset}_{subgroup}_{outcome}"),
+      name = glue("km_{cohort}_{matchset}_{subgroup}_{outcome}"),
       run = glue("r:latest analysis/km.R"),
-      arguments = c(matchset, subgroup, outcome),
+      arguments = c(cohort, matchset, subgroup, outcome),
       needs = list(
-        glue("match_{matchset}"),
-        "data_selection"
+        glue("match_{cohort}_{matchset}"),
+        glue("data_selection_{cohort}")
       ),
       highly_sensitive = lst(
-        rds = glue("output/match/{matchset}/km/{subgroup}/{outcome}/*.rds"),
+        rds = glue("output/{cohort}/{matchset}/km/{subgroup}/{outcome}/*.rds"),
       ),
       moderately_sensitive = lst(
-        png = glue("output/match/{matchset}/km/{subgroup}/{outcome}/*.png"),
+        png = glue("output/{cohort}/{matchset}/km/{subgroup}/{outcome}/*.png"),
       )
     )
 }
 
 
-action_eventcounts <- function(matchset) {
+action_eventcounts <- function(cohort, matchset) {
   action(
-    name = glue("eventcounts_{matchset}"),
+    name = glue("eventcounts_{cohort}_{matchset}"),
     run = glue("r:latest analysis/eventcounts.R"),
-    arguments = c(matchset),
+    arguments = c(cohort, matchset),
     needs = list(
-      glue("match_{matchset}"),
-      "data_selection"
+      glue("match_{cohort}_{matchset}"),
+      glue("data_selection_{cohort}")
     ),
     highly_sensitive = lst(
-      rds = glue("output/match/{matchset}/eventcounts/*.rds"),
+      rds = glue("output/{cohort}/{matchset}/eventcounts/*.rds"),
     )
   )
 }
@@ -128,26 +159,26 @@ action_eventcounts <- function(matchset) {
 
 ## model action function ----
 action_contrasts_combine <- function(
-    matchset, subgroups, outcomes
+    cohort, matchset, subgroups, outcomes
 ){
 
     action(
-      name = glue("contrasts_combine_{matchset}"),
+      name = glue("contrasts_combine_{cohort}_{matchset}"),
       run = glue("r:latest analysis/contrasts_combine.R"),
-      arguments = c(matchset),
+      arguments = c(cohort, matchset),
       needs = splice(
         glue_data(
           .x=expand_grid(
             subgroup=subgroups,
             outcome=outcomes
           ),
-          "km_{matchset}_{subgroup}_{outcome}"
+          "km_{cohort}_{matchset}_{subgroup}_{outcome}"
         ) %>% as.list,
-        list(glue("eventcounts_{matchset}"))
+        list(glue("eventcounts_{cohort}_{matchset}"))
       ),
       moderately_sensitive = lst(
-        csv = glue("output/match/{matchset}/combined/*.csv"),
-        png = glue("output/match/{matchset}/combined/plots/*.png"),
+        csv = glue("output/{cohort}/{matchset}/combined/*.csv"),
+        png = glue("output/{cohort}/{matchset}/combined/plots/*.png"),
       )
     )
 }
@@ -189,7 +220,7 @@ actions_list <- splice(
     run = "ehrql:v0 generate-dataset analysis/dataset_definition.py --output output/extracts/extract.arrow --dummy-data-file analysis/dummydata/dummyextract.arrow",
     needs = list(),
     highly_sensitive = lst(
-      cohort = "output/extracts/extract.arrow"
+      arrow = "output/extracts/extract.arrow"
     )
   ),
 
@@ -199,43 +230,19 @@ actions_list <- splice(
     run = "r:latest analysis/data_process.R",
     needs = list("extract"),
     highly_sensitive = lst(
-      rds = "output/data/data_processed.rds",
-      vaxlong = "output/data/data_vaxlong.rds"
-    )
-  ),
-
-  action(
-    name = "skim_process",
-    run = "r:latest analysis/data_skim.R",
-    arguments = c("output/data/data_processed.rds", "output/data_properties"),
-    needs = list("data_process"),
-    moderately_sensitive = lst(
-      cohort = "output/data_properties/data_processed*.txt"
-    )
-  ),
-
-  action(
-    name = "data_selection",
-    run = "r:latest analysis/data_selection.R",
-    needs = list("data_process"),
-    highly_sensitive = lst(
       rds = "output/data/*.rds",
-    ),
-    moderately_sensitive = lst(
-      csv = "output/prematch/*.csv"
     )
   ),
 
   action(
-    name = "skim_selection",
+    name = "data_skim",
     run = "r:latest analysis/data_skim.R",
-    arguments = c("output/data/data_cohort.rds", "output/data_properties"),
-    needs = list("data_selection"),
+    arguments = c("output/data/data_processed.rds", "output/data/skim"),
+    needs = list("data_process"),
     moderately_sensitive = lst(
-      cohort = "output/data_properties/data_cohort*.txt"
+      cohort = "output/data/skim/*.txt"
     )
   ),
-
 
   action(
     name = "geography",
@@ -248,147 +255,239 @@ actions_list <- splice(
   ),
 
 
+  comment("# # # # # # # # # # # # # # # # # # #", "Cohort: age75plus", "# # # # # # # # # # # # # # # # # # #"),
+
+  action_selection("age75plus"),
+
+
   comment("# # # # # # # # # # # # # # # # # # #", "matching set A", "# # # # # # # # # # # # # # # # # # #"),
 
-  action_match("A"),
+  action_match("age75plus", "A"),
 
   comment("### Overall models ('all')"),
 
-  action_contrasts("A", "all", "covidemergency"),
-  action_contrasts("A", "all", "covidadmitted"),
-  action_contrasts("A", "all", "covidcritcare"),
-  action_contrasts("A", "all", "coviddeath"),
-  action_contrasts("A", "all", "noncoviddeath"),
-  action_contrasts("A", "all", "fracture"),
-
-
-  comment("### Models by age ('age75plus')"),
-
-  action_contrasts("A", "age75plus", "covidemergency"),
-  action_contrasts("A", "age75plus", "covidadmitted"),
-  action_contrasts("A", "age75plus", "covidcritcare"),
-  action_contrasts("A", "age75plus", "coviddeath"),
-  action_contrasts("A", "age75plus", "noncoviddeath"),
-  action_contrasts("A", "age75plus", "fracture"),
-
+  action_contrasts("age75plus", "A", "all", "covidemergency"),
+  action_contrasts("age75plus", "A", "all", "covidadmitted"),
+  action_contrasts("age75plus", "A", "all", "covidcritcare"),
+  action_contrasts("age75plus", "A", "all", "coviddeath"),
+  action_contrasts("age75plus", "A", "all", "noncoviddeath"),
+  action_contrasts("age75plus", "A", "all", "fracture"),
 
   comment("### Models by age-band ('ageband')"),
 
-  action_contrasts("A", "ageband", "covidemergency"),
-  action_contrasts("A", "ageband", "covidadmitted"),
-  action_contrasts("A", "ageband", "covidcritcare"),
-  action_contrasts("A", "ageband", "coviddeath"),
-  action_contrasts("A", "ageband", "noncoviddeath"),
-  action_contrasts("A", "ageband", "fracture"),
+  action_contrasts("age75plus", "A", "ageband", "covidemergency"),
+  action_contrasts("age75plus", "A", "ageband", "covidadmitted"),
+  action_contrasts("age75plus", "A", "ageband", "covidcritcare"),
+  action_contrasts("age75plus", "A", "ageband", "coviddeath"),
+  action_contrasts("age75plus", "A", "ageband", "noncoviddeath"),
+  action_contrasts("age75plus", "A", "ageband", "fracture"),
 
 
   comment("### Models by clinically vulnerable group ('cv')"),
 
-  action_contrasts("A", "cv", "covidemergency"),
-  action_contrasts("A", "cv", "covidadmitted"),
-  action_contrasts("A", "cv", "covidcritcare"),
-  action_contrasts("A", "cv", "coviddeath"),
-  action_contrasts("A", "cv", "noncoviddeath"),
-  action_contrasts("A", "cv", "fracture"),
+  action_contrasts("age75plus", "A", "cv", "covidemergency"),
+  action_contrasts("age75plus", "A", "cv", "covidadmitted"),
+  action_contrasts("age75plus", "A", "cv", "covidcritcare"),
+  action_contrasts("age75plus", "A", "cv", "coviddeath"),
+  action_contrasts("age75plus", "A", "cv", "noncoviddeath"),
+  action_contrasts("age75plus", "A", "cv", "fracture"),
 
 
   comment("### Models by prior infection ('prior_covid_infection')"),
 
-  action_contrasts("A", "prior_covid_infection", "covidemergency"),
-  action_contrasts("A", "prior_covid_infection", "covidadmitted"),
-  action_contrasts("A", "prior_covid_infection", "covidcritcare"),
-  action_contrasts("A", "prior_covid_infection", "coviddeath"),
-  action_contrasts("A", "prior_covid_infection", "noncoviddeath"),
-  action_contrasts("A", "prior_covid_infection", "fracture"),
-
+  action_contrasts("age75plus", "A", "prior_covid_infection", "covidemergency"),
+  action_contrasts("age75plus", "A", "prior_covid_infection", "covidadmitted"),
+  action_contrasts("age75plus", "A", "prior_covid_infection", "covidcritcare"),
+  action_contrasts("age75plus", "A", "prior_covid_infection", "coviddeath"),
+  action_contrasts("age75plus", "A", "prior_covid_infection", "noncoviddeath"),
+  action_contrasts("age75plus", "A", "prior_covid_infection", "fracture"),
 
   comment("### Models by vax history ('vax_previous_count')"),
 
-  action_contrasts("A", "vax_previous_count", "covidemergency"),
-  action_contrasts("A", "vax_previous_count", "covidadmitted"),
-  action_contrasts("A", "vax_previous_count", "covidcritcare"),
-  action_contrasts("A", "vax_previous_count", "coviddeath"),
-  action_contrasts("A", "vax_previous_count", "noncoviddeath"),
-  action_contrasts("A", "vax_previous_count", "fracture"),
+  action_contrasts("age75plus", "A", "vax_previous_count", "covidemergency"),
+  action_contrasts("age75plus", "A", "vax_previous_count", "covidadmitted"),
+  action_contrasts("age75plus", "A", "vax_previous_count", "covidcritcare"),
+  action_contrasts("age75plus", "A", "vax_previous_count", "coviddeath"),
+  action_contrasts("age75plus", "A", "vax_previous_count", "noncoviddeath"),
+  action_contrasts("age75plus", "A", "vax_previous_count", "fracture"),
 
+  action_eventcounts("age75plus", "A"),
 
   comment("# # # # # # # # # # # # # # # # # # #", "matching set B", "# # # # # # # # # # # # # # # # # # #"),
 
-  action_match("B"),
+  action_match("age75plus", "B"),
 
   comment("### Overall models ('all')"),
 
-  action_contrasts("B", "all", "covidemergency"),
-  action_contrasts("B", "all", "covidadmitted"),
-  action_contrasts("B", "all", "covidcritcare"),
-  action_contrasts("B", "all", "coviddeath"),
-  action_contrasts("B", "all", "noncoviddeath"),
-  action_contrasts("B", "all", "fracture"),
-
-
-  comment("### Models by age ('age75plus')"),
-
-  action_contrasts("B", "age75plus", "covidemergency"),
-  action_contrasts("B", "age75plus", "covidadmitted"),
-  action_contrasts("B", "age75plus", "covidcritcare"),
-  action_contrasts("B", "age75plus", "coviddeath"),
-  action_contrasts("B", "age75plus", "noncoviddeath"),
-  action_contrasts("B", "age75plus", "fracture"),
-
+  action_contrasts("age75plus", "B", "all", "covidemergency"),
+  action_contrasts("age75plus", "B", "all", "covidadmitted"),
+  action_contrasts("age75plus", "B", "all", "covidcritcare"),
+  action_contrasts("age75plus", "B", "all", "coviddeath"),
+  action_contrasts("age75plus", "B", "all", "noncoviddeath"),
+  action_contrasts("age75plus", "B", "all", "fracture"),
 
   comment("### Models by age-band ('ageband')"),
 
-  action_contrasts("B", "ageband", "covidemergency"),
-  action_contrasts("B", "ageband", "covidadmitted"),
-  action_contrasts("B", "ageband", "covidcritcare"),
-  action_contrasts("B", "ageband", "coviddeath"),
-  action_contrasts("B", "ageband", "noncoviddeath"),
-  action_contrasts("B", "ageband", "fracture"),
+  action_contrasts("age75plus", "B", "ageband", "covidemergency"),
+  action_contrasts("age75plus", "B", "ageband", "covidadmitted"),
+  action_contrasts("age75plus", "B", "ageband", "covidcritcare"),
+  action_contrasts("age75plus", "B", "ageband", "coviddeath"),
+  action_contrasts("age75plus", "B", "ageband", "noncoviddeath"),
+  action_contrasts("age75plus", "B", "ageband", "fracture"),
 
   comment("### Models by clinically vulnerable group ('cv')"),
 
-  action_contrasts("B", "cv", "covidemergency"),
-  action_contrasts("B", "cv", "covidadmitted"),
-  action_contrasts("B", "cv", "covidcritcare"),
-  action_contrasts("B", "cv", "coviddeath"),
-  action_contrasts("B", "cv", "noncoviddeath"),
-  action_contrasts("B", "cv", "fracture"),
+  action_contrasts("age75plus", "B", "cv", "covidemergency"),
+  action_contrasts("age75plus", "B", "cv", "covidadmitted"),
+  action_contrasts("age75plus", "B", "cv", "covidcritcare"),
+  action_contrasts("age75plus", "B", "cv", "coviddeath"),
+  action_contrasts("age75plus", "B", "cv", "noncoviddeath"),
+  action_contrasts("age75plus", "B", "cv", "fracture"),
 
 
   comment("### Models by vax history ('vax_previous_count')"),
 
-  action_contrasts("B", "vax_previous_count", "covidemergency"),
-  action_contrasts("B", "vax_previous_count", "covidadmitted"),
-  action_contrasts("B", "vax_previous_count", "covidcritcare"),
-  action_contrasts("B", "vax_previous_count", "coviddeath"),
-  action_contrasts("B", "vax_previous_count", "noncoviddeath"),
-  action_contrasts("B", "vax_previous_count", "fracture"),
+  action_contrasts("age75plus", "B", "vax_previous_count", "covidemergency"),
+  action_contrasts("age75plus", "B", "vax_previous_count", "covidadmitted"),
+  action_contrasts("age75plus", "B", "vax_previous_count", "covidcritcare"),
+  action_contrasts("age75plus", "B", "vax_previous_count", "coviddeath"),
+  action_contrasts("age75plus", "B", "vax_previous_count", "noncoviddeath"),
+  action_contrasts("age75plus", "B", "vax_previous_count", "fracture"),
 
 
   comment("### Models by prior infection ('prior_covid_infection')"),
 
-  action_contrasts("B", "prior_covid_infection", "covidemergency"),
-  action_contrasts("B", "prior_covid_infection", "covidadmitted"),
-  action_contrasts("B", "prior_covid_infection", "covidcritcare"),
-  action_contrasts("B", "prior_covid_infection", "coviddeath"),
-  action_contrasts("B", "prior_covid_infection", "noncoviddeath"),
-  action_contrasts("B", "prior_covid_infection", "fracture"),
+  action_contrasts("age75plus", "B", "prior_covid_infection", "covidemergency"),
+  action_contrasts("age75plus", "B", "prior_covid_infection", "covidadmitted"),
+  action_contrasts("age75plus", "B", "prior_covid_infection", "covidcritcare"),
+  action_contrasts("age75plus", "B", "prior_covid_infection", "coviddeath"),
+  action_contrasts("age75plus", "B", "prior_covid_infection", "noncoviddeath"),
+  action_contrasts("age75plus", "B", "prior_covid_infection", "fracture"),
 
 
-  action_eventcounts("A"),
-  action_eventcounts("B"),
+  action_eventcounts("age75plus", "B"),
 
-  comment("# # # # # # # # # # # # # # # # # # #", "Combine estimates across outcomes and subgroups", "# # # # # # # # # # # # # # # # # # #"),
+
+  comment("# # # # # # # # # # # # # # # # # # #", "Cohort: cv", "# # # # # # # # # # # # # # # # # # #"),
+
+  action_selection("cv"),
+
+
+  comment("# # # # # # # # # # # # # # # # # # #", "matching set A", "# # # # # # # # # # # # # # # # # # #"),
+
+  action_match("cv", "A"),
+
+  comment("### Overall models ('all')"),
+
+  action_contrasts("cv", "A", "all", "covidemergency"),
+  action_contrasts("cv", "A", "all", "covidadmitted"),
+  action_contrasts("cv", "A", "all", "covidcritcare"),
+  action_contrasts("cv", "A", "all", "coviddeath"),
+  action_contrasts("cv", "A", "all", "noncoviddeath"),
+  action_contrasts("cv", "A", "all", "fracture"),
+
+  comment("### Models by age-band ('ageband')"),
+
+  action_contrasts("cv", "A", "ageband", "covidemergency"),
+  action_contrasts("cv", "A", "ageband", "covidadmitted"),
+  action_contrasts("cv", "A", "ageband", "covidcritcare"),
+  action_contrasts("cv", "A", "ageband", "coviddeath"),
+  action_contrasts("cv", "A", "ageband", "noncoviddeath"),
+  action_contrasts("cv", "A", "ageband", "fracture"),
+
+  comment("### Models by prior infection ('prior_covid_infection')"),
+
+  action_contrasts("cv", "A", "prior_covid_infection", "covidemergency"),
+  action_contrasts("cv", "A", "prior_covid_infection", "covidadmitted"),
+  action_contrasts("cv", "A", "prior_covid_infection", "covidcritcare"),
+  action_contrasts("cv", "A", "prior_covid_infection", "coviddeath"),
+  action_contrasts("cv", "A", "prior_covid_infection", "noncoviddeath"),
+  action_contrasts("cv", "A", "prior_covid_infection", "fracture"),
+
+  comment("### Models by vax history ('vax_previous_count')"),
+
+  action_contrasts("cv", "A", "vax_previous_count", "covidemergency"),
+  action_contrasts("cv", "A", "vax_previous_count", "covidadmitted"),
+  action_contrasts("cv", "A", "vax_previous_count", "covidcritcare"),
+  action_contrasts("cv", "A", "vax_previous_count", "coviddeath"),
+  action_contrasts("cv", "A", "vax_previous_count", "noncoviddeath"),
+  action_contrasts("cv", "A", "vax_previous_count", "fracture"),
+
+
+  action_eventcounts("cv", "A"),
+
+  comment("# # # # # # # # # # # # # # # # # # #", "matching set B", "# # # # # # # # # # # # # # # # # # #"),
+
+  action_match("cv", "B"),
+
+  comment("### Overall models ('all')"),
+
+  action_contrasts("cv", "B", "all", "covidemergency"),
+  action_contrasts("cv", "B", "all", "covidadmitted"),
+  action_contrasts("cv", "B", "all", "covidcritcare"),
+  action_contrasts("cv", "B", "all", "coviddeath"),
+  action_contrasts("cv", "B", "all", "noncoviddeath"),
+  action_contrasts("cv", "B", "all", "fracture"),
+
+  comment("### Models by age-band ('ageband')"),
+
+  action_contrasts("cv", "B", "ageband", "covidemergency"),
+  action_contrasts("cv", "B", "ageband", "covidadmitted"),
+  action_contrasts("cv", "B", "ageband", "covidcritcare"),
+  action_contrasts("cv", "B", "ageband", "coviddeath"),
+  action_contrasts("cv", "B", "ageband", "noncoviddeath"),
+  action_contrasts("cv", "B", "ageband", "fracture"),
+
+
+  comment("### Models by vax history ('vax_previous_count')"),
+
+  action_contrasts("cv", "B", "vax_previous_count", "covidemergency"),
+  action_contrasts("cv", "B", "vax_previous_count", "covidadmitted"),
+  action_contrasts("cv", "B", "vax_previous_count", "covidcritcare"),
+  action_contrasts("cv", "B", "vax_previous_count", "coviddeath"),
+  action_contrasts("cv", "B", "vax_previous_count", "noncoviddeath"),
+  action_contrasts("cv", "B", "vax_previous_count", "fracture"),
+
+
+  comment("### Models by prior infection ('prior_covid_infection')"),
+
+  action_contrasts("cv", "B", "prior_covid_infection", "covidemergency"),
+  action_contrasts("cv", "B", "prior_covid_infection", "covidadmitted"),
+  action_contrasts("cv", "B", "prior_covid_infection", "covidcritcare"),
+  action_contrasts("cv", "B", "prior_covid_infection", "coviddeath"),
+  action_contrasts("cv", "B", "prior_covid_infection", "noncoviddeath"),
+  action_contrasts("cv", "B", "prior_covid_infection", "fracture"),
+
+  action_eventcounts("cv", "B"),
+
+
+  comment("# # # # # # # # # # # # # # # # # # #", "Combine estimates across cohorts, matchsets, outcomes and subgroups", "# # # # # # # # # # # # # # # # # # #"),
 
   action_contrasts_combine(
+    "age75plus",
     "A",
-    subgroups = c("all", "age75plus", "ageband", "cv", "vax_previous_count", "prior_covid_infection"),
+    subgroups = c("all", "ageband", "cv", "vax_previous_count", "prior_covid_infection"),
     outcomes = c("covidemergency", "covidadmitted", "covidcritcare", "coviddeath", "noncoviddeath", "fracture")
   ),
 
   action_contrasts_combine(
+    "age75plus",
     "B",
-    subgroups = c("all", "age75plus", "ageband", "cv", "vax_previous_count", "prior_covid_infection"),
+    subgroups = c("all", "ageband", "cv", "vax_previous_count", "prior_covid_infection"),
+    outcomes = c("covidemergency", "covidadmitted", "covidcritcare", "coviddeath", "noncoviddeath", "fracture")
+  ),
+
+  action_contrasts_combine(
+    "cv",
+    "A",
+    subgroups = c("all", "ageband", "vax_previous_count", "prior_covid_infection"),
+    outcomes = c("covidemergency", "covidadmitted", "covidcritcare", "coviddeath", "noncoviddeath", "fracture")
+  ),
+
+  action_contrasts_combine(
+    "cv",
+    "B",
+    subgroups = c("all", "ageband", "vax_previous_count", "prior_covid_infection"),
     outcomes = c("covidemergency", "covidadmitted", "covidcritcare", "coviddeath", "noncoviddeath", "fracture")
   ),
 
@@ -399,11 +498,18 @@ actions_list <- splice(
     name = "release_objects",
     run = "r:latest analysis/release_objects.R",
     needs = list(
-      "data_selection",
-      "match_report_A",
-      "match_report_B",
-      "contrasts_combine_A",
-      "contrasts_combine_B"
+
+      "data_selection_age75plus",
+      "match_report_age75plus_A",
+      "match_report_age75plus_B",
+      "contrasts_combine_age75plus_A",
+      "contrasts_combine_age75plus_B",
+
+      "data_selection_cv",
+      "match_report_cv_A",
+      "match_report_cv_B",
+      "contrasts_combine_cv_A",
+      "contrasts_combine_cv_B"
     ),
     moderately_sensitive = lst(
       releaselist = "output/files-for-release.txt",

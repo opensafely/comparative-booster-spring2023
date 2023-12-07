@@ -27,22 +27,24 @@ args <- commandArgs(trailingOnly=TRUE)
 if(length(args)==0){
   # use for interactive testing
   removeobjects <- FALSE
+  cohort <- "age75plus"
   matchset <- "A"
 } else {
   removeobjects <- TRUE
-  matchset <- args[[1]]
+  cohort <- args[[1]]
+  matchset <- args[[2]]
 }
 
 
 
 # create output directories ----
 
-output_dir <- here("output", "match", matchset, "report")
+output_dir <- here("output", cohort, matchset, "report")
 fs::dir_create(output_dir)
 
 
 ## import matching info ----
-data_matchstatus <- read_rds(fs::path(here("output", "match", matchset), "data_matchstatus.rds"))
+data_matchstatus <- read_rds(fs::path(here("output", cohort, matchset), "data_matchstatus.rds"))
 
 # matching coverage on each day of recruitment period ----
 
@@ -378,86 +380,54 @@ ggsave(plot_smd, filename="plot_smd.png", path=output_dir)
 
 # flowchart ----
 
-data_flowchart_match <-
-  read_rds(here("output", "data", "data_inclusioncriteria.rds")) %>%
-  left_join(
-    data_matchstatus %>% select(patient_id, matched),
-    by="patient_id"
-  ) %>%
-  mutate(
-    c7 = c6 & matched,
-  ) %>%
-  select(-patient_id, -matched) %>%
-  group_by(boost_type) %>%
-  summarise(
-    across(.cols=everything(), .fns=sum)
-  ) %>%
-  pivot_longer(
-    cols=-boost_type,
-    names_to="criteria",
-    values_to="n"
-  ) %>%
-  group_by(boost_type) %>%
-  mutate(
-    n_exclude = lag(n) - n,
-    pct_exclude = n_exclude/lag(n),
-    pct_all = n / first(n),
-    pct_step = n / lag(n),
-    crit = str_extract(criteria, "^c\\d+"),
-    criteria = fct_case_when(
-      crit == "c0" ~ "Recieved booster dose of Pfizer or Sanofi between 1 April and 30 June 2023",
-      crit == "c1" ~ "  and clinically at-risk or aged 75+",
-      crit == "c2" ~ "  with no missing demographic information",
-      crit == "c3" ~ "  and not a health and social care worker",
-      crit == "c4" ~ "  and not a care/nursing home resident, end-of-life or housebound",
-      crit == "c5" ~ "  and no COVID-19-related events within 28 days",
-      crit == "c6" ~ "  and not admitted in hospital at time of booster",
-      crit == "c7" ~ "  and successfully matched",
-      TRUE ~ NA_character_
+create_flowchart <- function(flowchart, threshold){
+
+  flowchart <-
+    data_matchstatus %>%
+    select(patient_id, treatment, matched) %>%
+    mutate(
+      boost_type = case_when(
+        treatment==0L ~ "pfizerBA45",
+        treatment==1L ~ "sanofi",
+        TRUE ~ NA_character_
+      ),
+    ) %>%
+    group_by(boost_type) %>%
+    summarise(
+      n = roundmid_any(sum(matched), threshold),
+      n_lag = roundmid_any(n(), threshold),
+      n_level1 = n,
+      n_level1_fill = n,
+      n_exclude = n_lag - n,
+      pct_exclude = n_exclude/n(),
+      #pct_all = n_level1 / first(n),
+      pct_step = n / n_lag,
+      level=1,
+      crit = "c4",
+      criteria = factor("  and successfully matched")
+    ) %>%
+    ungroup() %>%
+    bind_rows(
+      flowchart,
+      .
+    ) %>%
+    arrange(
+      boost_type, criteria
+    ) %>%
+    group_by(boost_type) %>%
+    mutate(
+      pct_all = if_else(is.na(pct_all) & level==1, n_level1 / first(n_level1), pct_all)
     )
-  )
+}
 
 
-# flowchart -- rounded so disclosure-safe ----
+flowchart0 <- read_rds(here("output", cohort, "flowchart.rds"))
+flowchart0_rounded <- read_rds(here("output", cohort, "flowchart_rounded.rds"))
 
-data_flowchart_match_rounded <-
-  read_rds(here("output", "data", "data_inclusioncriteria.rds")) %>%
-  left_join(
-    data_matchstatus %>% select(patient_id, matched),
-    by="patient_id"
-  ) %>%
-  mutate(
-    c7 = c6 & matched,
-  ) %>%
-  select(-patient_id, -matched) %>%
-  group_by(boost_type) %>%
-  summarise(
-    across(.cols = everything(), .fns=~roundmid_any(sum(.), threshold))
-  ) %>%
-  pivot_longer(
-    cols=-boost_type,
-    names_to="criteria",
-    values_to="n"
-  ) %>%
-  group_by(boost_type) %>%
-  mutate(
-    n_exclude = lag(n) - n,
-    pct_exclude = n_exclude/lag(n),
-    pct_all = n / first(n),
-    pct_step = n / lag(n),
-    crit = str_extract(criteria, "^c\\d+"),
-    criteria = fct_case_when(
-      crit == "c0" ~ "Recieved booster dose of Pfizer or Sanofi between 1 April and 30 June 2023",
-      crit == "c1" ~ "  and clinically at-risk or aged 75+",
-      crit == "c2" ~ "  with no missing demographic information",
-      crit == "c3" ~ "  and not a health and social care worker",
-      crit == "c4" ~ "  and not a care/nursing home resident, end-of-life or housebound",
-      crit == "c5" ~ "  and no COVID-19-related events within 28 days",
-      crit == "c6" ~ "  and not admitted in hospital at time of booster",
-      crit == "c7" ~ "  and successfully matched",
-      TRUE ~ NA_character_
-    )
-  ) #
 
-write_csv(data_flowchart_match_rounded, fs::path(output_dir, "flowchart.csv"))
+data_flowchart_match <- create_flowchart(flowchart0, 1)
+data_flowchart_match_rounded <- create_flowchart(flowchart0_rounded, 7)
+
+write_csv(data_flowchart_match, fs::path(output_dir, "flowchart.csv"))
+write_csv(data_flowchart_match_rounded, fs::path(output_dir, "flowchart_rounded.csv"))
 

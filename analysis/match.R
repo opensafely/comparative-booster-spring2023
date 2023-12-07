@@ -13,19 +13,6 @@ library('survival')
 library('MatchIt')
 library("doParallel")
 
-## import command-line arguments ----
-
-args <- commandArgs(trailingOnly=TRUE)
-
-if(length(args)==0){
-  # use for interactive testing
-  removeobjects <- FALSE
-  matchset <- "A"
-} else {
-  removeobjects <- TRUE
-  matchset <- args[[1]]
-}
-
 
 ## Import custom user functions from lib
 source(here("analysis", "functions", "utility.R"))
@@ -33,15 +20,33 @@ source(here("analysis", "functions", "utility.R"))
 ## Import design elements
 source(here("analysis", "design", "design.R"))
 
+
+
+## import command-line arguments ----
+
+args <- commandArgs(trailingOnly=TRUE)
+
+if(length(args)==0){
+  # use for interactive testing
+  removeobjects <- FALSE
+  cohort <- "age75plus" #currently `age75plus` or `cv`
+  matchset <- "A"
+} else {
+  removeobjects <- TRUE
+  cohort <- args[[1]]
+  matchset <- args[[2]]
+}
+
+
 ## create output directories ----
 
-output_dir <- here("output", "match", matchset)
+output_dir <- here("output", cohort,  matchset)
 fs::dir_create(output_dir)
 
 # Import and prepare data ----
 
 ## one pow per patient ----
-data_cohort <- read_rds(here("output", "data", "data_cohort.rds"))
+data_cohort <- read_rds(here("output", cohort, "data_cohort.rds"))
 
 print(
   cat(

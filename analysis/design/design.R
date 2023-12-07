@@ -107,8 +107,7 @@ recoder <-
   lst(
     subgroups = c(
       `Main` = "all",
-      `Age` = "age75plus",
-      `Age-band` = "ageband",
+      `Age` = "ageband",
       `Clinically at-risk` = "cv",
       `Prior SARS-CoV-2 infection status` = "prior_covid_infection"
     ),
@@ -150,71 +149,51 @@ recoder <-
 
 treated_period_variables <- paste0("treatment_period_id", "_", seq_len(length(postbaselinecuts)-1))
 
+local({
+  matching_variables=list()
 
-if(exists("matchset")){
-
-  local({
-
-    matching_variables=list()
-
-    # matching set A
-    exact <- c(
-      "age75plus",
-      "ageband",
-      "cv",
-      #"sex",
-      #"region",
-      #"imd_Q5",
-
+  # matching set A
+  exact <- c(
+    "ageband",
+    "cv",
+    #"sex",
+    #"region",
+    #"imd_Q5",
       #"multimorb",
-      "prior_covid_infection",
-      NULL
-    )
-
-    caliper <- c(
-      boost_day = 3,
-      age = 3,
-      vax_interval_bigM = 14,
-      NULL
-    )
-
-    all <- c(exact, names(caliper))
-
-
+    "prior_covid_infection",
+    NULL
+  )
+  caliper <- c(
+    boost_day = 3,
+    age = 3,
+    vax_interval_bigM = 14,
+    NULL
+  )
+  all <- c(exact, names(caliper))
     matching_variables$A = lst(exact, caliper, all)
-
     # matching set B
-    exact <- c(
-
-      "age75plus",
-      #"ageband",
-      "cv",
-      "sex",
-      #"region",
-      "imd_Q5",
-      "vax_previous_count",
-
+  exact <- c(
+    "ageband",
+    "cv",
+    "sex",
+    #"region",
+    "imd_Q5",
+    "vax_previous_count",
       "multimorb",
-      "prior_covid_infection",
-      "immunosuppressed",
-      NULL
-    )
+    "prior_covid_infection",
+    "immunosuppressed",
+    NULL
+  )
+  caliper <- c(
+    boost_day = 3,
+    age = 3,
+    vax_interval_bigM = 14,
+    #imd = 1000,
+    NULL
+  )
+  all <- c(exact, names(caliper))
+  matching_variables$B = lst(exact, caliper, all)
 
-    caliper <- c(
-      boost_day = 3,
-      age = 3,
-      vax_interval_bigM = 14,
-      #imd = 1000,
-      NULL
-    )
+  matching_variables <<- matching_variables
 
-    all <- c(exact, names(caliper))
-
-    matching_variables$B = lst(exact, caliper, all)
-
-
-    matching_variables <<- matching_variables
-
-  })
-
-}
+})
