@@ -152,6 +152,13 @@ data_processed <- data_extract %>%
     fracturedeath_date = if_else(death_cause_fracture, death_date, NA_Date_),
     fracture_date = pmin(fractureemergency_date, fractureadmitted_date, fracturedeath_date, na.rm=TRUE),
 
+
+    # define cohorts
+
+    age75plus = age_july2023 >= 75,
+    #cv = cv,
+    is_eligible = age75plus | cv,
+
   )
 
 # Process vaccination dates ----

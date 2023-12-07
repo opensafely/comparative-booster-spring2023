@@ -13,29 +13,6 @@
 
 # Preliminaries ----
 
-
-# import command-line arguments ----
-
-args <- commandArgs(trailingOnly=TRUE)
-
-
-if(length(args)==0){
-  # use for interactive testing
-  removeobjects <- FALSE
-  matchset <- "A"
-  #subgroup <- "all"
-  subgroup <- "cv"
-  outcome <- "covidemergency"
-
-} else {
-  removeobjects <- TRUE
-  matchset <- args[[1]]
-  subgroup <- args[[2]]
-  outcome <- args[[3]]
-
-}
-
-
 ## Import libraries ----
 library('tidyverse')
 library('here')
@@ -50,21 +27,43 @@ source(here("analysis", "functions", "survival.R"))
 source(here("analysis", "design", "design.R"))
 
 
+# import command-line arguments ----
+
+args <- commandArgs(trailingOnly=TRUE)
+
+
+if(length(args)==0){
+  # use for interactive testing
+  removeobjects <- FALSE
+  cohort <- "age75plus"
+  matchset <- "A"
+  subgroup <- "cv"
+  outcome <- "covidemergency"
+
+} else {
+  removeobjects <- TRUE
+  cohort <- args[[1]]
+  matchset <- args[[2]]
+  subgroup <- args[[3]]
+  outcome <- args[[4]]
+
+}
+
 # derive subgroup info
 
 subgroup_sym <- sym(subgroup)
 
 # create output directories ----
 
-output_dir <- here("output", "match", matchset, "km", subgroup, outcome)
+output_dir <- here("output", cohort, matchset, "km", subgroup, outcome)
 fs::dir_create(output_dir)
 
 ## import match data
-data_matchstatus <- read_rds(here("output", "match", matchset, "data_matchstatus.rds"))
+data_matchstatus <- read_rds(here("output", cohort, matchset, "data_matchstatus.rds"))
 
 ## import baseline data, restrict to matched individuals and derive time-to-event variables
 data_matched <-
-  read_rds(here("output", "data", "data_cohort.rds")) %>%
+  read_rds(here("output", cohort, "data_cohort.rds")) %>%
   select(
     # select only variables needed for models to save space
     patient_id, boost_date,

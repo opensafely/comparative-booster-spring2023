@@ -12,19 +12,6 @@
 
 # Preliminaries ----
 
-# import command-line arguments ----
-
-args <- commandArgs(trailingOnly=TRUE)
-
-
-if(length(args)==0){
-  # use for interactive testing
-  removeobjects <- FALSE
-  matchset <- "A"
-} else {
-  removeobjects <- TRUE
-  matchset <- args[[1]]
-}
 
 
 ## Import libraries ----
@@ -42,15 +29,33 @@ source(here("analysis", "design", "design.R"))
 
 
 
-# create output directories ----
 
 
-output_dir <- here("output", "match", matchset, "eventcounts")
+## import command-line arguments ----
+
+args <- commandArgs(trailingOnly=TRUE)
+
+
+if(length(args)==0){
+  # use for interactive testing
+  removeobjects <- FALSE
+  cohort <- "age75plus"
+  matchset <- "A"
+} else {
+  removeobjects <- TRUE
+  cohort <- args[[1]]
+  matchset <- args[[2]]
+}
+
+## create output directories ----
+
+
+output_dir <- here("output", cohort, matchset, "eventcounts")
 fs::dir_create(output_dir)
 
 
 
-# derive subgroup info
+## derive subgroup info ----
 
 metaparams <-
   expand_grid(
@@ -60,12 +65,13 @@ metaparams <-
     subgroup_descr = fct_recoderelevel(subgroup,  recoder$subgroups),
   )
 
+# Import match status data ----
 
-data_matchstatus <- read_rds(here("output", "match", matchset, "data_matchstatus.rds"))
+data_matchstatus <- read_rds(here("output", cohort, matchset, "data_matchstatus.rds"))
 
 ## import baseline data, restrict to matched individuals and derive time-to-event variables
 data_matched <-
-  read_rds(here("output", "data", "data_cohort.rds")) %>%
+  read_rds(here("output", cohort, "data_cohort.rds")) %>%
   mutate(all = "all") %>%
   select(
     # select only variables needed for models to save space
