@@ -29,10 +29,6 @@ fs::dir_create(here("output", "data"))
 ## Import extracted dataset ----
 data_extract <- read_feather(here("output", "extracts", "extract.arrow"))
 
-boolfactor2bool <- function(x){
-  if_else(x=="TRUE", TRUE, FALSE, NA)
-}
-
 ## Process extracted dataset ----
 data_processed <- data_extract %>%
   mutate(
@@ -94,12 +90,6 @@ data_processed <- data_extract %>%
     ),
 
     care_home_combined = care_home_tpp | care_home_code, # any carehome flag
-
-    # temporary until ehrql case statements no longer return character / factors
-    sev_obesity = boolfactor2bool(sev_obesity),
-    diabetes = boolfactor2bool(diabetes),
-    sev_mental = boolfactor2bool(sev_mental),
-    chronic_kidney_disease = boolfactor2bool(chronic_kidney_disease),
 
     immuno_any = immunosuppressed | asplenia | cancer | solid_organ_transplant |  hiv_aids,
 
