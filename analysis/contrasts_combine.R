@@ -131,28 +131,6 @@ contrasts_overall <- metaparams %>%
 write_csv(contrasts_overall, fs::path(output_dir, "contrasts_overall_rounded.csv"))
 
 
-contrasts_20 <- metaparams %>%
-  mutate(
-    data = pmap(list(matchset, outcome, subgroup), function(matchset, outcome, subgroup) {
-      subgroup <- as.character(subgroup)
-      dat <- read_rds(here("output", "match", matchset, "km", subgroup, outcome, "contrasts_20_rounded.rds"))
-      dat %>%
-        ungroup() %>%
-        add_column(
-          subgroup_level = as.character(.[[subgroup]]),
-          subgroup_level_descr = fct_recoderelevel(.[[subgroup]], recoder[[subgroup]]),
-          .before=1
-        ) %>%
-        select(-all_of(subgroup))
-    }
-    )
-  ) %>%
-  unnest(data)
-
-write_csv(contrasts_20, fs::path(output_dir, "contrasts_20_rounded.csv"))
-
-
-
 ## move km plots to single folder ----
 fs::dir_create(here("output", "match", matchset, "combined", "plots"))
 
@@ -273,7 +251,7 @@ write_csv(followup, fs::path(output_dir, "followup_rounded.csv"))
 ## do not do era as this _must_ be done in delayedentry script, because we don't know from the km tables the individual entry and exit times for each person
 
 
-## keep incase need to use the entire lsit of follow-up times
+## keep incase need to use the entire list of follow-up times
 # followup_treatment <- km_estimates %>%
 #   group_by(
 #     outcome, outcome_descr, subgroup, subgroup_descr, subgroup_level, subgroup_level_descr, treatment
