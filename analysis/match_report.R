@@ -270,7 +270,8 @@ map_chr(var_labels[-c(1,2)], ~last(as.character(.)))
 
 
 # append all reported characteristics to matchstatus data
-data_matched_baseline <- read_rds(here("output", "data", "data_cohort.rds")) %>%
+data_matched_baseline <-
+  read_rds(here("output", cohort, "data_cohort.rds")) %>%
   filter(patient_id %in% data_matchstatus$patient_id) %>%
   select(patient_id, all_of(names(var_labels[-c(1,2)]))) %>%
   left_join(
