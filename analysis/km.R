@@ -431,6 +431,10 @@ km_contrasts_rounded_daily <- kmcontrasts(data_surv_rounded, c(0,seq_len(max(pos
 km_contrasts_rounded_cuts <- kmcontrasts(data_surv_rounded, postbaselinecuts_data)
 km_contrasts_rounded_overall <- kmcontrasts(data_surv_rounded, c(0,max(postbaselinecuts_data)))
 
+
+
+
+
 ## Cox models ----
 
 coxcontrast <- function(data, cuts=NULL){
@@ -508,3 +512,55 @@ contrasts_rounded_overall <-  left_join(km_contrasts_rounded_overall, cox_contra
 write_rds(contrasts_rounded_daily, fs::path(output_dir, "contrasts_daily_rounded.rds"))
 write_rds(contrasts_rounded_cuts, fs::path(output_dir, "contrasts_cuts_rounded.rds"))
 write_rds(contrasts_rounded_overall, fs::path(output_dir, "contrasts_overall_rounded.rds"))
+
+
+
+## follow-up duration summary statistics ----
+
+### overall ----
+followup <-
+  data_surv_rounded %>%
+  group_by(!!subgroup_sym) %>%
+  summarise(
+    entrytime = list(sort(rep(time, times=n.risk - (lag(n.risk,1,0) - lag(n.censor+n.event, 1, 0))))),
+    exittime = list(sort(rep(time, times=n.censor+n.event))),
+    .groups = 'keep'
+  ) %>%
+  unnest(c(exittime)) %>%
+  summarise(
+    persontime = sum(exittime), # = sum(time*(n.censor+n.event)),
+    entry_n = length(entrytime), # = sum(n.risk - (lag(n.risk,1,0) - lag(n.censor+n.event, 1, 0))),
+    exit_n = length(exittime),
+    exittime_mean = mean(exittime),
+    exittime_median = median(exittime),
+    exittime_Q1 = quantile(exittime, 0.25),
+    exittime_Q3 = quantile(exittime, 0.75),
+    exittime_min = min(exittime),
+    exittime_max = max(exittime),
+  )
+
+write_rds(followup, fs::path(output_dir, "followup_rounded.rds"))
+
+### by treatment group ----
+followup_treatment <-
+  data_surv_rounded %>%
+  group_by(treatment, !!subgroup_sym) %>%
+  summarise(
+    entrytime = list(sort(rep(time, times=n.risk - (lag(n.risk,1,0) - lag(n.censor+n.event, 1, 0))))),
+    exittime = list(sort(rep(time, times=n.censor+n.event))),
+    .groups = 'keep'
+  ) %>%
+  unnest(c(exittime)) %>%
+  summarise(
+    persontime = sum(exittime), # = sum(time*(n.censor+n.event)),
+    entry_n = length(entrytime), # = sum(n.risk - (lag(n.risk,1,0) - lag(n.censor+n.event, 1, 0))),
+    exit_n = length(exittime),
+    exittime_mean = mean(exittime),
+    exittime_median = median(exittime),
+    exittime_Q1 = quantile(exittime, 0.25),
+    exittime_Q3 = quantile(exittime, 0.75),
+    exittime_min = min(exittime),
+    exittime_max = max(exittime),
+  )
+
+write_rds(followup_treatment, fs::path(output_dir, "followup_treatment_rounded.rds"))

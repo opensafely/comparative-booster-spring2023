@@ -130,6 +130,55 @@ contrasts_overall <- metaparams %>%
 
 write_csv(contrasts_overall, fs::path(output_dir, "contrasts_overall_rounded.csv"))
 
+## follow-up duration summary statistics ----
+
+### overall ----
+followup <-
+  metaparams %>%
+  mutate(
+    data = pmap(list(cohort, matchset, outcome, subgroup), function(cohort, matchset, outcome, subgroup) {
+      subgroup <- as.character(subgroup)
+      dat <- read_rds(here("output", cohort, matchset, "km", subgroup, outcome, "followup_rounded.rds"))
+      dat %>%
+        ungroup() %>%
+        add_column(
+          subgroup_level = as.character(.[[subgroup]]),
+          subgroup_level_descr = fct_recoderelevel(.[[subgroup]], recoder[[subgroup]]),
+          .before=1
+        ) %>%
+        select(-all_of(subgroup))
+    }
+    )
+  ) %>%
+  unnest(data)
+
+write_csv(followup, fs::path(output_dir, "followup_rounded.csv"))
+
+
+### by treatment ----
+followup_treatment <-
+  metaparams %>%
+  mutate(
+    data = pmap(list(cohort, matchset, outcome, subgroup), function(cohort, matchset, outcome, subgroup) {
+      subgroup <- as.character(subgroup)
+      dat <- read_rds(here("output", cohort, matchset, "km", subgroup, outcome, "followup_treatment_rounded.rds"))
+      dat %>%
+        ungroup() %>%
+        add_column(
+          subgroup_level = as.character(.[[subgroup]]),
+          subgroup_level_descr = fct_recoderelevel(.[[subgroup]], recoder[[subgroup]]),
+          .before=1
+        ) %>%
+        select(-all_of(subgroup))
+    }
+    )
+  ) %>%
+  unnest(data)
+
+write_csv(followup_treatment, fs::path(output_dir, "followup_treatment_rounded.csv"))
+
+
+
 
 ## move km plots to single folder ----
 fs::dir_create(here("output", cohort, matchset, "combined", "plots"))
@@ -207,7 +256,13 @@ plot_estimates(irr, irr.ll, irr.ul, "irr")
 eventcounts <- read_rds(here("output", cohort, matchset, "eventcounts", "eventcounts.rds"))
 write_csv(eventcounts, fs::path(output_dir, "eventcounts.csv"))
 
+
+
+
+
+
 ## follow-up summary statistics ----
+## TODO remove after checking values match other `followup` outputs
 
 
 ## this is inefficient because of the `rep` -- could obtain this in km scripts instead
@@ -227,7 +282,7 @@ followup_treatment <- km_estimates %>%
     #exittime_max = max(time[n.censor+n.event>0]),
   )
 
-write_csv(followup_treatment, fs::path(output_dir, "followup_treatment_rounded.csv"))
+write_csv(followup_treatment, fs::path(output_dir, "followup_treatment_rounded_checksame.csv"))
 
 followup <- km_estimates %>%
   group_by(
@@ -246,31 +301,5 @@ followup <- km_estimates %>%
   )
 
 
-write_csv(followup, fs::path(output_dir, "followup_rounded.csv"))
-
-## do not do era as this _must_ be done in delayedentry script, because we don't know from the km tables the individual entry and exit times for each person
-
-
-## keep incase need to use the entire list of follow-up times
-# followup_treatment <- km_estimates %>%
-#   group_by(
-#     outcome, outcome_descr, subgroup, subgroup_descr, subgroup_level, subgroup_level_descr, treatment
-#   ) %>%
-#   summarise(
-#     #entrytime = list(sort(rep(time, times=n.risk - (lag(n.risk,1,0) - lag(n.censor+n.event, 1, 0))))),
-#     exittime = list(sort(rep(time, times=n.censor+n.event))),
-#     .groups = 'keep'
-#   ) %>%
-#   unnest(c(exittime)) %>%
-#   summarise(
-#     persontime = sum(exittime), # = sum(time*(n.censor+n.event)),
-#     #entry_n = length(entrytime), # = sum(n.risk - (lag(n.risk,1,0) - lag(n.censor+n.event, 1, 0))),
-#     exit_n = length(exittime),
-#     exittime_mean = mean(exittime),
-#     exittime_median = median(exittime),
-#     exittime_Q1 = quantile(exittime, 0.25),
-#     exittime_Q3 = quantile(exittime, 0.75),
-#     #exittime_min = min(exittime),
-#     #exittime_max = max(exittime),
-#   )
+write_csv(followup, fs::path(output_dir, "followup_rounded_checksame.csv"))
 

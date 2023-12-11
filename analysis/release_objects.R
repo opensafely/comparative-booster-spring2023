@@ -7,40 +7,41 @@
 library('tidyverse')
 library('here')
 library('glue')
-library('survival')
 
 
 ## pre-matching ----
 
-fs::dir_create(here("output", "release-objects", "prematch"))
-
-fs::file_copy(here("output", "prematch", "table1.csv"), fs::path(here("output", "release-objects", "prematch", "prematch_table1.csv")), overwrite = TRUE)
 
 ## post-matching ----
 
-for(matchset in c("A", "B")){
+for(cohort in c("age75plus", "cv")){
+  fs::dir_create(here("output", "release-objects", cohort, "prematch"))
 
-  output_dir <- here("output", "release-objects", matchset)
-  fs::dir_create(output_dir)
+  fs::file_copy(here("output", cohort, "table1.csv"), fs::path(here("output", "release-objects", cohort, "prematch_table1.csv")), overwrite = TRUE)
 
 
-  ## matching ----
+  for(matchset in c("A", "B")){
 
-  fs::file_copy(here("output", "match", matchset, "report", "table1.csv"), fs::path(output_dir, "match_table1.csv"), overwrite = TRUE)
-  fs::file_copy(here("output", "match", matchset, "report", "data_coverage.csv"), fs::path(output_dir, "match_coverage.csv"), overwrite = TRUE)
-  fs::file_copy(here("output", "match", matchset, "report", "flowchart.csv"), fs::path(output_dir, "match_flowchart.csv"), overwrite = TRUE)
+    output_dir <- here("output", "release-objects", cohort, matchset)
+    fs::dir_create(output_dir)
 
-  ## Contrasts ----
+    ## matching ----
 
-  fs::file_copy(here("output", "match", matchset, "combined", "km_estimates_rounded.csv"), fs::path(output_dir, "km_estimates_rounded.csv"), overwrite = TRUE)
-  fs::file_copy(here("output", "match", matchset, "combined", "contrasts_daily_rounded.csv"), fs::path(output_dir, "contrasts_daily_rounded.csv"), overwrite = TRUE)
-  fs::file_copy(here("output", "match", matchset, "combined", "contrasts_cuts_rounded.csv"), fs::path(output_dir, "contrasts_cuts_rounded.csv"), overwrite = TRUE)
-  fs::file_copy(here("output", "match", matchset, "combined", "contrasts_overall_rounded.csv"), fs::path(output_dir, "contrasts_overall_rounded.csv"), overwrite = TRUE)
+    fs::file_copy(here("output", cohort, matchset, "report", "table1.csv"), fs::path(output_dir, "match_table1.csv"), overwrite = TRUE)
+    fs::file_copy(here("output", cohort, matchset, "report", "data_coverage.csv"), fs::path(output_dir, "match_coverage.csv"), overwrite = TRUE)
+    fs::file_copy(here("output", cohort, matchset, "report", "flowchart.csv"), fs::path(output_dir, "match_flowchart.csv"), overwrite = TRUE)
 
-  fs::file_copy(here("output", "match", matchset, "combined", "eventcounts.csv"), fs::path(output_dir, "eventcounts.csv"), overwrite = TRUE)
-  fs::file_copy(here("output", "match", matchset, "combined", "followup_rounded.csv"), fs::path(output_dir, "followup_rounded.csv"), overwrite = TRUE)
-  fs::file_copy(here("output", "match", matchset, "combined", "followup_treatment_rounded.csv"), fs::path(output_dir, "followup_treatment_rounded.csv"), overwrite = TRUE)
+    ## Contrasts ----
 
+    fs::file_copy(here("output", cohort, matchset, "combined", "km_estimates_rounded.csv"), fs::path(output_dir, "km_estimates_rounded.csv"), overwrite = TRUE)
+    fs::file_copy(here("output", cohort, matchset, "combined", "contrasts_daily_rounded.csv"), fs::path(output_dir, "contrasts_daily_rounded.csv"), overwrite = TRUE)
+    fs::file_copy(here("output", cohort, matchset, "combined", "contrasts_cuts_rounded.csv"), fs::path(output_dir, "contrasts_cuts_rounded.csv"), overwrite = TRUE)
+    fs::file_copy(here("output", cohort, matchset, "combined", "contrasts_overall_rounded.csv"), fs::path(output_dir, "contrasts_overall_rounded.csv"), overwrite = TRUE)
+    fs::file_copy(here("output", cohort, matchset, "combined", "eventcounts.csv"), fs::path(output_dir, "eventcounts.csv"), overwrite = TRUE)
+    fs::file_copy(here("output", cohort, matchset, "combined", "followup_rounded.csv"), fs::path(output_dir, "followup_rounded.csv"), overwrite = TRUE)
+    fs::file_copy(here("output", cohort, matchset, "combined", "followup_treatment_rounded.csv"), fs::path(output_dir, "followup_treatment_rounded.csv"), overwrite = TRUE)
+
+  }
 }
 
 ## create text for output review issue ----
