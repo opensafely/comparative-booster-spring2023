@@ -1,6 +1,6 @@
 code,term
-103781000119103,Allergic bronchopulmonary mycosis
 10674711000119105,Acute severe exacerbation of asthma co-occurrent with allergic rhinitis
+10674791000119101,Acute exacerbation of intermittent allergic asthma
 10674991000119104,Intermittent allergic asthma
 10675391000119101,Severe controlled persistent asthma
 10675431000119106,Severe persistent allergic asthma
@@ -10,6 +10,7 @@ code,term
 10675871000119106,Mild persistent allergic asthma
 10675911000119109,Acute severe exacerbation of mild persistent allergic asthma
 10675991000119100,Acute severe exacerbation of mild persistent allergic asthma co-occurrent with allergic rhinitis
+10676271000119104,Acute exacerbation of moderate persistent allergic asthma
 10676391000119108,Moderate persistent allergic asthma
 10676431000119103,Acute severe exacerbation of moderate persistent allergic asthma
 10676511000119109,Acute severe exacerbation of moderate persistent asthma co-occurrent with allergic rhinitis
@@ -26,12 +27,12 @@ code,term
 125001000119103,Moderate persistent asthma co-occurrent with allergic rhinitis
 125011000119100,Mild persistent asthma co-occurrent with allergic rhinitis
 125021000119107,Intermittent asthma co-occurrent with allergic rhinitis
-135171000119106,Acute exacerbation of moderate persistent asthma
-135181000119109,Acute exacerbation of mild persistent asthma
+161527007,History of asthma
 16584951000119101,Oral steroid-dependent asthma
 1741000119102,Intermittent asthma uncontrolled
 1751000119100,Acute exacerbation of chronic obstructive airways disease with asthma
 18041002,Printers' asthma
+183478001,Emergency hospital admission for asthma
 195949008,Chronic asthmatic bronchitis
 195967001,Asthma
 195977004,Mixed asthma
@@ -42,6 +43,7 @@ code,term
 233683003,Hay fever with asthma
 233687002,Colophony asthma
 233688007,Sulfite-induced asthma
+233691007,Asthmatic pulmonary eosinophilia
 2360001000004109,Steroid dependent asthma
 266361008,Non-allergic asthma
 281239006,Exacerbation of asthma
@@ -52,9 +54,9 @@ code,term
 370219009,Moderate asthma
 370220003,Occasional asthma
 370221004,Severe asthma
-37981002,Allergic bronchopulmonary aspergillosis
 389145006,Allergic asthma
 401000119107,Asthma with irreversible airway obstruction
+401193004,Asthma confirmed
 404804003,Platinum asthma
 404806001,Cheese-makers' asthma
 404808000,Isocyanate induced asthma

@@ -216,6 +216,8 @@ sim_list = lst(
   chronic_liver_disease = bn_node( ~rbernoulli(n=..n, p = 0.02)),
   cancer = bn_node( ~rbernoulli(n=..n, p = 0.01)),
 
+  preg22_group = bn_node( ~rbernoulli(n = ..n, p = 0.001)),
+
   immdx = bn_node( ~rbernoulli(n=..n, p = 0.02)),
   immrx = bn_node( ~rbernoulli(n=..n, p = 0.02)),
   immunosuppressed = bn_node( ~immdx | immrx),
