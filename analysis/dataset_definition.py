@@ -313,13 +313,13 @@ dataset.bmi = case(
 # From PRIMIS
 
 # Asthma Diagnosis code date
-ast_date = first_prior_event(codelists.ast).date
+astdx = has_prior_event(codelists.ast)
 
 # Asthma Admission codes
-astadm_date = last_prior_event(
+astadm = has_prior_event(
   codelists.astadm,
   where=events.date.is_on_or_after(baseline_date - days(730))
-).date
+)
 
 # Asthma nebuliser code date
 astrxm1_date = last_prior_meds(
@@ -375,19 +375,46 @@ astrxm2l3_date = last_prior_meds(
   & medications.date.is_before("2024-12-01")
 ).date
 
-# Asthma group 
+
 dataset.asthma = case(
-  when(astadm_date.is_not_null()).then(True),
-  when((ast_date.is_not_null() & astrxm1_date.is_not_null())
-  & ((astrxm2e1_date != astrxm2l1_date) & (astrxm2l1_date.is_before(astrxm2e1_date + days(730))))).then(True),
-  when((ast_date.is_not_null() & astrxm1_date.is_not_null())
-  & ((astrxm2e2_date != astrxm2l2_date) & (astrxm2l2_date.is_before(astrxm2e2_date + days(730))))).then(True),
-  when((ast_date.is_not_null() & astrxm1_date.is_not_null())
-  & ((astrxm2e3_date != astrxm2l3_date) & (astrxm2l3_date.is_before(astrxm2e3_date + days(730))))).then(True),
-  when((ast_date.is_not_null() & astrxm1_date.is_not_null())
-  & (astrxm2e2_date.is_before(astrxm2l1_date + days(730)))).then(True),  
-  when((ast_date.is_not_null() & astrxm1_date.is_not_null())
-  & (astrxm2e3_date.is_before(astrxm2l2_date + days(730)))).then(True),
+  when(astadm).then(True),
+  when((astdx & astrxm1_date.is_not_null())
+    & ((astrxm2e1_date != astrxm2l1_date) & (astrxm2l1_date.is_before(astrxm2e1_date + days(730))))).then(True),
+  when((astdx & astrxm1_date.is_not_null())
+    & ((astrxm2e2_date != astrxm2l2_date) & (astrxm2l2_date.is_before(astrxm2e2_date + days(730))))).then(True),
+  when((astdx & astrxm1_date.is_not_null())
+    & ((astrxm2e3_date != astrxm2l3_date) & (astrxm2l3_date.is_before(astrxm2e3_date + days(730))))).then(True),
+  when((astdx & astrxm1_date.is_not_null())
+    & (astrxm2e2_date.is_before(astrxm2l1_date + days(730)))).then(True),  
+  when((astdx & astrxm1_date.is_not_null())
+    & (astrxm2e3_date.is_before(astrxm2l2_date + days(730)))).then(True),
+  default=False
+)
+
+# redfine Asthma as per green book
+# Poorly controlled asthma is defined as:
+# - ≥2 courses of oral corticosteroids in the preceding 24 months OR
+# - on maintenance oral corticosteroids OR
+# - ≥1 hospital admission for asthma in the preceding 24 months
+
+# Inhaled asthma prescription in previous year
+astrx_inhaled = has_prior_meds(
+  codelists.astrxm1,
+  where=medications.date.is_on_or_after(baseline_date - days(365))
+)
+
+# count of systemic steroid prescription inpast 2 years
+astrx_oral_count = (
+  prior_meds
+    .where(prior_meds.dmd_code.is_in(codelists.astrxm2))
+    .where(prior_meds.date.is_on_or_between(baseline_date - years(2), baseline_date))
+    .count_for_patient()
+)
+
+dataset.asthma_simple = case(
+  when(astadm).then(True),
+  #TODO add asthma admission from SUS data too?
+  when((astdx & astrx_inhaled & astrxm2_count>=2).then(True),
   default=False
 )
 
