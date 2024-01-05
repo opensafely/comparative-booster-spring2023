@@ -440,37 +440,37 @@ dataset.sev_obesity = case(
 )
 
 # Pregnancy delivery code date
-pregdel22_date = last_prior_event(
+pregAdel_date = last_prior_event(
   codelists.pregdel,
   where = (
-    events.date.is_on_or_after("2022-01-01") 
-    & events.date.is_before("2022-09-01")
+    events.date.is_on_or_between(baseline_date - days(7*65), baseline_date - days((7*30)+1))
   )
 ).date
 
 # Pregnancy date window A
-preg22A_date = last_prior_event(
+pregA_date = last_prior_event(
   codelists.preg,
   where = (
-    events.date.is_on_or_after("2022-01-01") 
-    & events.date.is_before("2022-09-01")
+    events.date.is_on_or_between(baseline_date - days((7*65)), baseline_date - days((7*30)+1))
   )
 ).date
 
 # Pregnancy date window B
-preg22B_date = last_prior_event(
+pregB = has_prior_event(
   codelists.preg,
   where = (
-    events.date.is_on_or_after("2022-09-01") 
-    & events.date.is_before("2023-04-01")
+    events.date.is_on_or_between(baseline_date - days((7*30)), baseline_date) # up to 8 months prior 
   )
-).date
+)
 
 # Pregnancy group
-dataset.preg22_group = case(
-    when(preg22B_date.is_not_null()).then(True),
-    when(pregdel22_date.is_not_null() 
-    & (preg22A_date.is_not_null() & preg22A_date.is_on_or_after(pregdel22_date))).then(True),
+dataset.preg_group = case(
+    when(pregB).then(True),
+    when(
+      (pregAdel_date.is_not_null() &
+      pregA_date.is_not_null() &
+      pregA_date.is_on_or_after(pregAdel_date))
+    ).then(True),
     default=False
 )
 
@@ -482,18 +482,15 @@ dmres_date = last_prior_event(codelists.dmres).date
 addis_date = last_prior_event(codelists.addis).date
 
 # Gestational diabetes dates and group
-gdiab_date = last_prior_event(codelists.gdiab).date
-gdiab_group = case(
-  when(gdiab_date.is_not_null() & dataset.preg22_group.is_not_null()).then(True),
-  default=False
-)
+gdiab = has_prior_event(codelists.gdiab)
+gdiab_group = gdiab & preg_group
 
 # Diabetes group
 dataset.diabetes = case(
     when(dmres_date < diab_date).then(True),
     when(diab_date.is_not_null() & dmres_date.is_null()).then(True),
     when(addis_date.is_not_null()).then(True),
-    when(gdiab_group.is_not_null()).then(True),
+    when(gdiab_group).then(True),
     default=False
 )
 
