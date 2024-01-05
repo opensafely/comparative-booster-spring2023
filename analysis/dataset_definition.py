@@ -531,34 +531,31 @@ dataset.cancer = has_prior_event(
 )
 
 # Immunosuppression diagnosis 
-immdx_date = last_prior_event(codelists.immdx_cov).date
+immdx = has_prior_event(codelists.immdx_cov)
+dataset.immdx = immdx
 
 # Immunosuppression medication 
-immrx_date = last_prior_meds(
+immrx = has_prior_meds(
     codelists.immrx,
-    where=(medications.date.is_on_or_after("2020-07-01"))
-).date
+    where=(medications.date.is_on_or_after(baseline_date - days(int(3 * 365.25))))
+)
+dataset.immrx = immrx
 
 # Immunosuppression admin date
-immadm_date = last_prior_event(
+immadm = has_prior_event(
     codelists.immadm,
-    where=(events.date.is_on_or_after("2020-07-01"))
-).date
+    where=(events.date.is_on_or_after(baseline_date - days(int(3 * 365.25))))
+)
 
 # Chemotherapy medication date
-dxt_chemo_date = last_prior_event(
+dxt_chemo = has_prior_event(
   codelists.dxt_chemo,
-  where=(events.date.is_on_or_after("2020-07-01"))
-).date
+  where=(events.date.is_on_or_after(baseline_date - days(int(3 * 365.25))))
+)
+dataset.dxt_chemo = dxt_chemo
 
 # Immunosuppression group
-dataset.immunosuppressed = case(
-  when(immdx_date.is_not_null()).then(True),
-  when(immrx_date.is_not_null()).then(True),
-  when(immadm_date.is_not_null()).then(True),
-  when(dxt_chemo_date.is_not_null()).then(True),
-  default=False
-)
+dataset.immunosuppressed = immdx | immrx | immadm | dxt_chemo
 
 # Asplenia or Dysfunction of the Spleen codes
 dataset.asplenia = has_prior_event(codelists.spln_cov)

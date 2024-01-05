@@ -221,7 +221,8 @@ sim_list = lst(
 
   immdx = bn_node( ~rbernoulli(n=..n, p = 0.02)),
   immrx = bn_node( ~rbernoulli(n=..n, p = 0.02)),
-  immunosuppressed = bn_node( ~immdx | immrx),
+  dxt_chemo = bn_node( ~rbernoulli(n=..n, p = 0.02)),
+  immunosuppressed = bn_node( ~immdx | immrx | dxt_chemo),
   asplenia = bn_node( ~rbernoulli(n=..n, p = 0.02)),
   solid_organ_transplant = bn_node( ~rbernoulli(n=..n, p = 0.01)),
   hiv_aids = bn_node( ~rbernoulli(n=..n, p = 0.01)),

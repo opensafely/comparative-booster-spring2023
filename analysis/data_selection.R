@@ -212,10 +212,12 @@ var_labels <- list(
   immunosuppressed ~ "Immunosuppressed",
   immuno_any ~ "Immunosuppressed (all)",
 
+  immdx ~ "Immunocompromising diagnosis",
+  immrx ~ "Immunosuppressive medications, previous 3 years",
+  dxt_chemo ~ "Chemotherapy, previous 3 years",
+  cancer ~ "Cancer, previous 3 years",
   asplenia ~ "Asplenia or poor spleen function",
-  cancer ~ "Cancer, within previous 3 years",
   solid_organ_transplant ~ "Solid organ transplant",
-  immrx ~ "Immunosuppressive medications, within 6 months",
   hiv_aids ~ "HIV/AIDS",
 
   multimorb ~ "Morbidity count",
