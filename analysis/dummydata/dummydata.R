@@ -206,6 +206,7 @@ sim_list = lst(
   ),
 
   asthma = bn_node( ~rbernoulli(n=..n, p = 0.02)),
+  asthma_simple = bn_node( ~asthma),
   chronic_neuro_disease = bn_node( ~rbernoulli(n=..n, p = 0.02)),
   chronic_resp_disease = bn_node( ~rbernoulli(n=..n, p = 0.02)),
   sev_obesity = bn_node( ~rbernoulli(n=..n, p = 0.02)),
@@ -216,9 +217,12 @@ sim_list = lst(
   chronic_liver_disease = bn_node( ~rbernoulli(n=..n, p = 0.02)),
   cancer = bn_node( ~rbernoulli(n=..n, p = 0.01)),
 
+  preg_group = bn_node( ~rbernoulli(n = ..n, p = 0.001)),
+
   immdx = bn_node( ~rbernoulli(n=..n, p = 0.02)),
   immrx = bn_node( ~rbernoulli(n=..n, p = 0.02)),
-  immunosuppressed = bn_node( ~immdx | immrx),
+  dxt_chemo = bn_node( ~rbernoulli(n=..n, p = 0.02)),
+  immunosuppressed = bn_node( ~immdx | immrx | dxt_chemo),
   asplenia = bn_node( ~rbernoulli(n=..n, p = 0.02)),
   solid_organ_transplant = bn_node( ~rbernoulli(n=..n, p = 0.01)),
   hiv_aids = bn_node( ~rbernoulli(n=..n, p = 0.01)),
@@ -374,3 +378,13 @@ dummydata_processed <- dummydata %>%
 
 fs::dir_create(here("analysis", "dummydata"))
 write_feather(dummydata_processed, sink = here("analysis", "dummydata", "dummyextract.arrow"))
+
+## Quick dummy data modifications ----
+## keep below code in case we need to make quick edits to dummy data without rerunning entire thing (which can be slow)
+#
+# dummydata_processed0 <- read_feather(here("analysis", "dummydata", "dummyextract.arrow"))
+#
+# dummydata_processed <- dummydata_processed0 %>%
+#   rename(preg_group=preg22_group)
+# write_feather(dummydata_processed, sink = here("analysis", "dummydata", "dummyextract.arrow"))
+

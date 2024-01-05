@@ -200,17 +200,17 @@ carehome = codelist_from_csv(
 )
 
 
-# High Risk from COVID-19 code
-shield = codelist_from_csv(
-    "codelists/primis-covid19-vacc-uptake-shield.csv",
-    column="code",
-)
-
-# Lower Risk from COVID-19 codes
-nonshield = codelist_from_csv(
-    "codelists/primis-covid19-vacc-uptake-nonshield.csv",
-    column="code",
-)
+# # High Risk from COVID-19 code
+# shield = codelist_from_csv(
+#     "codelists/primis-covid19-vacc-uptake-shield.csv",
+#     column="code",
+# )
+# 
+# # Lower Risk from COVID-19 codes
+# nonshield = codelist_from_csv(
+#     "codelists/primis-covid19-vacc-uptake-nonshield.csv",
+#     column="code",
+# )
 
 
 
@@ -226,9 +226,15 @@ astadm = codelist_from_csv(
   column="code",
 )
 
-# Asthma systemic steroid prescription codes
-astrx = codelist_from_csv(
-  "codelists/primis-covid19-vacc-uptake-astrx.csv",
+# Asthma inhaler or nebuliser medication codes
+astrxm1 = codelist_from_csv(
+  "codelists/primis-covid19-vacc-uptake-astrxm1.csv",
+  column="code",
+)
+
+# Asthma systemic steroid medication codes
+astrxm2 = codelist_from_csv(
+  "codelists/primis-covid19-vacc-uptake-astrxm2.csv",
   column="code",
 )
 
@@ -268,10 +274,34 @@ cld = codelist_from_csv(
   column="code",
 )
 
+# Pregnancy delivery codes
+pregdel = codelist_from_csv(
+  "codelists/primis-covid19-vacc-uptake-pregdel.csv",
+  column = "code",
+)
+
+# Pregnancy codes
+preg = codelist_from_csv(
+  "codelists/primis-covid19-vacc-uptake-preg.csv",
+  column = "code",
+)
+
 # Diabetes diagnosis codes
 diab = codelist_from_csv(
   "codelists/primis-covid19-vacc-uptake-diab.csv",
   column="code",
+)
+
+# Addisons disease and hypoadrenalism diagnosis codes
+addis = codelist_from_csv(
+  "codelists/primis-covid19-vacc-uptake-addis_cod.csv",
+  column = "code",
+)
+
+#Gestational diabetes diagnosis codes
+gdiab = codelist_from_csv(
+  "codelists/primis-covid19-vacc-uptake-gdiab_cod.csv",
+  column = "code",
 )
 
 # Immunosuppression diagnosis codes
@@ -283,6 +313,18 @@ immdx_cov = codelist_from_csv(
 # Immunosuppression medication codes
 immrx = codelist_from_csv(
   "codelists/primis-covid19-vacc-uptake-immrx.csv",
+  column="code",
+)
+
+# Immunosuppression admin codes
+immadm = codelist_from_csv(
+  "codelists/primis-covid19-vacc-uptake-immunosuppression-admin-codes.csv",
+  column="code",
+)
+
+# Chemotherapy or radiation (Primis)
+dxt_chemo = codelist_from_csv(
+  "codelists/primis-covid19-vacc-uptake-dxt_chemo_cod.csv",
   column="code",
 )
 

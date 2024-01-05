@@ -1,5 +1,6 @@
 code,term
 10007009,Coffin-Siris syndrome
+1010630006,X-linked complicated corpus callosum dysgenesis
 1089701000000105,Profound intellectual development disorder without impairment of behaviour
 1089711000000107,Profound intellectual development disorder with significant impairment of behaviour
 1089721000000101,Profound intellectual development disorder with minimal impairment of behaviour
@@ -22,30 +23,137 @@ code,term
 1094031000000100,Intellectual development disorder with impairment of behaviour
 109478007,Kohlschutter's syndrome
 110359009,Intellectual disability
+1156584007,X-linked intellectual disability hypotonic face syndrome
+1162462009,Angelman syndrome due to maternal monosomy 15q11q13
+1167371007,"Polyhydramnios, megalencephaly, symptomatic epilepsy syndrome"
+1167375003,"Microcephaly, corpus callosum and cerebellar vermis hypoplasia, facial dysmorphism, intellectual disability syndrome"
+1169355000,"Brain malformations, musculoskeletal abnormalities, facial dysmorphism, intellectual disability syndrome"
+1169359006,"Tall stature, intellectual disability, renal anomalies syndrome"
+1172594000,"Congenital labioscrotal agenesis, cerebellar malformation, corneal dystrophy, facial dysmorphism syndrome"
+1172624000,Arginine-glutamic acid dipeptide repeats-related neurodevelopmental syndrome
+1172626003,"Telomere maintenance 2-related intellectual disability, neurodevelopmental disorder"
+1172627007,"Early-onset epilepsy, intellectual disability, brain anomalies syndrome"
+1172629005,"Severe growth deficiency, strabismus, extensive dermal melanocytosis, intellectual disability syndrome"
+1172630000,"Global developmental delay, neuro-ophthalmological abnormalities, seizures, intellectual disability syndrome"
+1172685001,"Macrothrombocytopenia, lymphedema, developmental delay, facial dysmorphism, camptodactyly syndrome"
+1172691004,Chloride voltage-gated channel 4-related X-linked intellectual disability syndrome
+1172697000,"X-linked female restricted facial dysmorphism, short stature, choanal atresia, intellectual disability"
+1172698005,"Recurrent metabolic encephalomyopathic crises, rhabdomyolysis, cardiac arrhythmia, intellectual disability syndrome"
+1172889005,"Palatal anomalies, widely spaced teeth, facial dysmorphism, developmental delay syndrome"
+1172899000,Peripheral myelin protein 22-retinoic acid induced 1 contiguous gene duplication syndrome
+1173036000,Combined oxidative phosphorylation defect type 23
+1173998003,"Postnatal microcephaly, infantile hypotonia, spastic diplegia, dysarthria, intellectual disability syndrome"
+1177167002,"Intellectual disability, seizures, abnormal gait, facial dysmorphism syndrome"
+1177169004,"Congenital cerebellar ataxia due to RNA, U12 small nuclear mutation"
+1177175008,"Skeletal dysplasia, T-cell immunodeficiency, developmental delay syndrome"
+1179282009,"Severe neurodevelopmental disorder with feeding difficulties, stereotypic hand movement, bilateral cataract"
+1179283004,"Metopic ridging, ptosis, facial dysmorphism syndrome"
+1179301003,Dual specificity tyrosine phosphorylation regulated kinase 1A-related intellectual disability syndrome
+1179408008,"Chromodomain helicase dna-binding protein 3- related developmental delay, speech delay, intellectual disability, abnormalities of vision, facial dysmorphism syndrome"
+1186711002,"G protein subunit beta 5-related intellectual disability, cardiac arrhythmia syndrome"
+1186713004,"Growth delay, intellectual disability, hepatopathy syndrome"
+1186721005,Infantile inflammatory bowel disease with neurological involvement
+1186729007,"Intellectual disability, cardiac anomalies, short stature, joint laxity syndrome"
+1186730002,Gabriele-de Vries syndrome
+1186734006,Autosomal recessive complex spastic paraplegia due to Kennedy pathway dysfunction
+1187038009,Non-specific syndromic intellectual disability
+1187041000,"Stromal antigen 1-related intellectual disability, facial dysmorphism, gastroesophageal reflux syndrome"
+1187042007,"Early-onset seizures, distal limb anomalies, facial dysmorphism, global developmental delay syndrome"
+1187114007,"Micrognathia, recurrent infections, behavioral abnormalities, mild intellectual disability syndrome"
+1187122000,Witteveen Kolk syndrome
+1187195007,"Microcephalic cortical malformations, short stature due to rotatin deficiency"
+1187210007,"Intellectual disability, epilepsy, extrapyramidal syndrome"
+1187247007,"WW domain containing adaptor with coiled-coil-related facial dysmorphism, developmental delay, behavioral abnormalities syndrome"
+1187249005,VPS11 core subunit of CORVET and HOPS complexes-related autosomal recessive hypomyelinating leukodystrophy
+1187250005,"Seizures, scoliosis, macrocephaly syndrome"
+1187277001,"Short stature, brachydactyly, obesity, global developmental delay syndrome"
+1187278006,"Spastic paraplegia, severe developmental delay, epilepsy syndrome"
+1187303004,"Progressive spondyloepimetaphyseal dysplasia, short stature, short fourth metatarsals, intellectual disability syndrome"
+1187304005,"Macrocephaly, intellectual disability, neurodevelopmental disorder, small thorax syndrome"
+1187642008,"Macrocephaly, intellectual disability, left ventricular non compaction syndrome"
+1187644009,Basel Vanagaite Smirin Yosef syndrome
+1197148005,Sanjad Sakati syndrome
+1197588008,"X-linked microcephaly, growth retardation, prognathism, cryptorchidism syndrome"
+1197591008,"Severe intellectual disability, hypotonia, strabismus, coarse face, planovalgus syndrome"
+1197593006,"Intellectual disability, expressive aphasia, facial dysmorphism syndrome"
+1208341008,Severe oculo-renal-cerebellar syndrome
+1208344000,Fryns Smeets Thiry syndrome
+1208481000,Progressive cerebello-cerebral atrophy
+1208488006,Special AT-rich sequence-binding protein 2-associated syndrome
+1208614008,Autosomal dominant deafness with onychodystrophy syndrome
+1208720000,"Agenesis of corpus callosum, macrocephaly, hypertelorism syndrome"
+1208727002,"Severe intellectual disability, agenesis of corpus callosum, facial dysmorphism, cerebellar ataxia syndrome"
+1208746001,"Intellectual disability, muscle weakness, short stature, facial dysmorphism syndrome"
+1208936008,"Congenital ichthyosis, intellectual disability, spastic quadriplegia syndrome"
+1208987006,"Pleckstrin homology domain interacting protein-related behavioral problems, intellectual disability, obesity, dysmorphic features syndrome"
+1217228004,"X-linked intellectual disability, cerebellar hypoplasia, spondyloepiphyseal dysplasia syndrome"
+1217229007,"Craniofacial dysplasia, short stature, ectodermal anomalies, intellectual disability syndrome"
+1217371005,"Infantile hypotonia, oculomotor anomalies, hyperkinetic movements, developmental delay syndrome"
+1217379007,NK6 homeobox 2-related autosomal recessive hypomyelinating leukodystrophy
+1217381009,"Neurodevelopmental delay, seizures, ophthalmic anomalies, osteopenia, cerebellar atrophy syndrome"
+1217382002,"Intellectual disability, autism, speech apraxia, craniofacial dysmorphism syndrome"
+1220568003,"Glutamine rich 1-related intellectual disability, chondrodysplasia syndrome"
+1220589007,Keppen Lubinsky syndrome
+1220594007,Pierpont syndrome
+1220597000,"Retinitis pigmentosa, juvenile cataract, short stature, intellectual disability syndrome"
+1220600004,Arginyl-tRNA synthetase 1-related autosomal recessive hypomyelinating leukodystrophy
+1222656005,Synaptic Ras GTPase activating protein 1-related developmental and epileptic encephalopathy
+1222657001,Prune exopolyphosphatase 1-related neurological syndrome
+1222658006,"Global developmental delay, alopecia, macrocephaly, facial dysmorphism, structural brain anomalies syndrome"
+1222672002,3-methylglutaconic aciduria type 9
+1222706005,"Anterior maxillary protrusion, strabismus, intellectual disability syndrome"
+1222710008,"Neurodevelopmental disorder, craniofacial dysmorphism, cardiac defect, skeletal anomalies syndrome"
+1228886008,9q33.3q34.11 microdeletion syndrome
+1228890005,16p13.2 microdeletion syndrome
+1229872004,Xq25 microduplication syndrome
+1229873009,17q24.2 microdeletion syndrome
+1229875002,9q21.13 microdeletion syndrome
+1229882003,11q22.2q22.3 microdeletion syndrome
+1229883008,19p13.3 microduplication syndrome
+1229891004,20q11.2 microdeletion syndrome
+1229895008,8q24.3 microdeletion syndrome
+1230273004,Megaconial congenital muscular dystrophy
+1230376005,Contactin associated protein 2-related developmental and epileptic encephalopathy
+1236807002,Encephalopathy due to mitochondrial and peroxisomal fission defect
 1239331000000100,Significant intellectual disability
 17827007,Cross syndrome
+191689008,Active infantile autism
+191690004,Residual infantile autism
+191692007,Active disintegrative psychoses
+191693002,Residual disintegrative psychoses
 205615000,Trisomy 21- meiotic nondisjunction
+205616004,Trisomy 21- mitotic nondisjunction mosaicism
 205619006,"Trisomy 13, meiotic nondisjunction"
 205620000,Trisomy 13 - mitotic nondisjunction mosaicism
 205623003,Trisomy 18 - meiotic nondisjunction
 205624009,Trisomy 18 - mitotic nondisjunction mosaicism
 21111006,Complete trisomy 13 syndrome
 21634003,Borjeson-Forssman-Lehmann syndrome
+231536004,Atypical autism
 232059000,Laurence-Moon syndrome
 234146006,Hennekam lymphangiectasia-lymphedema syndrome
-236529001,"Prune belly syndrome with pulmonic stenosis, mental retardation and deafness"
+23560001,Asperger's disorder
+236529001,"Prune belly syndrome with pulmonic stenosis, intellectual disability and deafness"
 253176002,Gillespie syndrome
 254264002,Partial trisomy 21 in Down's syndrome
 254266000,Partial trisomy 18 in Edward's syndrome
 254268004,Partial trisomy 13 in Patau's syndrome
 31216003,Profound intellectual disability
 33982008,Hyperphosphatasemia with intellectual disability
+35919005,Pervasive developmental disorder
+371045000,Translocation Down syndrome
+373618009,Autistic spectrum disorder with isolated skills
+39951000119105,Pervasive developmental disorder of residual state
 40700009,Severe intellectual disability
+408856003,Autistic disorder
+408857007,Infantile autism
 41040004,Complete trisomy 21 syndrome
 412787009,"Intellectual disability, congenital heart disease, blepharophimosis, blepharoptosis and hypoplastic teeth"
 416075005,On learning disability register
 422437002,X-linked intellectual disability with marfanoid habitus
 432091002,Savant syndrome
+43614003,Autistic disorder of childhood onset
+442314000,Active but odd autism
 508171000000105,Severe learning disability
 51500006,Complete trisomy 18 syndrome
 5619004,Bardet-Biedl syndrome
@@ -55,19 +163,25 @@ code,term
 613003,Fragile X syndrome
 68618008,Rett's disorder
 699297004,Blepharophimosis-intellectual disability syndrome Maat-Kievit-Brunner type
-699298009,"Blepharophimosis-mental retardation syndrome, Say-Barber-Biesecker-Young-Simpson type"
+699298009,"Blepharophimosis, intellectual disability syndrome, Say-Barber-Biesecker-Young-Simpson type"
 699316006,Myhre syndrome
 699669001,Renpenning syndrome
+702327009,Monocarboxylate transporter 8 deficiency
 702344008,Pitt-Hopkins syndrome
+702354007,X-linked intellectual developmental disorder Christianson type
 702356009,X-linked intellectual disability-psychosis-macroorchidism syndrome
 702412005,X-linked intellectual deficit-dystonia-dysarthria syndrome
 702416008,X-linked intellectual disability Snyder type
+702423009,Deafness-dystonia-optic neuronopathy syndrome
 702441001,Fatal X-linked ataxia with deafness and loss of vision
+702450004,FOXG1 syndrome
+702732007,High-functioning autism
 702816000,Methyl-cytosine phosphate guanine binding protein-2 duplication syndrome
 703389002,Calcium/calmodulin-dependent serine protein kinase related intellectual disability
 703526007,Progressive epilepsy-intellectual disability syndrome Finnish type
 703535000,Mowat-Wilson syndrome
-709469005,Periodontitis co-occurrent with Down syndrome
+708037001,Residual Asperger's disorder
+712884004,Pathological demand avoidance
 715409005,Trigonocephaly C syndrome
 715428003,Skeletal dysplasia with epilepsy and short stature syndrome
 715441004,McDonough syndrome
@@ -82,22 +196,23 @@ code,term
 716334004,Intellectual disability and short stature with hand contracture and genital anomaly syndrome
 716706009,Female restricted epilepsy with intellectual disability syndrome
 716709002,FRAXE intellectual disability syndrome
-716996008,Hypoplasia of corpus callosum and mental retardation with adducted thumbs and spasticity and hydrocephalus syndrome
+716996008,"Hypoplasia of corpus callosum, intellectual disability, adducted thumbs, spasticity, hydrocephalus syndrome"
 717157006,Trisomy 10p
 717222003,Microphthalmia with ankyloblepharon and intellectual disability syndrome
 717223008,X-linked epilepsy with learning disability and behavior disorder syndrome
-717763008,Chudley Lowry Hoar syndrome
 717822006,Goldberg Shprintzen megacolon syndrome
 717887003,Biemond syndrome type 2
 717913006,Blepharonasofacial malformation syndrome
-717945001,"Brain anomaly, severe mental retardation, ectodermal dysplasia, skeletal deformity, ear anomaly, kidney dysplasia syndrome"
+717945001,"Brain anomaly, severe intellectual disability, ectodermal dysplasia, skeletal deformity, ear anomaly, kidney dysplasia syndrome"
 718226002,Wolf Hirschhorn syndrome
+718393002,Atypical Rett syndrome
 718573009,Achalasia microcephaly syndrome
 718577005,X-linked intellectual disability Atkin type
 718680001,Oro-facial digital syndrome type 9
 718681002,Oro-facial digital syndrome type 11
 718766002,"Spondyloepiphyseal dysplasia, craniosynostosis, cleft palate, cataract and intellectual disability syndrome"
 718845002,X-linked intellectual disability with ataxia and apraxia syndrome
+718847005,X-linked neurodegenerative syndrome Hamel type
 718848000,Fried syndrome
 718896000,X-linked recessive intellectual disability and macrocephaly with ciliary dysfunction syndrome
 718897009,X-linked intellectual disability Seemanova type
@@ -122,7 +237,6 @@ code,term
 719046005,12q14 microdeletion syndrome
 719069008,Shprintzen Goldberg craniosynostosis syndrome
 719097002,Branchioskeletogenital syndrome
-719101006,Carpenter Waziri syndrome
 719102004,Congenital cataract with ataxia and deafness syndrome
 719136005,X-linked intellectual disability with cerebellar hypoplasia syndrome
 719138006,X-linked intellectual disability with cubitus valgus and dysmorphism syndrome
@@ -135,7 +249,6 @@ code,term
 719161008,Syndromic X-linked intellectual disability due to jumonji at-rich interactive domain 1c mutation
 719162001,Radioulnar synostosis with microcephaly and scoliosis syndrome
 719202006,Spondyloepiphyseal dysplasia tarda Kohn type
-719212004,Smith Fineman Myers syndrome
 719378009,Microcephalus with brachydactyly and kyphoscoliosis syndrome
 719380003,Microcephalus cardiomyopathy syndrome
 719450007,Disorder of sex development with intellectual disability syndrome
@@ -143,6 +256,7 @@ code,term
 719583002,17q11.2 microduplication syndrome
 719599008,19q13.11 microdeletion syndrome
 719600006,1p21.3 microdeletion syndrome
+71961003,Childhood disintegrative disorder
 719800009,"Deafness, onychodystrophy, osteodystrophy, intellectual disability syndrome"
 719808002,Chromosome Xp11.3 microdeletion syndrome
 719810000,X-linked intellectual disability with seizure and psoriasis syndrome
@@ -152,7 +266,6 @@ code,term
 719826004,X-linked intellectual disability with acromegaly and hyperactivity syndrome
 719834005,Wilson Turner syndrome
 719842006,Congenital hypoplasia of ulna and intellectual disability syndrome
-719909009,Chromosome Xq28 trisomy syndrome
 719947004,Craniofacial dysmorphism with coloboma of eye and corpus callosum agenesis syndrome
 720401009,Cystic fibrosis with gastritis and megaloblastic anemia syndrome
 720468000,Aniridia and intellectual disability syndrome
@@ -182,7 +295,6 @@ code,term
 721146009,"Intellectual disability, epilepsy, bulbous nose syndrome"
 721207002,"Seizure, sensorineural deafness, ataxia, intellectual disability, electrolyte imbalance syndrome"
 721208007,Ectodermal dysplasia with blindness syndrome
-721224008,Holmes Gang syndrome
 721841001,Hypogonadism with mitral valve prolapse and intellectual disability syndrome
 721843003,"Growth retardation, alopecia, pseudoanodontia, optic atrophy syndrome"
 721875000,Juberg Marsidi syndrome
@@ -203,11 +315,11 @@ code,term
 722106001,Oro-facial digital syndrome type 8
 722107005,Ossification anomaly with psychomotor developmental delay syndrome
 722110003,"Osteogenesis imperfecta, retinopathy, seizures, intellectual disability syndrome"
-722111004,"Osteopenia, myopia, hearing loss, intellectual disability, facial dysmorphism syndrome"
 722209002,"Spastic paraplegia, intellectual disability, palmoplantar hyperkeratosis syndrome"
 722213009,Severe X-linked intellectual disability Gustavson type
 722281001,"Agammaglobulinemia, microcephaly, craniosynostosis, severe dermatitis syndrome"
 722282008,"Agenesis of corpus callosum, intellectual disability, coloboma, micrognathia syndrome"
+722287002,Autism and facial port-wine stain syndrome
 722378009,Congenital cataract with deafness and hypogonadism syndrome
 722379001,Congenital cataract with hypertrichosis and intellectual disability syndrome
 722380003,Congenital cataract with intellectual disability and hypogonadotropic hypogonadism syndrome
@@ -223,9 +335,9 @@ code,term
 723336008,Fallot complex with intellectual disability and growth delay syndrome
 723365002,Hypotrichosis and intellectual disability syndrome Lopes type
 723403008,"Microbrachycephaly, ptosis, cleft lip syndrome"
+723410002,N syndrome
 723441001,Non-progressive cerebellar ataxia with intellectual disability
 723454008,Phosphoribosylpyrophosphate synthetase superactivity
-723501008,Renier Gabreels Jasper syndrome
 723504000,Ramos Arroyo syndrome
 723621000,"Spastic tetraplegia, retinitis pigmentosa, intellectual disability syndrome"
 723676007,"Severe intellectual disability, epilepsy, anal anomaly, distal phalangeal hypoplasia syndrome"
@@ -277,6 +389,7 @@ code,term
 733455003,"Spastic paraplegia, glaucoma, intellectual disability syndrome"
 733472005,"Microcephalus, glomerulonephritis, marfanoid habitus syndrome"
 733522005,Megalocornea with intellectual disability syndrome
+733623005,"Autism spectrum disorder, epilepsy, arthrogryposis syndrome"
 734017008,"Ectodermal dysplasia, intellectual disability, central nervous system malformation syndrome"
 734173003,"Skeletal abnormality, cutis laxa, craniostenosis, ambiguous genitalia, retardation, facial abnormality syndrome"
 734349003,Alpha-thalassemia intellectual disability syndrome linked to chromosome 16
@@ -381,14 +494,12 @@ code,term
 773553003,"Hypohidrosis, enamel hypoplasia, palmoplantar keratoderma, intellectual disability syndrome"
 773554009,"THO complex 6-related developmental delay, microcephaly, facial dysmorphism syndrome"
 773556006,"Short ulna, dysmorphism, hypotonia, intellectual disability syndrome"
-773578004,"Spondylocostal dysostosis, hypospadias, intellectual disability syndrome"
 773581009,"Intellectual disability, craniofacial dysmorphism, cryptorchidism syndrome"
 773583007,"Aphonia, deafness, retinal dystrophy, bifid halluces, intellectual disability syndrome"
 773587008,"X-linked intellectual disability, cardiomegaly, congestive heart failure syndrome"
 773621003,"Intellectual disability, hypotonia, brachycephaly, pyloric stenosis, cryptorchidism syndrome"
 773670004,Distal Xq28 microduplication syndrome
 773692000,"Late-onset localized junctional epidermolysis bullosa, intellectual disability syndrome"
-773699009,Pitt Hopkins-like syndrome
 773735007,Deafness with onychodystrophy syndrome
 773769008,"Ataxia, photosensitivity, short stature syndrome"
 773772001,Rare non-syndromic intellectual disability
@@ -429,14 +540,36 @@ code,term
 787174003,"Intellectual disability, hyperkinetic movement, truncal ataxia syndrome"
 787175002,"Ankyrin 3 related intellectual disability, sleep disturbance syndrome"
 788417006,"Alopecia, epilepsy, intellectual disability syndrome Moynahan type"
-788584007,Blepharophimosis and mental retardation syndrome
+788584007,"Blepharophimosis, intellectual disability syndrome"
 79385002,Lowe syndrome
 816067005,"Diabetes, hypogonadism, deafness, intellectual disability syndrome"
-838441009,"Mental retardation, adducted thumbs, shuffling gait, aphasia syndrome"
+838441009,"Intellectual disability, aphasia, shuffling gait, adducted thumbs syndrome"
 840505007,Down syndrome co-occurrent with leukemoid reaction associated transient neonatal pustulosis
 86765009,Mild intellectual disability
+870260008,Pervasive developmental disorder with marked impairment of functional language with loss of previously acquired skills
+870261007,Pervasive developmental disorder with marked impairment of functional language without loss of previously acquired skills
+870262000,Pervasive developmental disorder with disorder of intellectual development without loss of previously acquired skills
+870263005,Pervasive developmental disorder with impairment of functional language
+870264004,Pervasive developmental disorder with disorder of intellectual development and pervasive impairment of functional language without loss of previously acquired skills
+870265003,Pervasive developmental disorder with disorder of intellectual development with loss of previously acquired skills
+870266002,Pervasive developmental disorder with disorder of intellectual development and marked impairment of functional language with loss of previously acquired skills
+870267006,Pervasive developmental disorder with disorder of intellectual development and marked impairment of functional language without loss of previously acquired skills
+870268001,Pervasive developmental disorder with disorder of intellectual development and complete impairment of functional language without loss of previously acquired skills
+870269009,Pervasive developmental disorder with disorder of intellectual development and absence of functional language with loss of previously acquired skills
+870270005,Pervasive developmental disorder with disorder of intellectual development and complete impairment of functional language with loss of previously acquired skills
+870280009,Pervasive developmental disorder with severe impairment of functional language with loss of previously acquired skills
+870282001,Pervasive developmental disorder with severe impairment of functional language without loss of previously acquired skills
+870303005,Pervasive developmental disorder with complete impairment of functional language with loss of previously acquired skills
+870304004,Pervasive developmental disorder with complete impairment of functional language without loss of previously acquired skills
+870305003,Pervasive developmental disorder with cognitive developmental delay and marked impairment of functional language
+870306002,Pervasive developmental disorder with complete impairment of functional language
+870307006,Pervasive developmental disorder with abscence of functional language
+870308001,Pervasive developmental disorder with cognitive developmental delay and complete impairment of functional language
+879939002,14q32 deletion syndrome
 889211000000104,Specific learning disability
+890118006,Mowat-Wilson syndrome due to monosomy 2q22
 931001000000105,Significant learning disability
+9527009,Tetrasomy 12p syndrome
 984661000000105,Mild learning disability
 984671000000103,Moderate learning disability
 984681000000101,Profound learning disability

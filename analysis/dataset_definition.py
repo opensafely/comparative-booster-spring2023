@@ -1,7 +1,7 @@
 import json
 from pathlib import Path
 
-from ehrql import Dataset , case, days, when, minimum_of
+from ehrql import Dataset, case, days, years, when, minimum_of
 from ehrql.tables.beta.tpp import (
   patients, 
   practice_registrations, 
@@ -167,6 +167,15 @@ def last_prior_event(codelist, where=True):
         .last_for_patient()
     )
 
+# query prior_events for date of earliest event-in-codelist
+def first_prior_event(codelist, where=True):
+    return (
+        prior_events.where(where)
+        .where(prior_events.snomedct_code.is_in(codelist))
+        .sort_by(events.date)
+        .first_for_patient()
+    )
+
 # meds occurring before booster date
 prior_meds = medications.where(medications.date.is_on_or_before(baseline_date))
 
@@ -176,6 +185,24 @@ def has_prior_meds(codelist, where=True):
         prior_meds.where(where)
         .where(prior_meds.dmd_code.is_in(codelist))
         .exists_for_patient()
+    )
+    
+# query prior meds for date of most recent med-in-codelist
+def last_prior_meds(codelist, where=True):
+    return (
+        prior_meds.where(where)
+        .where(prior_meds.dmd_code.is_in(codelist))
+        .sort_by(medications.date)
+        .last_for_patient()
+    )
+
+# query prior_events for date of earliest event-in-codelist
+def first_prior_meds(codelist, where=True):
+    return (
+        prior_meds.where(where)
+        .where(prior_meds.dmd_code.is_in(codelist))
+        .sort_by(medications.date)
+        .first_for_patient()
     )
 
 # prior covid test dates from SGSS
@@ -285,34 +312,111 @@ dataset.bmi = case(
 
 # From PRIMIS
 
+# Asthma Diagnosis code date
+astdx = has_prior_event(codelists.ast)
+
 # Asthma Admission codes
-astadm = has_prior_event(codelists.astadm)
+astadm = has_prior_event(
+  codelists.astadm,
+  where=events.date.is_on_or_after(baseline_date - days(730))
+)
 
-# Asthma Diagnosis code
-ast = has_prior_event(codelists.ast)
+# Asthma nebuliser code date
+astrxm1_date = last_prior_meds(
+  codelists.astrxm1,
+  where=medications.date.is_on_or_after(baseline_date - days(365))
+).date
 
-# Asthma systemic steroid prescription code in month 1
-astrxm1 = has_prior_meds(
-    codelists.astrx,
-    where=medications.date.is_after(baseline_date - days(30)),
+# # Asthma systemic steroid prescription code date
+# astrxm2_date = prior_meds(
+#   codelists.astrxm2,
+#   where=medications.date.is_on_or_after(baseline_date - days(730))
+# ).date
+
+# Earliest systemic steroid prescription in first 2 year window
+astrxm2e1_date = first_prior_meds(
+  codelists.astrxm2, 
+  where=medications.date.is_on_or_after("2018-12-01") 
+  & medications.date.is_before("2020-12-01")
+).date
+
+# Latest systemic steroid prescription in first 2 year window 
+astrxm2l1_date = last_prior_meds(
+  codelists.astrxm2, 
+  where=medications.date.is_on_or_after("2018-12-01") 
+  & medications.date.is_before("2020-12-01")
+).date
+
+# Earliest systemic steroid prescription in second 2 year window
+astrxm2e2_date = first_prior_meds(
+  codelists.astrxm2, 
+  where=medications.date.is_on_or_after("2020-12-01") 
+  & medications.date.is_before("2022-12-01")
+).date
+
+# Latest systemic steroid prescription in second 2 year window 
+astrxm2l2_date = last_prior_meds(
+  codelists.astrxm2, 
+  where=medications.date.is_on_or_after("2020-12-01") 
+  & medications.date.is_before("2022-12-01")
+).date
+
+# Earliest systemic steroid prescription in third 2 year window
+astrxm2e3_date = first_prior_meds(
+  codelists.astrxm2, 
+  where=medications.date.is_on_or_after("2022-12-01") 
+  & medications.date.is_before("2024-12-01")
+).date
+
+# Latest systemic steroid prescription in third 2 year window 
+astrxm2l3_date = last_prior_meds(
+  codelists.astrxm2, 
+  where=medications.date.is_on_or_after("2022-12-01") 
+  & medications.date.is_before("2024-12-01")
+).date
+
+
+dataset.asthma = case(
+  when(astadm).then(True),
+  when((astdx & astrxm1_date.is_not_null())
+    & ((astrxm2e1_date != astrxm2l1_date) & (astrxm2l1_date.is_before(astrxm2e1_date + days(730))))).then(True),
+  when((astdx & astrxm1_date.is_not_null())
+    & ((astrxm2e2_date != astrxm2l2_date) & (astrxm2l2_date.is_before(astrxm2e2_date + days(730))))).then(True),
+  when((astdx & astrxm1_date.is_not_null())
+    & ((astrxm2e3_date != astrxm2l3_date) & (astrxm2l3_date.is_before(astrxm2e3_date + days(730))))).then(True),
+  when((astdx & astrxm1_date.is_not_null())
+    & (astrxm2e2_date.is_before(astrxm2l1_date + days(730)))).then(True),  
+  when((astdx & astrxm1_date.is_not_null())
+    & (astrxm2e3_date.is_before(astrxm2l2_date + days(730)))).then(True),
+  default=False
 )
-# Asthma systemic steroid prescription code in month 2
-astrxm2 = has_prior_meds(
-    codelists.astrx,
-    where=(
-        medications.date.is_after(baseline_date - days(60))
-        & medications.date.is_on_or_before(baseline_date - days(30))
-    ),
+
+# redfine Asthma as per green book
+# Poorly controlled asthma is defined as:
+# - ≥2 courses of oral corticosteroids in the preceding 24 months OR
+# - on maintenance oral corticosteroids OR
+# - ≥1 hospital admission for asthma in the preceding 24 months
+
+# Inhaled asthma prescription in previous year
+astrx_inhaled = has_prior_meds(
+  codelists.astrxm1,
+  where=medications.date.is_on_or_after(baseline_date - days(365))
 )
-# Asthma systemic steroid prescription code in month 3
-astrxm3 = has_prior_meds(
-    codelists.astrx,
-    where=(
-        medications.date.is_after(baseline_date - days(90))
-        & medications.date.is_on_or_before(baseline_date - days(60))
-    ),
+
+# count of systemic steroid prescription inpast 2 years
+astrx_oral_count = (
+  prior_meds
+    .where(prior_meds.dmd_code.is_in(codelists.astrxm2))
+    .where(prior_meds.date.is_on_or_between(baseline_date - years(2), baseline_date))
+    .count_for_patient()
 )
-dataset.asthma = astadm | (ast & astrxm1 & astrxm2 & astrxm3)
+
+dataset.asthma_simple = case(
+  when(astadm).then(True),
+  #TODO add asthma admission from SUS data too?
+  when(astdx & astrx_inhaled & (astrx_oral_count>=2)).then(True),
+  default=False
+)
 
 # Chronic Neurological Disease including Significant Learning Disorder
 dataset.chronic_neuro_disease = has_prior_event(codelists.cns_cov)
@@ -335,13 +439,58 @@ dataset.sev_obesity = case(
     default=False
 )
 
-# Diabetes
+# Pregnancy delivery code date
+pregAdel_date = last_prior_event(
+  codelists.pregdel,
+  where = (
+    events.date.is_on_or_between(baseline_date - days(7*65), baseline_date - days((7*30)+1))
+  )
+).date
+
+# Pregnancy date window A
+pregA_date = last_prior_event(
+  codelists.preg,
+  where = (
+    events.date.is_on_or_between(baseline_date - days((7*65)), baseline_date - days((7*30)+1))
+  )
+).date
+
+# Pregnancy date window B
+pregB = has_prior_event(
+  codelists.preg,
+  where = (
+    events.date.is_on_or_between(baseline_date - days((7*30)), baseline_date) # up to 8 months prior 
+  )
+)
+
+# Pregnancy group
+dataset.preg_group = case(
+    when(pregB).then(True),
+    when(
+      (pregAdel_date.is_not_null() &
+      pregA_date.is_not_null() &
+      pregA_date.is_on_or_after(pregAdel_date))
+    ).then(True),
+    default=False
+)
+
+# Diabetes and diabetes resolution code date
 diab_date = last_prior_event(codelists.diab).date
 dmres_date = last_prior_event(codelists.dmres).date
 
+# Addisons and hypothyroidism code date
+addis = has_prior_event(codelists.addis)
+
+# Gestational diabetes dates and group
+gdiab = has_prior_event(codelists.gdiab)
+gdiab_group = gdiab & dataset.preg_group
+
+# Diabetes group
 dataset.diabetes = case(
     when(dmres_date < diab_date).then(True),
     when(diab_date.is_not_null() & dmres_date.is_null()).then(True),
+    when(addis).then(True),
+    when(gdiab_group).then(True),
     default=False
 )
 
@@ -361,7 +510,6 @@ dataset.chronic_heart_disease = has_prior_event(codelists.chd_cov)
 
 # Chronic kidney disease diagnostic codes
 ckd = has_prior_event(codelists.ckd_cov)
-
 # Chronic kidney disease codes - all stages
 ckd15_date = last_prior_event(codelists.ckd15).date
 # Chronic kidney disease codes-stages 3 - 5
@@ -373,7 +521,6 @@ dataset.chronic_kidney_disease = case(
     default=False
 )
 
-
 # Chronic Liver disease codes
 dataset.chronic_liver_disease = has_prior_event(codelists.cld)
 
@@ -383,25 +530,40 @@ dataset.cancer = has_prior_event(
     where=events.date.is_after(baseline_date - days(int(3 * 365.25))),
 )
 
-# Immunosuppression diagnosis codes
-dataset.immdx = has_prior_event(codelists.immdx_cov)
+# Immunosuppression diagnosis 
+immdx = has_prior_event(codelists.immdx_cov)
+dataset.immdx = immdx
 
-# Immunosuppression medication codes
-dataset.immrx = has_prior_meds(
+# Immunosuppression medication 
+immrx = has_prior_meds(
     codelists.immrx,
-    where=(medications.date.is_after(baseline_date - days(182))),
+    where=(medications.date.is_on_or_after(baseline_date - days(int(3 * 365.25))))
+)
+dataset.immrx = immrx
+
+# Immunosuppression admin date
+immadm = has_prior_event(
+    codelists.immadm,
+    where=(events.date.is_on_or_after(baseline_date - days(int(3 * 365.25))))
 )
 
-# any immunosuppression
-dataset.immunosuppressed = dataset.immrx | dataset.immdx
+# Chemotherapy medication date
+dxt_chemo = has_prior_event(
+  codelists.dxt_chemo,
+  where=(events.date.is_on_or_after(baseline_date - days(int(3 * 365.25))))
+)
+dataset.dxt_chemo = dxt_chemo
+
+# Immunosuppression group
+dataset.immunosuppressed = immdx | immrx | immadm | dxt_chemo
 
 # Asplenia or Dysfunction of the Spleen codes
 dataset.asplenia = has_prior_event(codelists.spln_cov)
 
-# organs transplant
+# Organs transplant
 dataset.solid_organ_transplant = has_prior_event(codelists.solid_organ_transplant)
 
-# organs transplant
+# HIV/AIDS
 dataset.hiv_aids = has_prior_event(codelists.hiv_aids)
 
 # Wider Learning Disability
