@@ -1,7 +1,7 @@
 import json
 from pathlib import Path
 
-from ehrql import Dataset , case, days, when, minimum_of
+from ehrql import Dataset, case, days, years, when, minimum_of
 from ehrql.tables.beta.tpp import (
   patients, 
   practice_registrations, 
@@ -414,7 +414,7 @@ astrx_oral_count = (
 dataset.asthma_simple = case(
   when(astadm).then(True),
   #TODO add asthma admission from SUS data too?
-  when((astdx & astrx_inhaled & astrxm2_count>=2).then(True),
+  when(astdx & astrx_inhaled & (astrx_oral_count>=2)).then(True),
   default=False
 )
 
@@ -483,7 +483,7 @@ addis_date = last_prior_event(codelists.addis).date
 
 # Gestational diabetes dates and group
 gdiab = has_prior_event(codelists.gdiab)
-gdiab_group = gdiab & preg_group
+gdiab_group = gdiab & dataset.preg_group
 
 # Diabetes group
 dataset.diabetes = case(

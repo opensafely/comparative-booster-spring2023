@@ -217,7 +217,7 @@ sim_list = lst(
   chronic_liver_disease = bn_node( ~rbernoulli(n=..n, p = 0.02)),
   cancer = bn_node( ~rbernoulli(n=..n, p = 0.01)),
 
-  preg22_group = bn_node( ~rbernoulli(n = ..n, p = 0.001)),
+  preg_group = bn_node( ~rbernoulli(n = ..n, p = 0.001)),
 
   immdx = bn_node( ~rbernoulli(n=..n, p = 0.02)),
   immrx = bn_node( ~rbernoulli(n=..n, p = 0.02)),
@@ -385,8 +385,6 @@ write_feather(dummydata_processed, sink = here("analysis", "dummydata", "dummyex
 # dummydata_processed0 <- read_feather(here("analysis", "dummydata", "dummyextract.arrow"))
 #
 # dummydata_processed <- dummydata_processed0 %>%
-#   mutate(
-#     asthma_simple = asthma
-#   )
+#   rename(preg_group=preg22_group)
 # write_feather(dummydata_processed, sink = here("analysis", "dummydata", "dummyextract.arrow"))
 
