@@ -479,7 +479,7 @@ diab_date = last_prior_event(codelists.diab).date
 dmres_date = last_prior_event(codelists.dmres).date
 
 # Addisons and hypothyroidism code date
-addis_date = last_prior_event(codelists.addis).date
+addis = has_prior_event(codelists.addis)
 
 # Gestational diabetes dates and group
 gdiab = has_prior_event(codelists.gdiab)
@@ -489,7 +489,7 @@ gdiab_group = gdiab & dataset.preg_group
 dataset.diabetes = case(
     when(dmres_date < diab_date).then(True),
     when(diab_date.is_not_null() & dmres_date.is_null()).then(True),
-    when(addis_date.is_not_null()).then(True),
+    when(addis).then(True),
     when(gdiab_group).then(True),
     default=False
 )
@@ -509,14 +509,14 @@ dataset.sev_mental = case(
 dataset.chronic_heart_disease = has_prior_event(codelists.chd_cov)
 
 # Chronic kidney disease diagnostic codes
-ckd_date = first_prior_event(codelists.ckd_cov).date
+ckd = has_prior_event(codelists.ckd_cov)
 # Chronic kidney disease codes - all stages
 ckd15_date = last_prior_event(codelists.ckd15).date
 # Chronic kidney disease codes-stages 3 - 5
 ckd35_date = last_prior_event(codelists.ckd35).date
 
 dataset.chronic_kidney_disease = case(
-    when(ckd_date.is_not_null()).then(True),
+    when(ckd).then(True),
     when((ckd35_date >= ckd15_date)).then(True),
     default=False
 )
