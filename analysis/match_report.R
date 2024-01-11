@@ -427,7 +427,7 @@ flowchart0_rounded <- read_rds(here("output", cohort, "flowchart_rounded.rds"))
 
 
 data_flowchart_match <- create_flowchart(flowchart0, 1)
-data_flowchart_match_rounded <- create_flowchart(flowchart0_rounded, 7)
+data_flowchart_match_rounded <- create_flowchart(flowchart0_rounded, threshold)
 
 write_csv(data_flowchart_match, fs::path(output_dir, "flowchart.csv"))
 write_csv(data_flowchart_match_rounded, fs::path(output_dir, "flowchart_rounded.csv"))

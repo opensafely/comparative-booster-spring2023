@@ -127,7 +127,8 @@ create_flowchart <- function(round_level = 1){
 
   flowchart_output <-
     data_inclusioncriteria %>%
-    select(-patient_id) %>%
+    select(-patient_id, -c0) %>%
+    filter(c1) %>%
     group_by(boost_type) %>%
     summarise(
       across(.cols=everything(), .fns=~ceiling_any(sum(.), round_level))
@@ -152,9 +153,8 @@ create_flowchart <- function(round_level = 1){
       #crit = str_extract(criteria, "^c\\d+"),
       crit = criteria,
       criteria = fct_case_when(
-        crit == "c0" ~ "Received COVID-19 vaccination between 1 April and 30 June 2023", # paste0("Aged 18+\n with 2 doses on or before ", format(study_dates$lastvax2_date, "%d %b %Y")),
-        crit == "c1" ~ "  vaccine product was PfizerBA45 or Sanofi",
-        crit == "c2" ~ "  with no prior vaccination within 14 days, or with PfizerBA45 or Sanofi",
+        crit == "c1" ~ "Received COVID-19 vaccine between 1 April and 30 June 2023",
+        crit == "c2" ~ "  with no prior vaccine within 14 days and no prior PfizerBA45 or Sanofi",
         crit == "c3_1" ~ "    no missing demographic information",
         crit == "c3_2" ~ "    not a health and social care worker",
         crit == "c3_3" ~ "    not a care/nursing home resident, end-of-life or housebound",
@@ -168,17 +168,35 @@ create_flowchart <- function(round_level = 1){
   return(flowchart_output)
 }
 
-
 ## unrounded flowchart
 data_flowchart <- create_flowchart(1)
 write_rds(data_flowchart, fs::path(output_dir, "flowchart.rds"))
 #write_csv(data_flowchart, here("output", "data", "flowchart.csv"))
 
 ## rounded flowchart
-data_flowchart_rounded <- create_flowchart(7)
+data_flowchart_rounded <- create_flowchart(threshold)
 write_rds(data_flowchart_rounded, fs::path(output_dir, "flowchart_rounded.rds"))
 write_csv(data_flowchart_rounded, fs::path(output_dir, "flowchart_rounded.csv"))
 
+## unrounded totals
+total_n_unrounded <-
+  bind_rows(
+    tibble(boost_type="Any", n=nrow(data_inclusioncriteria)),
+    count(data_inclusioncriteria %>% mutate(boost_type=fct_other(boost_type, keep=treatement_lookup$treatment), other_level="other"), boost_type, .drop=FALSE)
+  ) %>%
+  mutate(
+    pct = n/first(n)
+  )
+write_csv(total_n_unrounded, fs::path(output_dir, "total_unrounded.csv"))
+
+## rounded totals
+total_n_rounded <-
+  total_n_unrounded %>%
+  mutate(
+    n= ceiling_any(n, threshold),
+    pct = n/first(n)
+  )
+write_csv(total_n_rounded, fs::path(output_dir, "total_rounded.csv"))
 
 ## remove large in-memory objects
 remove(data_inclusioncriteria)
