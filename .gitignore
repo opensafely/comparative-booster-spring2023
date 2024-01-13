@@ -9,8 +9,5 @@ venv/
 .DS_Store
 .Rhistory
 .Rproj.user/
-/write-up/figures/*
-/write-up/*.html
 /released-output/*
-write-up/comparative booster effectiveness - draft manuscript v0.1.docx
-write-up/comparative boosting effectiveness v0.1.docx
+write-up/
