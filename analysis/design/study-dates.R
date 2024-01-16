@@ -12,7 +12,7 @@ fs::dir_create(here::here("lib", "design"))
 study_dates <- tibble::lst(
   studystart_date = "2023-04-01", # first possible study entry date (when both moderna and pfizer and sanofi being administered for boosters), and index date for dates as "time since index date" format
   studyend_date = "2023-06-30", # last study entry dates
-  followupend_date = "2023-08-31", # end of follow-up
+  followupend_date = "2023-10-19", # end of follow-up (+ 16 weeks after last recruitment date)
   firstpossiblevax_date = "2020-06-01", # used to catch "real" vaccination dates (eg not 1900-01-01)
 )
 
