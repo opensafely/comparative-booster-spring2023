@@ -106,8 +106,8 @@ threshold <- 6
 recoder <-
   lst(
     cohort = c(
-      `cv` = "Clinically vulnerable",
-      `age75plus` = "Aged 75 years or over"
+      `Clinically vulnerable` = "cv",
+      `Aged 75 years or over` = "age75plus"
     ),
     subgroups = c(
       `Main` = "all",
