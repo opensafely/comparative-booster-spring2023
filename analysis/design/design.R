@@ -107,7 +107,8 @@ recoder <-
   lst(
     cohort = c(
       `cv` = "Clinically vulnerable",
-      `age75plus` = "Aged 75 years or over"
+      `Clinically Vulnerable`  = "cv",
+      `Aged 75 years or over` = "age75plus"
     ),
     subgroups = c(
       `Main` = "all",

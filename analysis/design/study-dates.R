@@ -1,7 +1,9 @@
 # # # # # # # # # # # # # # # # # # # # #
 # Purpose: Define the study dates that are used throughout the rest of the project
 # Notes:
-# This script is separate from the design.R script as the dates are used by the study definition as well as analysis R scripts.
+# This script is separate from the design.R script as
+#  the dates are also used by the dataset definition (as well as analysis R scripts),
+#  where they cannot be "sourced" as usual
 # # # # # # # # # # # # # # # # # # # # #
 
 ## create output directories ----
