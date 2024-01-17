@@ -777,7 +777,7 @@ dataset.death_cause_covid = cause_of_death_matches(codelists.covid_icd10)
 dataset.pericarditisemergency_date = post_baseline_ec_date(codelists.pericarditis_snomedECDS)
 
 dataset.pericarditisadmitted_date = post_baseline_admission_date(
-  codelist = codelists.pericarditis_ICD10,
+  codelist = codelists.pericarditis_icd10,
   where = admissions.admission_method.is_in(
     ["21", "22", "23", "24", "25", "2A", "2B", "2C", "2D", "28"]
   ),
@@ -786,7 +786,7 @@ dataset.pericarditisadmitted_date = post_baseline_admission_date(
 dataset.myocarditisemergency_date = post_baseline_ec_date(codelists.myocarditis_snomedECDS)
 
 dataset.myocarditisadmitted_date = post_baseline_admission_date(
-  codelist = codelists.myocarditis_ICD10,
+  codelist = codelists.myocarditis_icd10,
   where = admissions.admission_method.is_in(
     ["21", "22", "23", "24", "25", "2A", "2B", "2C", "2D", "28"]
   ),
@@ -850,8 +850,7 @@ dataset.covid_test_frequency = post_baseline_tests.where(
 # define dataset poppulation
 dataset.define_population(
   spring2023_boosters.exists_for_patient() & 
-  (dataset.age_july2023 >= 16) &
-  #(dataset.age_july2023 >= 75) | cv) &
+  (dataset.age_july2023 >= 50) &
   (registered.exists_for_patient()) & 
   ((dataset.death_date >= dataset.boost_date) | dataset.death_date.is_null())
 )

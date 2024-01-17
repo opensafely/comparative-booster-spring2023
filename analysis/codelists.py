@@ -511,8 +511,8 @@ pericarditis_icd10 = [
 ]
 
 pericarditis_snomedECDS = [
-  3238004, #Pericarditis
-  373945007,	#Pericardial effusion
+  "3238004", #Pericarditis
+  "373945007",	#Pericardial effusion
 ]
 
 myocarditis_icd10 = [
@@ -520,5 +520,5 @@ myocarditis_icd10 = [
 ]
 
 myocarditis_snomedECDS = [
-  50920009,	#Myocarditis
+  "50920009",	#Myocarditis
 ]

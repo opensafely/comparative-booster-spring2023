@@ -49,8 +49,8 @@ data_processed <- data_extract %>%
 
     ageband = cut(
       age_july2023, # use fixed date to ascertain age so that age bands align with eligibility. because age and vax date are closely matched, this doesn't cause any problems
-      breaks=c(-Inf, 16, 50, 65, 75, 80, 85, Inf),
-      labels=c("under 16", "16-49", "50-64", "65-74", "75-79", "80-84", "85+"),
+      breaks=c(-Inf, 50, 65, 75, 80, 85, Inf),
+      labels=c("under 50", "50-64", "65-74", "75-79", "80-84", "85+"),
       right=FALSE
     ),
 
@@ -233,7 +233,14 @@ data_vax_history <- data_vax %>%
   ) %>%
   ungroup() %>%
   mutate(
-    vax_interval_bigM = if_else(vax_previous_count==0, 365L*5L, vax_interval) #if spring "booster" is first recorded vaccine, then set vax_interval to be very large
+    vax_interval_bigM = if_else(vax_previous_count==0, 365L*5L, vax_interval), #if spring "booster" is first recorded vaccine, then set vax_interval to be very large
+    vax_previous_group = cut(
+      vax_previous_count,
+      breaks = c(0,2,5,6, Inf),
+      labels = c("0-1", "2-4", "5", "6+"),
+      include.lowest = TRUE,
+      right=FALSE
+    )
   )
 
 stopifnot("vax_count should be equal to vax_previous_count+1" = all(data_vax_history$vax_count == data_vax_history$vax_previous_count+1))

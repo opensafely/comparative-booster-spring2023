@@ -46,10 +46,8 @@ events_lookup <- tribble(
   # safety
   "admitted", "admitted_unplanned_1_date", "Unplanned hospitalisation", maxfup_safety,
   "emergency", "emergency_date", "A&E attendance", maxfup_safety,
-  "pericarditisemergency", "pericarditisemergency_date", "Pericarditis A&E attendance", maxfup_safety,
-  "pericarditisadmitted", "pericarditisemergency_date", "Pericarditis hospitalisation", maxfup_safety,
-  "myocarditisemergency", "myocarditisemergency_date", "Myocarditis A&E attendance", maxfup_safety,
-  "myocarditisadmitted", "myocarditisemergency_date", "Myocarditis hospitalisation", maxfup_safety,
+  "pericarditis", "pericarditis_date", "Pericarditis", maxfup_safety,
+  "myocarditis", "myocarditis_date", "Myocarditis", maxfup_safety,
 
   # negative control
   "noncoviddeath", "noncoviddeath_date", "Non-COVID-19 death", maxfup_effectiveness,
@@ -113,7 +111,9 @@ recoder <-
       `Main` = "all",
       `Age` = "ageband",
       `Clinically at-risk` = "cv",
-      `Prior SARS-CoV-2 infection status` = "prior_covid_infection"
+      `Prior COVID-19 vaccine count` = "vax_previous_group",
+      #`Prior SARS-CoV-2 infection status` = "prior_covid_infection"
+      NULL
     ),
     status = c(
       `Unmatched`= "unmatched",
@@ -137,7 +137,7 @@ recoder <-
     ),
     all = c(` ` = "all"),
     ageband = c(
-      "16-49", "50-64", "65-74", "75-79", "80-84", "85+"
+      "50-64", "65-74", "75-79", "80-84", "85+"
     ) %>% {set_names(.,.)},
     cv = c(
       `Clinically at-risk` = "TRUE",
@@ -147,6 +147,9 @@ recoder <-
       `No prior SARS-CoV-2 infection` = "FALSE",
       `Prior SARS-CoV-2 infection` = "TRUE"
     ),
+    vax_previous_group = c(
+      "0-1", "2-4", "5", "6+"
+    ) %>% {set_names(.,.)},
   )
 
 ## model formulae ----
@@ -175,15 +178,16 @@ local({
   )
   all <- c(exact, names(caliper))
     matching_variables$A = lst(exact, caliper, all)
-    # matching set B
+
+  # matching set B
   exact <- c(
     "ageband",
     "cv",
     "sex",
-    #"region",
-    "imd_Q5",
-    "vax_previous_count",
-      "multimorb",
+    "region",
+    #"imd_Q5",
+    "vax_previous_group",
+    "multimorb",
     "prior_covid_infection",
     "immunosuppressed",
     NULL
@@ -191,8 +195,8 @@ local({
   caliper <- c(
     boost_day = 3,
     age = 3,
-    vax_interval_bigM = 14,
-    #imd = 1000,
+    vax_interval_bigM = 28,
+    imd = 5000,
     NULL
   )
   all <- c(exact, names(caliper))

@@ -37,7 +37,7 @@ fs::dir_create(output_dir)
 
 metaparams <-
   expand_grid(
-    outcome = factor(c("covidemergency", "covidadmitted", "covidcritcare", "coviddeath", "noncoviddeath", "fracture")),
+    outcome = factor(c("covidemergency", "covidadmitted", "covidcritcare", "coviddeath", "noncoviddeath", "fracture", "pericarditis", "myocarditis")),
     subgroup = if(cohort=="cv") factor(recoder$subgroups[recoder$subgroups!="cv"]) else factor(recoder$subgroups),
     #outcome = factor("covidadmitted"),
     #subgroup = factor(c("all", "ageband")),
@@ -247,7 +247,6 @@ plot_estimates <- function(estimate, estimate.ll, estimate.ul, name){
 
 plot_estimates(rd, rd.ll, rd.ul, "rd")
 plot_estimates(rr, rr.ll, rr.ul, "rr")
-plot_estimates(coxhr, coxhr.ll, coxhr.ul, "coxhr")
 plot_estimates(irr, irr.ll, irr.ul, "irr")
 
 
@@ -255,51 +254,4 @@ plot_estimates(irr, irr.ll, irr.ul, "irr")
 
 eventcounts <- read_rds(here("output", cohort, matchset, "eventcounts", "eventcounts.rds"))
 write_csv(eventcounts, fs::path(output_dir, "eventcounts.csv"))
-
-
-
-
-
-
-## follow-up summary statistics ----
-## TODO remove after checking values match other `followup` outputs
-
-
-## this is inefficient because of the `rep` -- could obtain this in km scripts instead
-followup_treatment <- km_estimates %>%
-  group_by(
-    outcome, outcome_descr, subgroup, subgroup_descr, subgroup_level, subgroup_level_descr, treatment
-  ) %>%
-  summarise(
-    persontime = sum(interval*n.risk), # = sum(time*(n.censor+n.event)),
-    entry_n = first(n.risk), # = sum(n.risk - (lag(n.risk,1,0) - lag(n.censor+n.event, 1, 0))),
-    exit_n = sum(n.censor+n.event),
-    exittime_mean = weighted.mean(time,n.censor+n.event),
-    exittime_median = median(rep(time, times=n.censor+n.event)),
-    exittime_Q1 = quantile(rep(time, times=n.censor+n.event), 0.25),
-    exittime_Q3 = quantile(rep(time, times=n.censor+n.event), 0.75),
-    #exittime_min = min(time[n.censor+n.event>0]),
-    #exittime_max = max(time[n.censor+n.event>0]),
-  )
-
-write_csv(followup_treatment, fs::path(output_dir, "followup_treatment_rounded_checksame.csv"))
-
-followup <- km_estimates %>%
-  group_by(
-    outcome, outcome_descr, subgroup, subgroup_descr, subgroup_level, subgroup_level_descr
-  ) %>%
-  summarise(
-    persontime = sum(interval*n.risk), # = sum(time*(n.censor+n.event)),
-    entry_n = sum(n.risk - (lag(n.risk,1,0) - lag(n.censor+n.event, 1, 0))),
-    exit_n = sum(n.censor+n.event),
-    exittime_mean = weighted.mean(time,n.censor+n.event),
-    exittime_median = median(rep(time, times=n.censor+n.event)),
-    exittime_Q1 = quantile(rep(time, times=n.censor+n.event), 0.25),
-    exittime_Q3 = quantile(rep(time, times=n.censor+n.event), 0.75),
-    #exittime_min = min(time[n.censor+n.event>0]),
-    #exittime_max = max(time[n.censor+n.event>0]),
-  )
-
-
-write_csv(followup, fs::path(output_dir, "followup_rounded_checksame.csv"))
 

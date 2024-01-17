@@ -53,6 +53,35 @@ fs::dir_create(output_dir)
 data_processed <- read_rds(here("output", "data", "data_processed.rds"))
 
 
+# Report total number of people vaccinated in time period, by vaccine type ----
+# This output ignores cohort, so is the same across different cohorts
+# but it is more lightweight than outputting in the `data_process` script, because then
+# the release action will need to copy in the entire processed data set
+
+## unrounded totals
+total_n_unrounded <-
+  bind_rows(
+    tibble(boost_type="any", n=nrow(data_processed)),
+    count(data_processed %>% mutate(boost_type=fct_other(boost_type, keep=treatement_lookup$treatment, other_level="other")), boost_type, .drop=FALSE)
+  ) %>%
+  mutate(
+    pct = n/first(n)
+  )
+write_csv(total_n_unrounded, fs::path(output_dir, "total_allcohorts_unrounded.csv"))
+
+## rounded totals
+total_n_rounded <-
+  total_n_unrounded %>%
+  mutate(
+    n= ceiling_any(n, threshold),
+    pct = n/first(n)
+  )
+write_csv(total_n_rounded, fs::path(output_dir, "total_allcohorts_rounded.csv"))
+
+
+
+
+
 ## Define selection criteria ----
 data_criteria <- data_processed %>%
   filter(!!cohort_sym) %>%
@@ -68,23 +97,25 @@ data_criteria <- data_processed %>%
     has_region = !is.na(region),
     #has_msoa = !is.na(msoa),
     isnot_hscworker = !hscworker,
-    isnot_carehomeresident = !care_home_combined,
+    #isnot_carehomeresident = !care_home_combined,
     isnot_endoflife = !endoflife,
-    isnot_housebound = !housebound,
+    #isnot_housebound = !housebound,
     no_prior_pfizerBA45 = !vaxhist_pfizerBA45,
     no_prior_sanofi = !vaxhist_sanofi,
     vax_dates_possible,
     vax_intervals_atleast14days,
     vax_type_pfixer_or_sanofi = boost_type %in% c("pfizerBA45", "sanofi"),
+    vax_previous_2plus = (vax_previous_count >= 2),
     has_norecentcovid = ((boost_date - anycovid_0_date) >= 28) | is.na(anycovid_0_date),
     isnot_inhospital = !inhospital,
 
     include = (
       vax_dates_possible &
       vax_intervals_atleast14days & vax_type_pfixer_or_sanofi & no_prior_pfizerBA45 & no_prior_sanofi &
+      vax_previous_2plus &
       has_age & has_sex & has_imd & has_region & #has_ethnicity &
       isnot_hscworker &
-      isnot_carehomeresident & isnot_endoflife & isnot_housebound &
+      isnot_endoflife &
       has_norecentcovid &
       isnot_inhospital
     ),
@@ -106,12 +137,13 @@ data_inclusioncriteria <- data_criteria %>%
     c0 = TRUE,
     c1 = c0 & vax_type_pfixer_or_sanofi,
     c2 = c1 & vax_dates_possible & vax_intervals_atleast14days & no_prior_pfizerBA45 & no_prior_sanofi,
-    c3_1 = c2 & (has_age & has_sex & has_imd & has_region),
-    c3_2 = c2 & (isnot_hscworker),
-    c3_3 = c2 & (isnot_carehomeresident & isnot_endoflife & isnot_housebound),
-    c3_4 = c2 & (has_norecentcovid),
-    c3_5 = c2 & (isnot_inhospital),
-    c3 = c3_1 & c3_2 & c3_3 & c3_4 & c3_5
+    c3 = c2 & vax_previous_2plus,
+    c4_1 = c3 & (has_age & has_sex & has_imd & has_region),
+    c4_2 = c3 & (isnot_hscworker),
+    c4_3 = c3 & (isnot_endoflife),
+    c4_4 = c3 & (has_norecentcovid),
+    c4_5 = c3 & (isnot_inhospital),
+    c4 = c4_1 & c4_2 & c4_3 & c4_4 & c4_5
   ) %>%
   filter(c0)
 
@@ -155,13 +187,14 @@ create_flowchart <- function(round_level = 1){
       criteria = fct_case_when(
         crit == "c1" ~ "Received COVID-19 vaccine between 1 April and 30 June 2023",
         crit == "c2" ~ "  with no prior vaccine within 14 days and no prior PfizerBA45 or Sanofi",
-        crit == "c3_1" ~ "    no missing demographic information",
-        crit == "c3_2" ~ "    not a health and social care worker",
-        crit == "c3_3" ~ "    not a care/nursing home resident, end-of-life or housebound",
-        crit == "c3_4" ~ "    no COVID-19-related events within 28 days",
-        crit == "c3_5" ~ "    not admitted in hospital at time of booster",
-        crit == "c3" ~ "  included in matching run",
-        TRUE ~ "NA_character_boop"
+        crit == "c3" ~ "  with at least 2 previous COVID-19 vaccine doses",
+        crit == "c4_1" ~ "    no missing demographic information",
+        crit == "c4_2" ~ "    not a health and social care worker",
+        crit == "c4_3" ~ "    not end-of-life",
+        crit == "c4_4" ~ "    no documented COVID-19 infection/disease within prior 28 days",
+        crit == "c4_5" ~ "    not admitted in hospital at time of booster",
+        crit == "c4" ~ "  included in matching run",
+        TRUE ~ "NA_character_boop" # should not appear
       )
     )
 
@@ -181,8 +214,8 @@ write_csv(data_flowchart_rounded, fs::path(output_dir, "flowchart_rounded.csv"))
 ## unrounded totals
 total_n_unrounded <-
   bind_rows(
-    tibble(boost_type="Any", n=nrow(data_inclusioncriteria)),
-    count(data_inclusioncriteria %>% mutate(boost_type=fct_other(boost_type, keep=treatement_lookup$treatment), other_level="other"), boost_type, .drop=FALSE)
+    tibble(boost_type="any", n=nrow(data_inclusioncriteria)),
+    count(data_inclusioncriteria %>% mutate(boost_type=fct_other(boost_type, keep=treatement_lookup$treatment, other_level="other")), boost_type, .drop=FALSE)
   ) %>%
   mutate(
     pct = n/first(n)
@@ -208,7 +241,7 @@ var_labels <- list(
   N  ~ "Total N",
   treatment_descr ~ "Vaccine type",
   vax_interval ~ "Days since previous vaccine",
-  vax_previous_count ~ "Previous vaccine count",
+  vax_previous_group ~ "Previous vaccine count",
   age_july2023 ~ "Age",
   ageband ~ "Age band",
   sex ~ "Sex",
@@ -216,6 +249,9 @@ var_labels <- list(
   imd_Q5 ~ "Deprivation",
   region ~ "Region",
   cv ~ "Clinically at-risk",
+
+  housebound ~ "Clinically housebound",
+  care_home_combined ~ "Care/nursing home resident",
 
   sev_obesity ~ "Body Mass Index > 40 kg/m^2",
 
@@ -245,7 +281,15 @@ var_labels <- list(
 
   prior_tests_cat ~ "Number of SARS-CoV-2 tests",
 
-  prior_covid_infection ~ "Prior documented SARS-CoV-2 infection"
+  prior_covid_infection ~ "Prior documented SARS-CoV-2 infection",
+
+  vaxhist_pfizer  ~ "Previously received Pfizer (original)",
+  vaxhist_az  ~ "Previously received AZ",
+  vaxhist_moderna  ~ "Previously received Moderna",
+  vaxhist_pfizerBA1  ~ "Previously received Pfizer/BA.1",
+  vaxhist_pfizerXBB15  ~ "Previously received Pfizer/XBB.1.5",
+  vaxhist_modernaomicron  ~ "Previously received Moderna/Omicron",
+  vaxhist_modernaXBB15  ~ "Previously received Moderna/XBB.1.5"
 ) %>%
   set_names(., map_chr(., all.vars))
 
@@ -264,10 +308,10 @@ tab_summary_prematch <-
   tbl_summary(
     by = treatment_descr,
     label = unname(var_labels[names(.)]),
-    statistic = list(
+    statistic = lst(
       N = "{N}",
-      age_july2023="{mean} ({sd})",
-      vax_interval="{mean} ({sd})"
+      #age_july2023="{mean} ({sd})",
+      #vax_interval="{mean} ({sd})"
     ),
   )
 
