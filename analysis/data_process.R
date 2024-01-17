@@ -152,6 +152,11 @@ data_processed <- data_extract %>%
     fracturedeath_date = if_else(death_cause_fracture, death_date, NA_Date_),
     fracture_date = pmin(fractureemergency_date, fractureadmitted_date, fracturedeath_date, na.rm=TRUE),
 
+    pericarditisdeath_date = if_else(death_cause_pericarditis, death_date, NA_Date_),
+    pericarditis_date = pmin(pericarditisemergency_date, pericarditisadmitted_date, pericarditisdeath_date, na.rm=TRUE),
+
+    myocarditisdeath_date = if_else(death_cause_myocarditis, death_date, NA_Date_),
+    myocarditis_date = pmin(myocarditisemergency_date, myocarditisadmitted_date, myocarditisdeath_date, na.rm=TRUE),
 
     # define cohorts
 

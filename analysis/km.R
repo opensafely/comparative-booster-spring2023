@@ -53,8 +53,10 @@ if(length(args)==0){
 
 subgroup_sym <- sym(subgroup)
 
-# create output directories ----
+# get outcome-specific max follow-up
+maxfup <- events_lookup %>% filter(event==outcome) %>% pull(maxfup)
 
+# create output directories ----
 output_dir <- here("output", cohort, matchset, "km", subgroup, outcome)
 fs::dir_create(output_dir)
 

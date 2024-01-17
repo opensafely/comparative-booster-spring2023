@@ -505,3 +505,20 @@ fractures_snomedECDS = [
     "481870042","4948002","367527001", "74395007", "95851007"
   ]
 
+
+pericarditis_icd10 = [
+  "I30"
+]
+
+pericarditis_snomedECDS = [
+  3238004, #Pericarditis
+  373945007,	#Pericardial effusion
+]
+
+myocarditis_icd10 = [
+ "I514", "I41", "I40"
+]
+
+myocarditis_snomedECDS = [
+  50920009,	#Myocarditis
+]

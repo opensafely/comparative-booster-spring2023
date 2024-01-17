@@ -21,30 +21,39 @@ study_dates <-
 
 # define outcomes ----
 
+# maximum follow-up duration
+
+maxfup_effectiveness <- 112L
+maxfup_safety <- 28L
+
 events_lookup <- tribble(
-  ~event, ~event_var, ~event_descr,
+  ~event, ~event_var, ~event_descr, ~maxfup,
 
   # other
-  "test", "covid_test_date", "SARS-CoV-2 test",
+  "test", "covid_test_date", "SARS-CoV-2 test", maxfup_effectiveness,
 
   # effectiveness
-  "postest", "positive_test_date", "Positive SARS-CoV-2 test",
-  "covidemergency", "covidemergency_date", "COVID-19 A&E attendance",
-  "covidadmitted", "covidadmitted_date", "COVID-19 hospitalisation",
-  "noncovidadmitted", "noncovidadmitted_date", "Non-COVID-19 hospitalisation",
-  "covidadmittedproxy1", "covidadmittedproxy1_date", "COVID-19 hospitalisation (A&E proxy)",
-  "covidadmittedproxy2", "covidadmittedproxy2_date", "COVID-19 hospitalisation (A&E proxy v2)",
-  "covidcritcare", "covidcritcare_date", "COVID-19 critical care",
-  "coviddeath", "coviddeath_date", "COVID-19 death",
-  "death", "death_date", "Any death",
+  "postest", "positive_test_date", "Positive SARS-CoV-2 test", maxfup_effectiveness,
+  "covidemergency", "covidemergency_date", "COVID-19 A&E attendance", maxfup_effectiveness,
+  "covidadmitted", "covidadmitted_date", "COVID-19 hospitalisation", maxfup_effectiveness,
+  "noncovidadmitted", "noncovidadmitted_date", "Non-COVID-19 hospitalisation", maxfup_effectiveness,
+  "covidadmittedproxy1", "covidadmittedproxy1_date", "COVID-19 hospitalisation (A&E proxy)", maxfup_effectiveness,
+  "covidadmittedproxy2", "covidadmittedproxy2_date", "COVID-19 hospitalisation (A&E proxy v2)", maxfup_effectiveness,
+  "covidcritcare", "covidcritcare_date", "COVID-19 critical care", maxfup_effectiveness,
+  "coviddeath", "coviddeath_date", "COVID-19 death", maxfup_effectiveness,
+  "death", "death_date", "Any death", maxfup_effectiveness,
 
   # safety
-  "admitted", "admitted_unplanned_1_date", "Unplanned hospitalisation",
-  "emergency", "emergency_date", "A&E attendance",
+  "admitted", "admitted_unplanned_1_date", "Unplanned hospitalisation", maxfup_safety,
+  "emergency", "emergency_date", "A&E attendance", maxfup_safety,
+  "pericarditisemergency", "pericarditisemergency_date", "Pericarditis A&E attendance", maxfup_safety,
+  "pericarditisadmitted", "pericarditisemergency_date", "Pericarditis hospitalisation", maxfup_safety,
+  "myocarditisemergency", "myocarditisemergency_date", "Myocarditis A&E attendance", maxfup_safety,
+  "myocarditisadmitted", "myocarditisemergency_date", "Myocarditis hospitalisation", maxfup_safety,
 
   # negative control
-  "noncoviddeath", "noncoviddeath_date", "Non-COVID-19 death",
-  "fracture", "fracture_date", "Fracture",
+  "noncoviddeath", "noncoviddeath_date", "Non-COVID-19 death", maxfup_effectiveness,
+  "fracture", "fracture_date", "Fracture", maxfup_effectiveness,
 )
 
 
@@ -87,16 +96,7 @@ treatement_lookup <-
   )
 
 # where to split follow-up time after recruitment
-#postbaselinecuts <- c(0,7,14,28,42,56,70,84,112,140,168,196)
-postbaselinecuts <- c(0,7,14,28,56,84,112,140,168,196)
-
-# maximum follow-up duration
-
-maxfup <- max(postbaselinecuts)
-
-# define calendar date cut points for calendar period specific analysis ----
-# used for variant era specific analyses
-#calendarcuts <- c(study_dates$studystart_date, as.Date("2021-12-15"), study_dates$followupend_date+1)
+postbaselinecuts <- c(0,7,14,28,56,84,112)
 
 # redaction threshold
 threshold <- 6

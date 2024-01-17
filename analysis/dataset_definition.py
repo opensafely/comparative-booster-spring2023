@@ -687,6 +687,7 @@ dataset.covidadmitted_0_date = (
 #######################################################################################
 
 
+### Effectiveness outcomes 
 
 # Positive case identification after study start date
 dataset.primary_care_covid_case_date = (
@@ -769,8 +770,41 @@ dataset.death_date = ons_deaths.date
 # covid-related death (stated anywhere on death certificate)
 dataset.death_cause_covid = cause_of_death_matches(codelists.covid_icd10)
 
-dataset.fractureemergency_date = post_baseline_ec_date(codelists.fractures_snomedECDS)
 
+
+### Safety outcomes (within 28 days)
+
+dataset.pericarditisemergency_date = post_baseline_ec_date(codelists.pericarditis_snomedECDS)
+
+dataset.pericarditisadmitted_date = post_baseline_admission_date(
+  codelist = codelists.pericarditis_ICD10,
+  where = admissions.admission_method.is_in(
+    ["21", "22", "23", "24", "25", "2A", "2B", "2C", "2D", "28"]
+  ),
+)
+
+dataset.myocarditisemergency_date = post_baseline_ec_date(codelists.myocarditis_snomedECDS)
+
+dataset.myocarditisadmitted_date = post_baseline_admission_date(
+  codelist = codelists.myocarditis_ICD10,
+  where = admissions.admission_method.is_in(
+    ["21", "22", "23", "24", "25", "2A", "2B", "2C", "2D", "28"]
+  ),
+)
+
+
+# thrombocytopaenia
+# Thrombosis with Thrombocytopenia Syndrome (TTS)
+# anaphalaxis
+# thromboembolic events
+# venous or arterial events
+# Guillain-Barre syndrome ?
+
+
+
+### Negative control outcomes 
+
+dataset.fractureemergency_date = post_baseline_ec_date(codelists.fractures_snomedECDS)
 
 dataset.fractureadmitted_date = post_baseline_admission_date(
     codelist=codelists.fractures_icd10,
@@ -782,7 +816,10 @@ dataset.fractureadmitted_date = post_baseline_admission_date(
 # fracture-related death (stated anywhere on death certificate)
 #dataset.fracturedeath_date = death_cause_matches(codelists.fractures_icd10).date
 dataset.death_cause_fracture = cause_of_death_matches(codelists.fractures_icd10)
+dataset.death_cause_pericarditis = cause_of_death_matches(codelists.pericarditis_icd10)
+dataset.death_cause_myocarditis = cause_of_death_matches(codelists.myocarditis_icd10)
 
+## SAFETY outcomes
 
 
 # censor date (minimum of deregistration or death or 20 weeks after baseline)

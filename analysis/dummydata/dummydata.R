@@ -329,6 +329,14 @@ sim_list = lst(
     ~rbernoulli(n=..n, p = 0.05),
     needs="death_day"
   ),
+  death_cause_pericarditis = bn_node(
+    ~rbernoulli(n=..n, p = 0.001),
+    needs="death_day"
+  ),
+  death_cause_myocarditis = bn_node(
+    ~rbernoulli(n=..n, p = 0.001),
+    needs="death_day"
+  ),
 
   # fractures
   fractureemergency_day = bn_node(
@@ -339,6 +347,26 @@ sim_list = lst(
   fractureadmitted_day = bn_node(
     ~as.integer(runif(n=..n, boost_day, boost_day+100)),
     missing_rate = ~0.97
+  ),
+
+  pericarditisemergency_day = bn_node(
+    ~as.integer(runif(n=..n, boost_day, boost_day+100)),
+    missing_rate = ~0.99
+  ),
+
+  pericarditisadmitted_day = bn_node(
+    ~as.integer(runif(n=..n, boost_day, boost_day+100)),
+    missing_rate = ~0.99
+  ),
+
+  myocarditisemergency_day = bn_node(
+    ~as.integer(runif(n=..n, boost_day, boost_day+100)),
+    missing_rate = ~0.99
+  ),
+
+  myocarditisadmitted_day = bn_node(
+    ~as.integer(runif(n=..n, boost_day, boost_day+100)),
+    missing_rate = ~0.99
   ),
 
 
@@ -385,6 +413,14 @@ write_feather(dummydata_processed, sink = here("analysis", "dummydata", "dummyex
 # dummydata_processed0 <- read_feather(here("analysis", "dummydata", "dummyextract.arrow"))
 #
 # dummydata_processed <- dummydata_processed0 %>%
-#   rename(preg_group=preg22_group)
+#   mutate(
+#     myocarditisemergency_date =  if_else(runif(n=n())<0.995, as.Date(NA_integer_), as.integer(runif(n=n(), 0, 100))+boost_date),
+#     myocarditisadmitted_date =  if_else(runif(n=n())<0.995, as.Date(NA_integer_), as.integer(runif(n=n(), 0, 100))+boost_date),
+#     pericarditisemergency_date = if_else(runif(n=n())<0.995, as.Date(NA_integer_), as.integer(runif(n=n(), 0, 100))+boost_date),
+#     pericarditisadmitted_date =  if_else(runif(n=n())<0.995, as.Date(NA_integer_), as.integer(runif(n=n(), 0, 100))+boost_date),
+#     death_cause_pericarditis = if_else(!is.na(death_date), runif(n=n())>0.99, NA),
+#     death_cause_myocarditis = if_else(!is.na(death_date), runif(n=n())>0.99, NA)
+#   )
+#
 # write_feather(dummydata_processed, sink = here("analysis", "dummydata", "dummyextract.arrow"))
-
+#
