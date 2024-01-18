@@ -850,7 +850,7 @@ dataset.covid_test_frequency = post_baseline_tests.where(
 # define dataset poppulation
 dataset.define_population(
   spring2023_boosters.exists_for_patient() & 
-  (dataset.age_july2023 >= 50) &
+  (dataset.age_july2023 >= 50) & (dataset.age_july2023 <= 110) &
   (registered.exists_for_patient()) & 
   ((dataset.death_date >= dataset.boost_date) | dataset.death_date.is_null())
 )
