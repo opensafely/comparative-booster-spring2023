@@ -305,7 +305,7 @@ tab_summary_baseline <-
   tbl_summary(
     by = treatment_descr,
     label = unname(var_labels[names(.)]),
-    statistic = list(
+    statistic = lst(
       N = "{N}",
       #age_july2023="{mean} ({sd})",
       #vax_interval="{mean} ({sd})",
