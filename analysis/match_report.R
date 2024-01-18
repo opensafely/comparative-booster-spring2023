@@ -227,14 +227,18 @@ var_labels <- list(
   N  ~ "Total N",
   treatment_descr ~ "Vaccine type",
   vax_interval ~ "Days since previous vaccine",
-  vax_previous_count ~ "Previous vaccine count",
+  vax_previous_group ~ "Previous vaccine count",
   age_july2023 ~ "Age",
   ageband ~ "Age band",
   sex ~ "Sex",
   ethnicity ~ "Ethnicity",
   imd_Q5 ~ "Deprivation",
   region ~ "Region",
+
   cv ~ "Clinically at-risk",
+
+  housebound ~ "Clinically housebound",
+  care_home_combined ~ "Care/nursing home resident",
 
   sev_obesity ~ "Body Mass Index > 40 kg/m^2",
 
@@ -262,7 +266,15 @@ var_labels <- list(
 
   prior_tests_cat ~ "Number of SARS-CoV-2 tests",
 
-  prior_covid_infection ~ "Prior documented SARS-CoV-2 infection"
+  prior_covid_infection ~ "Prior documented SARS-CoV-2 infection",
+
+  vaxhist_pfizer  ~ "Previously received Pfizer (original)",
+  vaxhist_az  ~ "Previously received AZ",
+  vaxhist_moderna  ~ "Previously received Moderna",
+  vaxhist_pfizerBA1  ~ "Previously received Pfizer/BA.1",
+  vaxhist_pfizerXBB15  ~ "Previously received Pfizer/XBB.1.5",
+  vaxhist_modernaomicron  ~ "Previously received Moderna/Omicron",
+  vaxhist_modernaXBB15  ~ "Previously received Moderna/XBB.1.5"
 ) %>%
   set_names(., map_chr(., all.vars))
 
@@ -293,10 +305,11 @@ tab_summary_baseline <-
   tbl_summary(
     by = treatment_descr,
     label = unname(var_labels[names(.)]),
+    #type = all_continuous() ~ "continuous2",
     statistic = list(
-      N = "{N}",
-      age_july2023="{mean} ({sd})",
-      vax_interval="{mean} ({sd})"
+      N ~ "{N}",
+      #all_continuous() ~ c("Mean (SD)" = "{mean} ({sd})", "Median (Q1, Q3)"= "{median} ({p25}, {p75})")
+      all_continuous() ~ "{median} ({p25}, {p75});  {mean} ({sd})"
     ),
   )
 
@@ -357,7 +370,7 @@ plot_smd <-
   ggplot(data_smd)+
   geom_point(aes(x=smd, y=level))+
   geom_rect(aes(alpha = variable_card, ymin = rev(cardn)-0.5, ymax =rev(cardn+0.5)), xmin = -Inf, xmax = Inf, fill='grey', colour="transparent") +
-  scale_alpha_continuous(range=c(0,0.3), guide=FALSE)+
+  scale_alpha_continuous(range=c(0,0.3), guide="none")+
   labs(
     x="Standardised mean difference",
     y=NULL,
@@ -404,7 +417,7 @@ create_flowchart <- function(flowchart, threshold){
       #pct_all = n_level1 / first(n),
       pct_step = n / n_lag,
       level=1,
-      crit = "c4",
+      crit = "c5",
       criteria = factor("  and successfully matched")
     ) %>%
     ungroup() %>%

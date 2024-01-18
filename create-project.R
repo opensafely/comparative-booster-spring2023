@@ -70,7 +70,7 @@ action_selection <- function(cohort){
         rds = glue("output/{cohort}/*.rds"),
       ),
       moderately_sensitive = lst(
-        csv = glue("output/{cohort}/*.csv")
+        csv = glue("output/{cohort}/*.csv"),
       )
     ),
 
@@ -272,6 +272,8 @@ actions_list <- splice(
   action_contrasts("age75plus", "A", "all", "coviddeath"),
   action_contrasts("age75plus", "A", "all", "noncoviddeath"),
   action_contrasts("age75plus", "A", "all", "fracture"),
+  action_contrasts("age75plus", "A", "all", "pericarditis"),
+  action_contrasts("age75plus", "A", "all", "myocarditis"),
 
   comment("### Models by age-band ('ageband')"),
 
@@ -281,7 +283,8 @@ actions_list <- splice(
   action_contrasts("age75plus", "A", "ageband", "coviddeath"),
   action_contrasts("age75plus", "A", "ageband", "noncoviddeath"),
   action_contrasts("age75plus", "A", "ageband", "fracture"),
-
+  action_contrasts("age75plus", "A", "ageband", "pericarditis"),
+  action_contrasts("age75plus", "A", "ageband", "myocarditis"),
 
   comment("### Models by clinically vulnerable group ('cv')"),
 
@@ -291,25 +294,30 @@ actions_list <- splice(
   action_contrasts("age75plus", "A", "cv", "coviddeath"),
   action_contrasts("age75plus", "A", "cv", "noncoviddeath"),
   action_contrasts("age75plus", "A", "cv", "fracture"),
+  action_contrasts("age75plus", "A", "cv", "pericarditis"),
+  action_contrasts("age75plus", "A", "cv", "myocarditis"),
 
+  comment("### Models by vax history ('vax_previous_group')"),
 
-  comment("### Models by prior infection ('prior_covid_infection')"),
+  action_contrasts("age75plus", "A", "vax_previous_group", "covidemergency"),
+  action_contrasts("age75plus", "A", "vax_previous_group", "covidadmitted"),
+  action_contrasts("age75plus", "A", "vax_previous_group", "covidcritcare"),
+  action_contrasts("age75plus", "A", "vax_previous_group", "coviddeath"),
+  action_contrasts("age75plus", "A", "vax_previous_group", "noncoviddeath"),
+  action_contrasts("age75plus", "A", "vax_previous_group", "fracture"),
+  action_contrasts("age75plus", "A", "vax_previous_group", "pericarditis"),
+  action_contrasts("age75plus", "A", "vax_previous_group", "myocarditis"),
 
-  action_contrasts("age75plus", "A", "prior_covid_infection", "covidemergency"),
-  action_contrasts("age75plus", "A", "prior_covid_infection", "covidadmitted"),
-  action_contrasts("age75plus", "A", "prior_covid_infection", "covidcritcare"),
-  action_contrasts("age75plus", "A", "prior_covid_infection", "coviddeath"),
-  action_contrasts("age75plus", "A", "prior_covid_infection", "noncoviddeath"),
-  action_contrasts("age75plus", "A", "prior_covid_infection", "fracture"),
-
-  comment("### Models by vax history ('vax_previous_count')"),
-
-  action_contrasts("age75plus", "A", "vax_previous_count", "covidemergency"),
-  action_contrasts("age75plus", "A", "vax_previous_count", "covidadmitted"),
-  action_contrasts("age75plus", "A", "vax_previous_count", "covidcritcare"),
-  action_contrasts("age75plus", "A", "vax_previous_count", "coviddeath"),
-  action_contrasts("age75plus", "A", "vax_previous_count", "noncoviddeath"),
-  action_contrasts("age75plus", "A", "vax_previous_count", "fracture"),
+  # comment("### Models by prior infection ('prior_covid_infection')"),
+  #
+  # action_contrasts("age75plus", "A", "prior_covid_infection", "covidemergency"),
+  # action_contrasts("age75plus", "A", "prior_covid_infection", "covidadmitted"),
+  # action_contrasts("age75plus", "A", "prior_covid_infection", "covidcritcare"),
+  # action_contrasts("age75plus", "A", "prior_covid_infection", "coviddeath"),
+  # action_contrasts("age75plus", "A", "prior_covid_infection", "noncoviddeath"),
+  # action_contrasts("age75plus", "A", "prior_covid_infection", "fracture"),
+  # action_contrasts("age75plus", "A", "prior_covid_infection", "pericarditis"),
+  # action_contrasts("age75plus", "A", "prior_covid_infection", "myocarditis"),
 
   action_eventcounts("age75plus", "A"),
 
@@ -325,6 +333,8 @@ actions_list <- splice(
   action_contrasts("age75plus", "B", "all", "coviddeath"),
   action_contrasts("age75plus", "B", "all", "noncoviddeath"),
   action_contrasts("age75plus", "B", "all", "fracture"),
+  action_contrasts("age75plus", "B", "all", "pericarditis"),
+  action_contrasts("age75plus", "B", "all", "myocarditis"),
 
   comment("### Models by age-band ('ageband')"),
 
@@ -334,6 +344,8 @@ actions_list <- splice(
   action_contrasts("age75plus", "B", "ageband", "coviddeath"),
   action_contrasts("age75plus", "B", "ageband", "noncoviddeath"),
   action_contrasts("age75plus", "B", "ageband", "fracture"),
+  action_contrasts("age75plus", "B", "ageband", "pericarditis"),
+  action_contrasts("age75plus", "B", "ageband", "myocarditis"),
 
   comment("### Models by clinically vulnerable group ('cv')"),
 
@@ -343,26 +355,30 @@ actions_list <- splice(
   action_contrasts("age75plus", "B", "cv", "coviddeath"),
   action_contrasts("age75plus", "B", "cv", "noncoviddeath"),
   action_contrasts("age75plus", "B", "cv", "fracture"),
+  action_contrasts("age75plus", "B", "cv", "pericarditis"),
+  action_contrasts("age75plus", "B", "cv", "myocarditis"),
 
+  comment("### Models by vax history ('vax_previous_group')"),
 
-  comment("### Models by vax history ('vax_previous_count')"),
+  action_contrasts("age75plus", "B", "vax_previous_group", "covidemergency"),
+  action_contrasts("age75plus", "B", "vax_previous_group", "covidadmitted"),
+  action_contrasts("age75plus", "B", "vax_previous_group", "covidcritcare"),
+  action_contrasts("age75plus", "B", "vax_previous_group", "coviddeath"),
+  action_contrasts("age75plus", "B", "vax_previous_group", "noncoviddeath"),
+  action_contrasts("age75plus", "B", "vax_previous_group", "fracture"),
+  action_contrasts("age75plus", "B", "vax_previous_group", "pericarditis"),
+  action_contrasts("age75plus", "B", "vax_previous_group", "myocarditis"),
 
-  action_contrasts("age75plus", "B", "vax_previous_count", "covidemergency"),
-  action_contrasts("age75plus", "B", "vax_previous_count", "covidadmitted"),
-  action_contrasts("age75plus", "B", "vax_previous_count", "covidcritcare"),
-  action_contrasts("age75plus", "B", "vax_previous_count", "coviddeath"),
-  action_contrasts("age75plus", "B", "vax_previous_count", "noncoviddeath"),
-  action_contrasts("age75plus", "B", "vax_previous_count", "fracture"),
-
-
-  comment("### Models by prior infection ('prior_covid_infection')"),
-
-  action_contrasts("age75plus", "B", "prior_covid_infection", "covidemergency"),
-  action_contrasts("age75plus", "B", "prior_covid_infection", "covidadmitted"),
-  action_contrasts("age75plus", "B", "prior_covid_infection", "covidcritcare"),
-  action_contrasts("age75plus", "B", "prior_covid_infection", "coviddeath"),
-  action_contrasts("age75plus", "B", "prior_covid_infection", "noncoviddeath"),
-  action_contrasts("age75plus", "B", "prior_covid_infection", "fracture"),
+  # comment("### Models by prior infection ('prior_covid_infection')"),
+  #
+  # action_contrasts("age75plus", "B", "prior_covid_infection", "covidemergency"),
+  # action_contrasts("age75plus", "B", "prior_covid_infection", "covidadmitted"),
+  # action_contrasts("age75plus", "B", "prior_covid_infection", "covidcritcare"),
+  # action_contrasts("age75plus", "B", "prior_covid_infection", "coviddeath"),
+  # action_contrasts("age75plus", "B", "prior_covid_infection", "noncoviddeath"),
+  # action_contrasts("age75plus", "B", "prior_covid_infection", "fracture"),
+  # action_contrasts("age75plus", "B", "prior_covid_infection", "pericarditis"),
+  # action_contrasts("age75plus", "B", "prior_covid_infection", "myocarditis"),
 
 
   action_eventcounts("age75plus", "B"),
@@ -385,6 +401,8 @@ actions_list <- splice(
   action_contrasts("cv", "A", "all", "coviddeath"),
   action_contrasts("cv", "A", "all", "noncoviddeath"),
   action_contrasts("cv", "A", "all", "fracture"),
+  action_contrasts("cv", "A", "all", "pericarditis"),
+  action_contrasts("cv", "A", "all", "myocarditis"),
 
   comment("### Models by age-band ('ageband')"),
 
@@ -394,24 +412,30 @@ actions_list <- splice(
   action_contrasts("cv", "A", "ageband", "coviddeath"),
   action_contrasts("cv", "A", "ageband", "noncoviddeath"),
   action_contrasts("cv", "A", "ageband", "fracture"),
+  action_contrasts("cv", "A", "ageband", "pericarditis"),
+  action_contrasts("cv", "A", "ageband", "myocarditis"),
 
-  comment("### Models by prior infection ('prior_covid_infection')"),
+  comment("### Models by vax history ('vax_previous_group')"),
 
-  action_contrasts("cv", "A", "prior_covid_infection", "covidemergency"),
-  action_contrasts("cv", "A", "prior_covid_infection", "covidadmitted"),
-  action_contrasts("cv", "A", "prior_covid_infection", "covidcritcare"),
-  action_contrasts("cv", "A", "prior_covid_infection", "coviddeath"),
-  action_contrasts("cv", "A", "prior_covid_infection", "noncoviddeath"),
-  action_contrasts("cv", "A", "prior_covid_infection", "fracture"),
+  action_contrasts("cv", "A", "vax_previous_group", "covidemergency"),
+  action_contrasts("cv", "A", "vax_previous_group", "covidadmitted"),
+  action_contrasts("cv", "A", "vax_previous_group", "covidcritcare"),
+  action_contrasts("cv", "A", "vax_previous_group", "coviddeath"),
+  action_contrasts("cv", "A", "vax_previous_group", "noncoviddeath"),
+  action_contrasts("cv", "A", "vax_previous_group", "fracture"),
+  action_contrasts("cv", "A", "vax_previous_group", "pericarditis"),
+  action_contrasts("cv", "A", "vax_previous_group", "myocarditis"),
 
-  comment("### Models by vax history ('vax_previous_count')"),
-
-  action_contrasts("cv", "A", "vax_previous_count", "covidemergency"),
-  action_contrasts("cv", "A", "vax_previous_count", "covidadmitted"),
-  action_contrasts("cv", "A", "vax_previous_count", "covidcritcare"),
-  action_contrasts("cv", "A", "vax_previous_count", "coviddeath"),
-  action_contrasts("cv", "A", "vax_previous_count", "noncoviddeath"),
-  action_contrasts("cv", "A", "vax_previous_count", "fracture"),
+  # comment("### Models by prior infection ('prior_covid_infection')"),
+  #
+  # action_contrasts("cv", "A", "prior_covid_infection", "covidemergency"),
+  # action_contrasts("cv", "A", "prior_covid_infection", "covidadmitted"),
+  # action_contrasts("cv", "A", "prior_covid_infection", "covidcritcare"),
+  # action_contrasts("cv", "A", "prior_covid_infection", "coviddeath"),
+  # action_contrasts("cv", "A", "prior_covid_infection", "noncoviddeath"),
+  # action_contrasts("cv", "A", "prior_covid_infection", "fracture"),
+  # action_contrasts("cv", "A", "prior_covid_infection", "pericarditis"),
+  # action_contrasts("cv", "A", "prior_covid_infection", "myocarditis"),
 
 
   action_eventcounts("cv", "A"),
@@ -428,6 +452,8 @@ actions_list <- splice(
   action_contrasts("cv", "B", "all", "coviddeath"),
   action_contrasts("cv", "B", "all", "noncoviddeath"),
   action_contrasts("cv", "B", "all", "fracture"),
+  action_contrasts("cv", "B", "all", "pericarditis"),
+  action_contrasts("cv", "B", "all", "myocarditis"),
 
   comment("### Models by age-band ('ageband')"),
 
@@ -437,26 +463,31 @@ actions_list <- splice(
   action_contrasts("cv", "B", "ageband", "coviddeath"),
   action_contrasts("cv", "B", "ageband", "noncoviddeath"),
   action_contrasts("cv", "B", "ageband", "fracture"),
+  action_contrasts("cv", "B", "ageband", "pericarditis"),
+  action_contrasts("cv", "B", "ageband", "myocarditis"),
 
 
-  comment("### Models by vax history ('vax_previous_count')"),
+  comment("### Models by vax history ('vax_previous_group')"),
 
-  action_contrasts("cv", "B", "vax_previous_count", "covidemergency"),
-  action_contrasts("cv", "B", "vax_previous_count", "covidadmitted"),
-  action_contrasts("cv", "B", "vax_previous_count", "covidcritcare"),
-  action_contrasts("cv", "B", "vax_previous_count", "coviddeath"),
-  action_contrasts("cv", "B", "vax_previous_count", "noncoviddeath"),
-  action_contrasts("cv", "B", "vax_previous_count", "fracture"),
+  action_contrasts("cv", "B", "vax_previous_group", "covidemergency"),
+  action_contrasts("cv", "B", "vax_previous_group", "covidadmitted"),
+  action_contrasts("cv", "B", "vax_previous_group", "covidcritcare"),
+  action_contrasts("cv", "B", "vax_previous_group", "coviddeath"),
+  action_contrasts("cv", "B", "vax_previous_group", "noncoviddeath"),
+  action_contrasts("cv", "B", "vax_previous_group", "fracture"),
+  action_contrasts("cv", "B", "vax_previous_group", "pericarditis"),
+  action_contrasts("cv", "B", "vax_previous_group", "myocarditis"),
 
-
-  comment("### Models by prior infection ('prior_covid_infection')"),
-
-  action_contrasts("cv", "B", "prior_covid_infection", "covidemergency"),
-  action_contrasts("cv", "B", "prior_covid_infection", "covidadmitted"),
-  action_contrasts("cv", "B", "prior_covid_infection", "covidcritcare"),
-  action_contrasts("cv", "B", "prior_covid_infection", "coviddeath"),
-  action_contrasts("cv", "B", "prior_covid_infection", "noncoviddeath"),
-  action_contrasts("cv", "B", "prior_covid_infection", "fracture"),
+  # comment("### Models by prior infection ('prior_covid_infection')"),
+  #
+  # action_contrasts("cv", "B", "prior_covid_infection", "covidemergency"),
+  # action_contrasts("cv", "B", "prior_covid_infection", "covidadmitted"),
+  # action_contrasts("cv", "B", "prior_covid_infection", "covidcritcare"),
+  # action_contrasts("cv", "B", "prior_covid_infection", "coviddeath"),
+  # action_contrasts("cv", "B", "prior_covid_infection", "noncoviddeath"),
+  # action_contrasts("cv", "B", "prior_covid_infection", "fracture"),
+  # action_contrasts("cv", "B", "prior_covid_infection", "pericarditis"),
+  # action_contrasts("cv", "B", "prior_covid_infection", "myocarditis"),
 
   action_eventcounts("cv", "B"),
 
@@ -466,29 +497,29 @@ actions_list <- splice(
   action_contrasts_combine(
     "age75plus",
     "A",
-    subgroups = c("all", "ageband", "cv", "vax_previous_count", "prior_covid_infection"),
-    outcomes = c("covidemergency", "covidadmitted", "covidcritcare", "coviddeath", "noncoviddeath", "fracture")
+    subgroups = c("all", "ageband", "cv", "vax_previous_group"),
+    outcomes = c("covidemergency", "covidadmitted", "covidcritcare", "coviddeath", "noncoviddeath", "fracture", "pericarditis", "myocarditis")
   ),
 
   action_contrasts_combine(
     "age75plus",
     "B",
-    subgroups = c("all", "ageband", "cv", "vax_previous_count", "prior_covid_infection"),
-    outcomes = c("covidemergency", "covidadmitted", "covidcritcare", "coviddeath", "noncoviddeath", "fracture")
+    subgroups = c("all", "ageband", "cv", "vax_previous_group"),
+    outcomes = c("covidemergency", "covidadmitted", "covidcritcare", "coviddeath", "noncoviddeath", "fracture", "pericarditis", "myocarditis")
   ),
 
   action_contrasts_combine(
     "cv",
     "A",
-    subgroups = c("all", "ageband", "vax_previous_count", "prior_covid_infection"),
-    outcomes = c("covidemergency", "covidadmitted", "covidcritcare", "coviddeath", "noncoviddeath", "fracture")
+    subgroups = c("all", "ageband", "vax_previous_group"),
+    outcomes = c("covidemergency", "covidadmitted", "covidcritcare", "coviddeath", "noncoviddeath", "fracture", "pericarditis", "myocarditis")
   ),
 
   action_contrasts_combine(
     "cv",
     "B",
-    subgroups = c("all", "ageband", "vax_previous_count", "prior_covid_infection"),
-    outcomes = c("covidemergency", "covidadmitted", "covidcritcare", "coviddeath", "noncoviddeath", "fracture")
+    subgroups = c("all", "ageband", "vax_previous_group"),
+    outcomes = c("covidemergency", "covidadmitted", "covidcritcare", "coviddeath", "noncoviddeath", "fracture", "pericarditis", "myocarditis")
   ),
 
 
