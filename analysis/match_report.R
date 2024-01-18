@@ -305,10 +305,11 @@ tab_summary_baseline <-
   tbl_summary(
     by = treatment_descr,
     label = unname(var_labels[names(.)]),
-    statistic = lst(
-      N = "{N}",
-      #age_july2023="{mean} ({sd})",
-      #vax_interval="{mean} ({sd})",
+    #type = all_continuous() ~ "continuous2",
+    statistic = list(
+      N ~ "{N}",
+      #all_continuous() ~ c("Mean (SD)" = "{mean} ({sd})", "Median (Q1, Q3)"= "{median} ({p25}, {p75})")
+      all_continuous() ~ "{median} ({p25}, {p75});  {mean} ({sd})"
     ),
   )
 
@@ -369,7 +370,7 @@ plot_smd <-
   ggplot(data_smd)+
   geom_point(aes(x=smd, y=level))+
   geom_rect(aes(alpha = variable_card, ymin = rev(cardn)-0.5, ymax =rev(cardn+0.5)), xmin = -Inf, xmax = Inf, fill='grey', colour="transparent") +
-  scale_alpha_continuous(range=c(0,0.3), guide=FALSE)+
+  scale_alpha_continuous(range=c(0,0.3), guide="none")+
   labs(
     x="Standardised mean difference",
     y=NULL,
