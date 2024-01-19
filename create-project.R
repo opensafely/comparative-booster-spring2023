@@ -554,7 +554,8 @@ actions_list <- splice(
     moderately_sensitive = lst(
       releaselist = "output/files-for-release.txt",
       command = "output/osrelease-command.txt",
-      csv = "output/release-objects/*.csv",
+      output1 = "output/release-objects/*.csv",
+      output2 = "output/release-objects/*/*.csv",
     )
   ),
 
