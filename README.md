@@ -54,14 +54,16 @@ These scripts can be run locally, as they do not depend on any data extracted fr
 These scripts use data extracted from the OpenSAFELY-TPP server, after [`analysis/dataset_definition.py`](analysis/dataset_definition.py) has run.
 -   [`data_process.R`](./analysis/data_process.R) imports the extracted database data (or dummy data), standardises some variables and derives some new ones.
 -   [`data_selection.R`](./analysis/data_selection.R) filters out participants who should not eligible for matching, and creates a small table used for the inclusion/exclusion flowchart.
--   [`match.R`](./analysis/match.R) runs the matching algorithm to pair Pfizer with Sanofi booster recipients. It outputs a dataset given the matching status (TRUE/FALSE) of each candidate, and a matching ID.  and other matching diagnostics. The script takes one argument:
-    -   `matchset`, the set of matching variables used to match, as defined in the [`design.R`](analysis/design/design.R) script.
--   [`match_report.R`](./analysis/match_report.R) describes baseline information for the matched cohort, eg Table 1 type cohort characteristics, and an inclusion criteria flowchart. The script also uses the `matchset` argument to pick up the matching data from the previous script.
--   [`km.R`](./analysis/km.R) derives Kaplan-Meier survival estimates for the treatment groups and calculates relative risk and risk differences. The script takes three arguments:
-    -  `matchset`, as before.
-    -   `subgroup` to choose which subgroup to run the analysis within. Choose _all_ for no subgroups (i.e., the main analysis). Choose _<variable>_ to select a specific variable to stratify on -- this variable must be exactly matched in the matching run. 
-    -   `outcome` to choose the outcome of interest, for example _covidadmitted_ or _coviddeath_.
--   [`contrasts_combine`](./analysis/contrasts_combine.R) collects treatment contrasts from the [`km.R`](./analysis/km.R) script and combines into one dataset.
+-   [`match.R`](./analysis/match.R) runs the matching algorithm to pair Pfizer with Sanofi booster recipients. It outputs a dataset given the matching status (TRUE/FALSE) of each candidate, and a matching ID.  and other matching diagnostics. The script takes two argument:
+    - `cohort`, the name of the cohort, currently "cv" or "age75plus" .
+    - `matchset`, the set of matching variables used to match, as defined in the [`design.R`](analysis/design/design.R) script.
+-   [`match_report.R`](./analysis/match_report.R) describes baseline information for the matched cohort, eg Table 1 type cohort characteristics, and an inclusion criteria flowchart. The script also uses the `cohort` and `matchset` arguments to pick up the matching data from the previous script.
+-   [`km.R`](./analysis/km.R) derives Kaplan-Meier survival estimates for the treatment groups and calculates relative risk and risk differences. The script takes four arguments:
+    - `cohort`, as before.
+    - `matchset`, as before.
+    - `subgroup` to choose which subgroup to run the analysis within. Choose _all_ for no subgroups (i.e., the main analysis). Choose _<variable>_ to select a specific variable to stratify on -- this variable must be exactly matched in the matching run. 
+    - `outcome` to choose the outcome of interest, for example _covidadmitted_ or _coviddeath_.
+-   [`combine`](./analysis/combine.R) collects treatment contrasts from the [`km.R`](./analysis/km.R) script and other preliminary outputs (flowcharts, table1, matching coverage, etc) and combines into a single dataset for each output type.
 -   [`release_objects`](./analysis/release_objects.R) collects files that are intended for release and puts them in a single directory to make releasing files easier. 
 
 

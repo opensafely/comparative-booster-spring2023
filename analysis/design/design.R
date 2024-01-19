@@ -133,7 +133,10 @@ recoder <-
       "COVID-19 death" = "coviddeath",
       "Non-COVID-19 death" = "noncoviddeath",
       "All-cause death" = "death",
-      "Fracture" = "fracture"
+      "Fracture" = "fracture",
+      "Pericarditis" = "pericarditis",
+      "Myocarditis" = "myocarditis",
+      NULL
     ),
     all = c(` ` = "all"),
     ageband = c(

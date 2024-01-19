@@ -288,7 +288,7 @@ kmcontrasts <- function(data, cuts = NULL) {
       surv, surv.se, surv.ll, surv.ul,
       risk, risk.se, risk.ll, risk.ul,
       inc = -(surv - lag(surv, 1, 1)) / lag(surv, 1, 1),
-      inc2 = diff(c(0, -log(surv)))
+      #inc2 = diff(c(0, -log(surv)))
     ) %>%
     group_by(!!subgroup_sym, treatment, fup_start, fup_end, fup_period) %>%
     summarise(
@@ -297,7 +297,7 @@ kmcontrasts <- function(data, cuts = NULL) {
       persontime = sum(n.atrisk * interval), # total person-time at risk within time period
 
       inc = weighted.mean(inc, n.atrisk * interval),
-      inc2 = weighted.mean(inc2, n.atrisk * interval),
+      #inc2 = weighted.mean(inc2, n.atrisk * interval),
       n.atrisk = first(n.atrisk), # number at risk at start of time period
       n.event = sum(n.event, na.rm = TRUE), # number of events within time period
       n.censor = sum(n.censor, na.rm = TRUE), # number censored within time period
@@ -339,7 +339,7 @@ kmcontrasts <- function(data, cuts = NULL) {
       names_glue = "{.value}_{treatment}",
       values_from = c(
         persontime, n.atrisk, n.event, n.censor,
-        inc, inc2,
+        inc, #inc2,
         surv, surv.se, surv.ll, surv.ul,
         risk, risk.se, risk.ll, risk.ul,
         cml.event, cml.rate
@@ -359,10 +359,10 @@ kmcontrasts <- function(data, cuts = NULL) {
 
 
       # incidence rate ratio, v2
-      irr2 = inc2_1 / inc2_0,
-      irr2.ln.se = sqrt((1 / n.event_0) + (1 / n.event_1)),
-      irr2.ll = exp(log(irr2) + qnorm(0.025) * irr2.ln.se),
-      irr2.ul = exp(log(irr2) + qnorm(0.975) * irr2.ln.se),
+      # irr2 = inc2_1 / inc2_0,
+      # irr2.ln.se = sqrt((1 / n.event_0) + (1 / n.event_1)),
+      # irr2.ll = exp(log(irr2) + qnorm(0.025) * irr2.ln.se),
+      # irr2.ul = exp(log(irr2) + qnorm(0.975) * irr2.ln.se),
 
       # incidence rate difference
       # ird = rate_1 - rate_0,
@@ -370,12 +370,11 @@ kmcontrasts <- function(data, cuts = NULL) {
       ## quantities calculated from time zero until end of time period
       # these should be the same as values calculated on each day of follow up
 
-
       # cumulative incidence rate ratio
-      cmlirr = cml.rate_1 / cml.rate_0,
-      cmlirr.ln.se = sqrt((1 / cml.event_0) + (1 / cml.event_1)),
-      cmlirr.ll = exp(log(cmlirr) + qnorm(0.025) * cmlirr.ln.se),
-      cmlirr.ul = exp(log(cmlirr) + qnorm(0.975) * cmlirr.ln.se),
+      # cmlirr = cml.rate_1 / cml.rate_0,
+      # cmlirr.ln.se = sqrt((1 / cml.event_0) + (1 / cml.event_1)),
+      # cmlirr.ll = exp(log(cmlirr) + qnorm(0.025) * cmlirr.ln.se),
+      # cmlirr.ul = exp(log(cmlirr) + qnorm(0.975) * cmlirr.ln.se),
 
       # survival ratio, standard error, and confidence limits
       sr = surv_1 / surv_0,

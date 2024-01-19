@@ -12,36 +12,36 @@ library('glue')
 
 ## total vaccinated in time period, by vaccine type
 # choosing cv cohort arbitrarily, could use any cohort as output is the same
-file_copy(here("output", "cv", "total_allcohorts_rounded.csv"), here("output", "release-objects", "flowchart_totals_allcohorts_rounded.csv"), overwrite = TRUE)
+file_copy(
+  here("output", "combine", "flowchart_totals_allcohorts_rounded.csv"),
+  here("output", "release-objects", "flowchart_totals_allcohorts_rounded.csv"),
+  overwrite = TRUE
+)
 
-for(cohort in c("age75plus", "cv")){
-  dir_create(here("output", "release-objects", cohort, "prematch"))
 
-  file_copy(here("output", cohort, "table1.csv"), here("output", "release-objects", cohort, "table1_prematch_rounded.csv"), overwrite = TRUE)
-  file_copy(here("output", cohort, "total_rounded.csv"), here("output", "release-objects", cohort, "flowchart_totals_rounded.csv"), overwrite = TRUE)
+for(cohort in recoder$cohort){
 
-  for(matchset in c("A", "B")){
+  output_dir <- here("output", "release-objects", cohort)
 
-    output_dir <- here("output", "release-objects", cohort, matchset)
-    dir_create(output_dir)
+  # pre-contrasts ----
+  # non-outcome specific files
 
-    ## matching ----
+  file_copy(here("output", "combine", cohort, "descriptives", "table1_rounded.csv"), path(output_dir, glue("table1_rounded.csv")), overwrite = TRUE)
+  file_copy(here("output", "combine", cohort, "descriptives", "flowchart_totals_rounded.csv"), path(output_dir, glue("flowchart_totals_rounded.csv")), overwrite = TRUE)
+  file_copy(here("output", "combine", cohort, "descriptives", "flowchart_rounded.csv"), path(output_dir, glue("flowchart_rounded.csv")), overwrite = TRUE)
+  file_copy(here("output", "combine", cohort, "descriptives", "coverage_rounded.csv"), path(output_dir, glue("coverage_rounded.csv")), overwrite = TRUE)
+  file_copy(here("output", "combine", cohort, "descriptives", "eventcounts.csv"), path(output_dir, "eventcounts_rounded.csv"), overwrite = TRUE)
 
-    file_copy(here("output", cohort, matchset, "report", "table1.csv"), path(output_dir, "table1_rounded.csv"), overwrite = TRUE)
-    file_copy(here("output", cohort, matchset, "report", "data_coverage.csv"), path(output_dir, "coverage_rounded.csv"), overwrite = TRUE)
-    file_copy(here("output", cohort, matchset, "report", "flowchart_rounded.csv"), path(output_dir, "flowchart_rounded.csv"), overwrite = TRUE)
+  ## Contrasts ----
+  # outcome specific files
 
-    ## Contrasts ----
+  file_copy(here("output", "combine", cohort, "contrasts", "km_estimates_rounded.csv"), path(output_dir, "km_estimates_rounded.csv"), overwrite = TRUE)
+  file_copy(here("output", "combine", cohort, "contrasts", "contrasts_daily_rounded.csv"), path(output_dir, "contrasts_daily_rounded.csv"), overwrite = TRUE)
+  file_copy(here("output", "combine", cohort, "contrasts", "contrasts_cuts_rounded.csv"), path(output_dir, "contrasts_cuts_rounded.csv"), overwrite = TRUE)
+  file_copy(here("output", "combine", cohort, "contrasts", "contrasts_overall_rounded.csv"), path(output_dir, "contrasts_overall_rounded.csv"), overwrite = TRUE)
+  file_copy(here("output", "combine", cohort, "contrasts", "followup_rounded.csv"), path(output_dir, "followup_rounded.csv"), overwrite = TRUE)
+  file_copy(here("output", "combine", cohort, "contrasts", "followup_treatment_rounded.csv"), path(output_dir, "followup_treatment_rounded.csv"), overwrite = TRUE)
 
-    file_copy(here("output", cohort, matchset, "combined", "km_estimates_rounded.csv"), path(output_dir, "km_estimates_rounded.csv"), overwrite = TRUE)
-    file_copy(here("output", cohort, matchset, "combined", "contrasts_daily_rounded.csv"), path(output_dir, "contrasts_daily_rounded.csv"), overwrite = TRUE)
-    file_copy(here("output", cohort, matchset, "combined", "contrasts_cuts_rounded.csv"), path(output_dir, "contrasts_cuts_rounded.csv"), overwrite = TRUE)
-    file_copy(here("output", cohort, matchset, "combined", "contrasts_overall_rounded.csv"), path(output_dir, "contrasts_overall_rounded.csv"), overwrite = TRUE)
-    file_copy(here("output", cohort, matchset, "combined", "eventcounts.csv"), path(output_dir, "eventcounts_rounded.csv"), overwrite = TRUE)
-    file_copy(here("output", cohort, matchset, "combined", "followup_rounded.csv"), path(output_dir, "followup_rounded.csv"), overwrite = TRUE)
-    file_copy(here("output", cohort, matchset, "combined", "followup_treatment_rounded.csv"), path(output_dir, "followup_treatment_rounded.csv"), overwrite = TRUE)
-
-  }
 }
 
 ## create text for output review issue ----
