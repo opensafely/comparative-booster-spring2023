@@ -1483,8 +1483,20 @@ actions:
   ## Combine estimates across cohorts, matchsets, outcomes and subgroups 
   ## # # # # # # # # # # # # # # # # # # # 
 
-  contrasts_combine_age75plus_A:
-    run: r:latest analysis/contrasts_combine.R age75plus A
+  combine_age75plus_descriptives:
+    run: r:latest analysis/combine_descriptives.R age75plus
+    needs:
+    - data_selection_age75plus
+    - match_report_age75plus_A
+    - match_report_age75plus_B
+    - eventcounts_age75plus_A
+    - eventcounts_age75plus_B
+    outputs:
+      moderately_sensitive:
+        csv: output/combine/age75plus/descriptives/*.csv
+
+  combine_age75plus_contrasts:
+    run: r:latest analysis/combine_contrasts.R age75plus
     needs:
     - km_age75plus_A_all_covidemergency
     - km_age75plus_A_all_covidadmitted
@@ -1518,15 +1530,6 @@ actions:
     - km_age75plus_A_vax_previous_group_fracture
     - km_age75plus_A_vax_previous_group_pericarditis
     - km_age75plus_A_vax_previous_group_myocarditis
-    - eventcounts_age75plus_A
-    outputs:
-      moderately_sensitive:
-        csv: output/age75plus/A/combined/*.csv
-        png: output/age75plus/A/combined/plots/*.png
-
-  contrasts_combine_age75plus_B:
-    run: r:latest analysis/contrasts_combine.R age75plus B
-    needs:
     - km_age75plus_B_all_covidemergency
     - km_age75plus_B_all_covidadmitted
     - km_age75plus_B_all_covidcritcare
@@ -1559,14 +1562,25 @@ actions:
     - km_age75plus_B_vax_previous_group_fracture
     - km_age75plus_B_vax_previous_group_pericarditis
     - km_age75plus_B_vax_previous_group_myocarditis
-    - eventcounts_age75plus_B
     outputs:
       moderately_sensitive:
-        csv: output/age75plus/B/combined/*.csv
-        png: output/age75plus/B/combined/plots/*.png
+        csv: output/combine/age75plus/contrasts/*.csv
+        png: output/combine/age75plus/contrasts/plots/*.png
 
-  contrasts_combine_cv_A:
-    run: r:latest analysis/contrasts_combine.R cv A
+  combine_cv_descriptives:
+    run: r:latest analysis/combine_descriptives.R cv
+    needs:
+    - data_selection_cv
+    - match_report_cv_A
+    - match_report_cv_B
+    - eventcounts_cv_A
+    - eventcounts_cv_B
+    outputs:
+      moderately_sensitive:
+        csv: output/combine/cv/descriptives/*.csv
+
+  combine_cv_contrasts:
+    run: r:latest analysis/combine_contrasts.R cv
     needs:
     - km_cv_A_all_covidemergency
     - km_cv_A_all_covidadmitted
@@ -1592,15 +1606,6 @@ actions:
     - km_cv_A_vax_previous_group_fracture
     - km_cv_A_vax_previous_group_pericarditis
     - km_cv_A_vax_previous_group_myocarditis
-    - eventcounts_cv_A
-    outputs:
-      moderately_sensitive:
-        csv: output/cv/A/combined/*.csv
-        png: output/cv/A/combined/plots/*.png
-
-  contrasts_combine_cv_B:
-    run: r:latest analysis/contrasts_combine.R cv B
-    needs:
     - km_cv_B_all_covidemergency
     - km_cv_B_all_covidadmitted
     - km_cv_B_all_covidcritcare
@@ -1625,11 +1630,10 @@ actions:
     - km_cv_B_vax_previous_group_fracture
     - km_cv_B_vax_previous_group_pericarditis
     - km_cv_B_vax_previous_group_myocarditis
-    - eventcounts_cv_B
     outputs:
       moderately_sensitive:
-        csv: output/cv/B/combined/*.csv
-        png: output/cv/B/combined/plots/*.png
+        csv: output/combine/cv/contrasts/*.csv
+        png: output/combine/cv/contrasts/plots/*.png
 
   ## # # # # # # # # # # # # # # # # # # # 
   ## Files for release 
@@ -1638,21 +1642,15 @@ actions:
   release_objects:
     run: r:latest analysis/release_objects.R
     needs:
-    - data_selection_age75plus
-    - match_report_age75plus_A
-    - match_report_age75plus_B
-    - contrasts_combine_age75plus_A
-    - contrasts_combine_age75plus_B
-    - data_selection_cv
-    - match_report_cv_A
-    - match_report_cv_B
-    - contrasts_combine_cv_A
-    - contrasts_combine_cv_B
+    - combine_age75plus_descriptives
+    - combine_age75plus_contrasts
+    - combine_cv_descriptives
+    - combine_cv_contrasts
     outputs:
       moderately_sensitive:
         releaselist: output/files-for-release.txt
         command: output/osrelease-command.txt
-        csv: output/release-objects/*/*.csv
+        csv: output/release-objects/*.csv
 
   ## # # # # # # # # # # # # # # # # # # # 
   ## End 

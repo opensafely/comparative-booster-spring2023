@@ -63,6 +63,9 @@ metaparams <-
   ) %>%
   mutate(
     subgroup_descr = fct_recoderelevel(subgroup,  recoder$subgroups),
+  ) %>%
+  filter(
+    cohort!=subgroup
   )
 
 # Import match status data ----

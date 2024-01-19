@@ -158,29 +158,44 @@ action_eventcounts <- function(cohort, matchset) {
 
 
 ## model action function ----
-action_contrasts_combine <- function(
-    cohort, matchset, subgroups, outcomes
+action_combine <- function(
+    cohort
 ){
 
+  splice(
     action(
-      name = glue("contrasts_combine_{cohort}_{matchset}"),
-      run = glue("r:latest analysis/contrasts_combine.R"),
-      arguments = c(cohort, matchset),
-      needs = splice(
-        glue_data(
-          .x=expand_grid(
-            subgroup=subgroups,
-            outcome=outcomes
-          ),
-          "km_{cohort}_{matchset}_{subgroup}_{outcome}"
-        ) %>% as.list,
-        list(glue("eventcounts_{cohort}_{matchset}"))
+      name = glue("combine_{cohort}_descriptives"),
+      run = glue("r:latest analysis/combine_descriptives.R"),
+      arguments = c(cohort),
+      needs = list(
+        glue("data_selection_{cohort}"),
+        glue("match_report_{cohort}_A"),
+        glue("match_report_{cohort}_B"),
+        glue("eventcounts_{cohort}_A"),
+        glue("eventcounts_{cohort}_B")
       ),
       moderately_sensitive = lst(
-        csv = glue("output/{cohort}/{matchset}/combined/*.csv"),
-        png = glue("output/{cohort}/{matchset}/combined/plots/*.png"),
+        csv = glue("output/combine/{cohort}/descriptives/*.csv"),
+      )
+    ),
+    action(
+      name = glue("combine_{cohort}_contrasts"),
+      run = glue("r:latest analysis/combine_contrasts.R"),
+      arguments = c(cohort),
+      needs = glue_data(
+        .x=expand_grid(
+          matchset = c("A", "B"),
+          subgroup=c("all", "ageband", "cv", "vax_previous_group"),
+          outcome=c("covidemergency", "covidadmitted", "covidcritcare", "coviddeath", "noncoviddeath", "fracture", "pericarditis", "myocarditis")
+        ) %>% filter(cohort!=subgroup),
+        "km_{cohort}_{matchset}_{subgroup}_{outcome}"
+      ),
+      moderately_sensitive = lst(
+        csv = glue("output/combine/{cohort}/contrasts/*.csv"),
+        png = glue("output/combine/{cohort}/contrasts/plots/*.png"),
       )
     )
+  )
 }
 
 # specify project ----
@@ -494,34 +509,36 @@ actions_list <- splice(
 
   comment("# # # # # # # # # # # # # # # # # # #", "Combine estimates across cohorts, matchsets, outcomes and subgroups", "# # # # # # # # # # # # # # # # # # #"),
 
-  action_contrasts_combine(
-    "age75plus",
-    "A",
-    subgroups = c("all", "ageband", "cv", "vax_previous_group"),
-    outcomes = c("covidemergency", "covidadmitted", "covidcritcare", "coviddeath", "noncoviddeath", "fracture", "pericarditis", "myocarditis")
-  ),
+  # action_contrasts_combine(
+  #   "age75plus",
+  #   "A",
+  #   subgroups = c("all", "ageband", "cv", "vax_previous_group"),
+  #   outcomes = c("covidemergency", "covidadmitted", "covidcritcare", "coviddeath", "noncoviddeath", "fracture", "pericarditis", "myocarditis")
+  # ),
+  #
+  # action_contrasts_combine(
+  #   "age75plus",
+  #   "B",
+  #   subgroups = c("all", "ageband", "cv", "vax_previous_group"),
+  #   outcomes = c("covidemergency", "covidadmitted", "covidcritcare", "coviddeath", "noncoviddeath", "fracture", "pericarditis", "myocarditis")
+  # ),
+  #
+  # action_contrasts_combine(
+  #   "cv",
+  #   "A",
+  #   subgroups = c("all", "ageband", "vax_previous_group"),
+  #   outcomes = c("covidemergency", "covidadmitted", "covidcritcare", "coviddeath", "noncoviddeath", "fracture", "pericarditis", "myocarditis")
+  # ),
+  #
+  # action_contrasts_combine(
+  #   "cv",
+  #   "B",
+  #   subgroups = c("all", "ageband", "vax_previous_group"),
+  #   outcomes = c("covidemergency", "covidadmitted", "covidcritcare", "coviddeath", "noncoviddeath", "fracture", "pericarditis", "myocarditis")
+  # ),
 
-  action_contrasts_combine(
-    "age75plus",
-    "B",
-    subgroups = c("all", "ageband", "cv", "vax_previous_group"),
-    outcomes = c("covidemergency", "covidadmitted", "covidcritcare", "coviddeath", "noncoviddeath", "fracture", "pericarditis", "myocarditis")
-  ),
-
-  action_contrasts_combine(
-    "cv",
-    "A",
-    subgroups = c("all", "ageband", "vax_previous_group"),
-    outcomes = c("covidemergency", "covidadmitted", "covidcritcare", "coviddeath", "noncoviddeath", "fracture", "pericarditis", "myocarditis")
-  ),
-
-  action_contrasts_combine(
-    "cv",
-    "B",
-    subgroups = c("all", "ageband", "vax_previous_group"),
-    outcomes = c("covidemergency", "covidadmitted", "covidcritcare", "coviddeath", "noncoviddeath", "fracture", "pericarditis", "myocarditis")
-  ),
-
+  action_combine("age75plus"),
+  action_combine("cv"),
 
   comment("# # # # # # # # # # # # # # # # # # #", "Files for release", "# # # # # # # # # # # # # # # # # # #"),
 
@@ -529,26 +546,17 @@ actions_list <- splice(
     name = "release_objects",
     run = "r:latest analysis/release_objects.R",
     needs = list(
-
-      "data_selection_age75plus",
-      "match_report_age75plus_A",
-      "match_report_age75plus_B",
-      "contrasts_combine_age75plus_A",
-      "contrasts_combine_age75plus_B",
-
-      "data_selection_cv",
-      "match_report_cv_A",
-      "match_report_cv_B",
-      "contrasts_combine_cv_A",
-      "contrasts_combine_cv_B"
+      "combine_age75plus_descriptives",
+      "combine_age75plus_contrasts",
+      "combine_cv_descriptives",
+      "combine_cv_contrasts"
     ),
     moderately_sensitive = lst(
       releaselist = "output/files-for-release.txt",
       command = "output/osrelease-command.txt",
-      csv = "output/release-objects/*/*.csv",
+      csv = "output/release-objects/*.csv",
     )
   ),
-
 
 comment("# # # # # # # # # # # # # # # # # # #", "End", "# # # # # # # # # # # # # # # # # # #")
 
