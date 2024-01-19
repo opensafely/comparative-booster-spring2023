@@ -47,8 +47,9 @@ dir_create(output_dir)
 ## total vaccinated in time period, by vaccine type
 # choosing cv cohort arbitrarily, could use any cohort as output is the same
 if(cohort=="cv"){
-  file_copy(here("output", cohort, "total_allcohorts_rounded.csv"), here("output", "combine", "flowchart_totals_allcohorts_rounded.csv"), overwrite = TRUE)
+  file_copy(here("output", cohort, "total_allcohorts_rounded.csv"), path(output_dir, "flowchart_totals_allcohorts_rounded.csv"), overwrite = TRUE)
 }
+
 
 file_copy(here("output", cohort, "total_rounded.csv"), path(output_dir, "flowchart_totals_rounded.csv"), overwrite = TRUE)
 

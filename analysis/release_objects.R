@@ -9,20 +9,22 @@ library('here')
 library('fs')
 library('glue')
 
+dir_create(here("output", "release-objects"))
 
 ## total vaccinated in time period, by vaccine type
 # choosing cv cohort arbitrarily, could use any cohort as output is the same
 file_copy(
-  here("output", "combine", "flowchart_totals_allcohorts_rounded.csv"),
+  here("output", "combine", "cv", "descriptives", "flowchart_totals_allcohorts_rounded.csv"),
   here("output", "release-objects", "flowchart_totals_allcohorts_rounded.csv"),
   overwrite = TRUE
 )
 
+source(here("analysis", "design", "design.R"))
 
 for(cohort in recoder$cohort){
 
   output_dir <- here("output", "release-objects", cohort)
-
+  dir_create(output_dir)
   # pre-contrasts ----
   # non-outcome specific files
 
