@@ -62,7 +62,7 @@ data_processed <- read_rds(here("output", "data", "data_processed.rds"))
 total_n_unrounded <-
   bind_rows(
     tibble(boost_type="any", n=nrow(data_processed)),
-    count(data_processed %>% mutate(boost_type=fct_other(boost_type, keep=treatement_lookup$treatment, other_level="other")), boost_type, .drop=FALSE)
+    count(data_processed %>% mutate(boost_type=fct_other(boost_type, keep=treatment_lookup$treatment, other_level="other")), boost_type, .drop=FALSE)
   ) %>%
   mutate(
     pct = n/first(n)
@@ -215,7 +215,7 @@ write_csv(data_flowchart_rounded, fs::path(output_dir, "flowchart_rounded.csv"))
 total_n_unrounded <-
   bind_rows(
     tibble(boost_type="any", n=nrow(data_inclusioncriteria)),
-    count(data_inclusioncriteria %>% mutate(boost_type=fct_other(boost_type, keep=treatement_lookup$treatment, other_level="other")), boost_type, .drop=FALSE)
+    count(data_inclusioncriteria %>% mutate(boost_type=fct_other(boost_type, keep=treatment_lookup$treatment, other_level="other")), boost_type, .drop=FALSE)
   ) %>%
   mutate(
     pct = n/first(n)
