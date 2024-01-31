@@ -86,7 +86,7 @@ vax_product_lookup = c(
 # )
 
 
-treatement_lookup <-
+treatment_lookup <-
   tribble(
     ~treatment, ~treatment_descr,
     "pfizerBA45", "pfizer/BA.4-5",
