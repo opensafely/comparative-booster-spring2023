@@ -1,0 +1,1226 @@
+---
+title: Supplementary materials for Comparative safety and effectiveness of Pfizer BA.4-5 versus Sanofi during the Spring 2023 COVID-19 booster vaccination programme in England
+format:
+  # html:
+  #   toc: false
+  #   embed-resources: true
+  docx
+output-file: supplementary_draft.docx
+keep-md: false
+execute:
+  echo: false
+  output: true
+  warning: false
+  #message: true
+knitr:
+  opts_chunk: 
+    #fig.path: ./
+    fig.pos: H
+    R.options:
+      knitr.graphics.auto_pdf: true
+bibliography: references.bib
+csl: vancouver.csl
+link-citations: true
+zotero: true
+# header-includes:
+# - \usepackage{float} 
+# - \floatplacement{figure}{H}
+# - \usepackage{caption}
+# - \captionsetup[figure]{labelformat=empty}
+# - \captionsetup[table]{labelformat=empty}
+---
+
+
+```{r}
+#| label: setup
+
+source(here::here("write-up", "manuscript", "setup.R"))
+```
+
+```{r}
+#| label: process
+
+source(here("write-up", "manuscript", "import-process.R"))
+```
+
+
+
+```{r}
+#| label: figure-function
+
+show_coverage <- function(.cohort){
+  
+  xmin <- min(match_coverage$boost_date )
+  xmax <- max(match_coverage$boost_date )+1
+  
+  
+  data_annotate <- tibble(
+      boost_date = date(c("2023-05-01", "2023-05-01", "2023-05-20", "2023-06-07")),
+      cumuln = c(1000000, -100000, 0, -10000),
+      dailyn = c(50000, -25000, 0, -12000),
+      label = c("Sanofi", "Pfizer BA.4-5", "Matched", "Unmatched"),
+      colour = c(brewer_pal(type="qual", palette="Set2")(2)[c(2,1)], "grey50", "grey70"),
+      vjust = c(-1, 1, 0, 0.5)
+    )
+
+  plot_coverage_cumuln <-
+    rst[[.cohort]]$match_coverage %>%
+    mutate(
+     # treatment_descr = fct_recoderelevel(as.character(treatment), recoder$treatment),
+      #status_descr = fct_rev(fct_recoderelevel(as.character(status), recoder$status)),
+      #status_descr = fct_rev(status_descr),
+      cumuln = cumuln*((treatment*2) - 1),
+      dailyn = n*((treatment*2) - 1)
+    ) %>%
+    ggplot()+
+    geom_col(
+      aes(
+        x=boost_date+0.5,
+        y=dailyn,
+        group=paste0(treatment,status_descr),
+        fill=treatment_descr,
+        alpha=status_descr,
+        colour=NULL
+      ),
+      position=position_stack(reverse=TRUE),
+      width=1
+    )+
+    geom_rect(xmin=xmin, xmax= xmax+1, ymin=-6, ymax=6, fill="grey", colour="transparent")+
+    geom_text(data=data_annotate, aes(x=boost_date, y=dailyn, label=label), colour=data_annotate$colour, vjust=data_annotate$vjust, hjust=1.05, fontface="bold")+
+    scale_x_date(
+      breaks = seq(xmin, xmax+1, by=14),
+      #breaks = unique(lubridate::ceiling_date(match_coverage$boost_date, "1 month")),
+      limits = c(xmin-1, NA),
+      labels = scales::label_date("%d/%m"),
+      expand = expansion(add=1),
+      sec.axis = sec_axis(
+        trans = ~as.Date(.),
+        breaks=as.Date(seq(floor_date(xmin, "month"), ceiling_date(xmax, "month"),by="month")),
+        labels = scales::label_date("%B %y")
+      )
+    )+
+    scale_y_continuous(
+      labels = ~scales::label_number(accuracy = 1, big.mark=",")(abs(.)),
+      expand = expansion(c(0, NA))
+    )+
+    scale_fill_brewer(type="qual", palette="Set2")+
+    scale_colour_brewer(type="qual", palette="Set2")+
+    scale_alpha_discrete(range= c(0.8,0.4))+
+    labs(
+      x="Date",
+      y="Booster recipients",
+      colour=NULL,
+      fill=NULL,
+      alpha=NULL
+    ) +
+    theme_minimal()+
+    theme(
+      axis.line.x.bottom = element_blank(),
+      axis.text.x.top=element_text(hjust=0),
+      strip.text.y.right = element_text(angle = 0),
+      axis.ticks.x=element_line(),
+      legend.position = "none",
+      legend.box = "horizontal"
+    )+
+    NULL
+  
+  ggsave(
+      filename=glue("coverage_{.cohort}.png"),
+      path=output_dir_qmd,
+      plot=plot_coverage_cumuln,
+      unit="cm",
+      width=15,
+      height=10
+    )
+  
+  return(plot_coverage_cumuln)
+
+
+}
+```
+
+#### Figure S1a: Cumulative numbers included in the matched sample for the CV cohort
+```{r}
+#| label: figure-coverage-cv
+#| out-width: '90%'
+#| out-height: '50%'
+#| output: asis
+#| out-extra: ''
+
+
+show_coverage("cv")
+```
+
+#### Figure S1b: Cumulative numbers included in the matched sample for the 75+ cohort
+
+```{r}
+#| label: figure-coverage-age75plus
+#| out-width: '90%'
+#| out-height: '50%'
+#| output: asis
+#| out-extra: ''
+
+
+show_coverage("age75plus")
+```
+&nbsp; &nbsp; &nbsp;
+
+&nbsp; &nbsp; &nbsp;
+
+&nbsp; &nbsp; &nbsp;
+
+
+```{r}
+#| label: table-table1-function
+
+show_table1 <- function(.cohort){
+  match_table1_wide_wide <-
+    rst[[.cohort]]$match_table1_wide %>%
+    filter(!(variable %in% c("N","immunossuppressed"))) %>%
+    mutate(
+      smd = if_else((variable %in% matching_variables$B$exact) & (matchset == "postmatch"), "-", smd)
+    ) %>%
+    pivot_wider(
+      id_cols = c(var_label, variable, variable_levels, level),
+      names_from=matchset,
+      values_from = c(stat_0, stat_1, smd)
+    ) %>%
+    mutate(
+      order_var = cumsum(lag(variable, 1, first(variable))!=variable),
+      var_label = if_else(lag(as.character(var_label), n=1, default="") == as.character(var_label), "", as.character(var_label)),
+    )
+  
+  
+  match_table1_wide_wide %>%
+    gt() %>%
+    fmt_markdown(columns = "var_label") %>%
+    tab_style(
+      style = list(
+        cell_fill(color = "gray96")
+      ),
+      locations = cells_body(
+        rows = order_var%%2 == 0
+      )
+    ) %>%
+    tab_style(
+      style = list(
+        cell_text(weight = "bold")
+      ),
+      locations = cells_column_labels(everything())
+    ) %>%
+    cols_label(
+      var_label = "Variable",
+      variable_levels = "",
+      `stat_0_prematch` = glue("Pfizer BA.4-5 (N={filter(match_table1, cohort==.cohort, matchset=='prematch', variable=='N', by==0) %>% pull(n)})"),
+      `stat_1_prematch` = glue("Sanofi (N={filter(match_table1, cohort==.cohort, matchset=='prematch', variable=='N', by==1) %>% pull(n)})"),
+      `smd_prematch` = "SMD",
+      `stat_0_postmatch` = glue("Pfizer BA.4-5 (N={filter(match_table1, cohort==.cohort, matchset=='postmatch', variable=='N', by==0) %>% pull(n)})"),
+      `stat_1_postmatch` = glue("Sanofi (N={filter(match_table1, cohort==.cohort, matchset=='postmatch', variable=='N', by==1) %>% pull(n)})"),
+      `smd_postmatch` = "SMD"
+    ) %>%
+    tab_spanner(
+      label = "Before matching",
+      columns = ends_with("_prematch")
+    ) %>%
+    tab_spanner(
+      label = "After matching",
+      columns = ends_with("_postmatch")
+    ) %>%
+    cols_align(
+      align = c("right"),
+      columns =  ends_with(c("_prematch", "_postmatch"))
+    ) %>%
+    cols_hide(c("variable", "level", "order_var")) %>%
+    tab_options(
+      table.font.size = 8
+    )
+
+}
+```
+
+
+#### Table S1a: Baseline characteristics in the CV cohort between Pfizer BA.4-5 and Sanofi groups, before and after matching
+
+```{r}
+#| label: table-table1-cv
+#| out-width: '90%'
+#| out-height: '50%'
+#| output: asis
+#| out-extra: ''
+
+show_table1("cv")
+```
+For variables that were matched exactly the SMD is zero by design, and so are not shown.
+
+
+#### Table S1b: Baseline characteristics in the 75+ cohort between Pfizer BA.4-5 and Sanofi groups, before and after matching
+
+```{r}
+#| label: table-table1-age75plus
+#| out-width: '90%'
+#| out-height: '50%'
+#| output: asis
+#| out-extra: ''
+
+show_table1("age75plus")
+```
+For variables that were matched exactly the SMD is zero by design, and so are not shown.
+
+
+
+```{r}
+#| label: figure-smd-function
+
+show_smd <- function(.cohort) {
+  plot_smd <-
+    rst[[.cohort]]$data_smd %>%
+    filter(
+      matchset %in% c("prematch", "postmatch")
+    ) %>%
+    filter(
+      #!(variable %in% matching_variables$B$exact)
+    ) %>%
+    mutate(
+      matchset=fct_recoderelevel(matchset, c("Pre-match"="prematch", "Post-match"="postmatch")),
+    ) %>%
+    droplevels() %>%
+    group_by(matchset) %>%
+    arrange(matchset, variable, level) %>%
+    mutate(
+      variable_levels = replace_na(as.character(variable_levels), ""),
+    ) %>%
+    mutate(
+      level=fct_rev(fct_inorder(as.character(level))),
+      cardn = row_number()
+    ) %>%
+    ggplot()+
+    geom_point(aes(x=smd, y=level, group=matchset, colour=matchset), position=position_dodge(width=0.3))+
+    geom_linerange(aes(xmax=smd, xmin=0, y=level, group=matchset, colour=matchset), position=position_dodge(width=0.3))+
+    geom_rect(aes(alpha = variable_card, ymin = rev(cardn)-0.5, ymax =rev(cardn+0.5), group=matchset), xmin = -Inf, xmax = Inf, fill='grey', colour="transparent") +
+    scale_alpha_continuous(range=c(0,0.1), guide='none')+
+    scale_colour_brewer(type="qual", palette="Set1")+
+    labs(
+      x="Standardised mean difference\n <- more in Pfizer BA.4-5  |  more in Sanofi -> ",
+      y=NULL,
+      alpha=NULL,
+      colour= NULL
+    )+
+    theme_minimal(base_size=10) +
+    theme(
+      legend.position = "bottom",
+      strip.placement = "outside",
+      strip.background = element_rect(fill="transparent", colour="transparent"),
+      strip.text.y.left = element_text(angle = 0, hjust=1),
+      panel.grid.major.y = element_blank(),
+      panel.grid.minor.y = element_blank(),
+      panel.spacing = unit(0, "lines")
+    )
+  
+  plot_smd
+}
+
+```
+
+
+
+#### Figure S2a: Standardised Mean Differences for CV cohort between Pfizer BA.4-5 and Sanofi groups, before and after matching
+```{r}
+#| label: figure-smd-cv
+#| out-width: '90%'
+#| out-height: '100%'
+#| output: asis
+#| out-extra: ''
+
+show_smd("cv")
+```
+
+#### Figure S2b: Standardised Mean Differences for 75+ cohort between Pfizer BA.4-5 and Sanofi groups, before and after matching
+```{r}
+#| label: figure-smd-age75plus
+#| out-width: '90%'
+#| out-height: '100%'
+#| output: asis
+#| out-extra: ''
+
+show_smd("age75plus")
+```
+
+
+\newpage
+
+
+
+```{r}
+#| label: table-contrasts-function
+
+show_contrasts <- function(.cohort){
+  
+  rst[[.cohort]]$contrasts_table %>%
+    filter(
+      outcome %in% outcomes,
+      subgroup %in% subgroups,
+    ) %>%
+    group_by(outcome_descr, subgroup_descr) %>%
+    mutate(
+      rd.p = if_else(row_number()==1 & (subgroup!="all"), rd.p, NA_character_),
+      rr.ln.p = if_else(row_number()==1 & (subgroup!="all"), rr.ln.p, NA_character_),
+      irr.ln.p = if_else(row_number()==1 & (subgroup!="all"), irr.ln.p, NA_character_)
+    ) %>%
+    group_by(outcome_descr) %>%
+    select(
+      outcome_descr,
+      subgroup_descr,
+      subgroup_level_descr,
+      
+      rdCI,
+      rd.p,
+      rrCI,
+      rr.ln.p,
+      irrCI,
+      irr.ln.p,
+    ) %>%
+    mutate(
+      # add indicator for row shading
+      shade = cumsum((lag(as.character(subgroup_descr), 1, "")!=subgroup_descr)*1L),
+      # remove repeat values of subgroup_level
+      subgroup_descr = if_else(lag(as.character(subgroup_descr), n=1, default="")==subgroup_descr & row_number()!=1, "", as.character(subgroup_descr)),
+    ) %>%
+    ungroup() %>%
+    gt(groupname_col="outcome_descr") %>%
+    cols_label(
+      
+      outcome_descr = "Outcome",
+      subgroup_descr = "Sub-group",
+      subgroup_level_descr = "",
+    
+      rdCI = glue("Risk difference per {perN_format} people (95% CI)"),
+      rd.p = "P-value",
+      rrCI = "Risk ratio (95% CI)",
+      rr.ln.p = "P-value",
+      irrCI = "IRR (95% CI)",
+      irr.ln.p = "P-value",
+    ) %>%
+    cols_align(
+      align = c("right"),
+      columns = ends_with(c("CI", ".p"))
+    ) %>%
+    sub_missing(
+      columns = ends_with(c("CI", ".p")),
+      missing_text = ""
+    ) %>%
+    tab_options(
+      table.font.size = 8
+    ) %>%
+    tab_style(
+      style = list(
+        cell_fill(color = "gray96")
+      ),
+      locations = cells_body(
+        rows = shade%%2 != 0
+      )
+    ) %>%
+    cols_hide(c("shade"))
+  
+}
+  
+
+```
+
+#### Table S2a: Risk differences, risk ratios, and incidence rate ratios in the CV cohort, with p-values for subgroup heterogeneity
+
+```{r}
+#| label: table-contrasts-cv
+#| out-width: '90%'
+#| out-height: '50%'
+#| output: asis
+#| out-extra: ''
+
+show_contrasts("cv")
+```
+
+&nbsp; &nbsp; &nbsp;
+
+&nbsp; &nbsp; &nbsp;
+
+&nbsp; &nbsp; &nbsp;
+
+#### Table S2b: Risk differences, risk ratios, and incidence rate ratios in the age75plus cohort, with p-values for subgroup heterogeneity
+
+```{r}
+#| label: table-contrasts-age75plus
+#| out-width: '90%'
+#| out-height: '50%'
+#| output: asis
+#| out-extra: ''
+
+show_contrasts("age75plus")
+```
+
+
+\newpage
+
+
+
+```{r}
+#| label: table-fup-function
+
+show_fup <- function(.cohort){
+  rst[[.cohort]]$followup_table %>%
+    filter(
+      outcome %in% outcomes,
+      subgroup %in% "all",
+    ) %>%
+    pivot_longer(
+      cols=ends_with("weeks"),
+      names_to = "stat",
+      values_to = "value"
+    ) %>%
+    pivot_wider(
+      id_cols = c(outcome_descr, subgroup_descr, subgroup_level_descr, treatment_descr),
+      names_from = "stat",
+      values_from = "value"
+    ) %>%
+    group_by(outcome_descr) %>%
+    select(
+      outcome_descr,
+      #subgroup_descr,
+      #subgroup_level_descr,
+      treatment_descr,
+      ends_with("weeks")
+    ) %>%
+    gt(groupname_col="outcome_descr") %>%
+    cols_label(
+      
+      outcome_descr = "Outcome",
+      #subgroup_descr = "Sub-group",
+      #subgroup_level_descr = "",
+      treatment_descr = "Vaccine",
+      total_weeks = "Total",
+      mean_weeks = "Mean",
+      median_weeks = "Median",
+      Q1_weeks = "Q1",
+      Q3_weeks = "Q3",
+    ) %>%
+    tab_spanner(
+      label = "Weeks of follow-up",
+      columns = ends_with(c("weeks"))
+    ) %>%
+    cols_align(
+      align = c("right"),
+      columns = ends_with(c("weeks"))
+    ) %>%
+    tab_options(
+      table.font.size = 8
+    )
+}
+cat("  \n\n")
+```
+
+
+#### Table S3a: Summary of follow-up time for CV cohort
+
+```{r}
+#| label: table-fup-cv
+#| out-width: '90%'
+#| out-height: '50%'
+#| output: asis
+#| out-extra: ''
+
+show_fup("cv")
+```
+
+
+#### Table S3b: Summary of follow-up time for 75+ cohort
+
+```{r}
+#| label: table-fup-age75plus
+#| out-width: '90%'
+#| out-height: '50%'
+#| output: asis
+#| out-extra: ''
+
+show_fup("age75plus")
+```
+
+
+&nbsp; &nbsp; &nbsp;
+
+&nbsp; &nbsp; &nbsp;
+
+&nbsp; &nbsp; &nbsp;
+
+\newpage
+
+```{r}
+#| label: table-testrates-function
+
+show_testingrates <- function(.cohort){
+
+  rst[[.cohort]]$eventcounts %>%
+    filter(
+      #outcome %in% outcomes,
+      subgroup %in% subgroups,
+    ) %>%
+    transmute(
+      subgroup_descr,
+      subgroup_level_descr,
+      treatment,
+      persontime = label_number(1, 1/7)(persontime),
+      test_rate = label_number(0.001, 7)(test_rate), 
+    ) %>%
+    pivot_wider(
+      id_cols = c(subgroup_descr, subgroup_level_descr),
+      names_from = treatment,
+      values_from = c(persontime, test_rate)
+    ) %>%
+    mutate(
+      # add indicator for row shading
+      shade = cumsum((lag(subgroup_descr, 1, "")!=subgroup_descr)*1L),
+    ) %>%
+    group_by(subgroup_descr) %>%
+    mutate(
+      # remove repeat values of subgroup_level
+      subgroup_descr = if_else(lag(subgroup_descr,n=1, default="")==subgroup_descr, "", as.character(subgroup_descr)),
+      subgroup_level_descr = coalesce(subgroup_level_descr, ""),
+    ) %>%
+    ungroup() %>%
+    gt() %>%
+    cols_label(
+      subgroup_descr = "Sub-group",
+      subgroup_level_descr = "",
+      persontime_0 = "Person-weeks",
+      persontime_1 = "Person-weeks",
+      test_rate_0 = "All tests",
+      test_rate_1 = "All tests"
+    ) %>%
+    tab_spanner(
+      label = "Pfizer BA.4-5",
+      columns = c(persontime_0, test_rate_0)
+    ) %>%
+    tab_spanner(
+      label = "Sanofi",
+      columns = c(persontime_1, test_rate_1)
+    ) %>%
+    cols_align(
+      align = c("right"),
+      columns = c(persontime_0, persontime_1, test_rate_0, test_rate_1)
+    ) %>%
+    tab_style(
+      style = list(
+        cell_fill(color = "gray96")
+      ),
+      locations = cells_body(
+        rows = shade%%2 != 0
+      )
+    ) %>%
+    cols_hide(c("shade")) %>%
+    tab_options(
+      table.font.size = 8
+    )
+}
+
+```
+
+#### Table S4a: Testing rates after boosting for the CV cohort
+
+```{r}
+#| label: table-testingrates-cv
+#| out-width: '90%'
+#| out-height: '50%'
+#| output: true
+#| out-extra: ''
+
+show_testingrates("cv")
+```
+
+#### Table S4b: Testing rates after boosting for the 75+ cohort
+
+```{r}
+#| label: table-testingrates-age75plus
+#| out-width: '90%'
+#| out-height: '50%'
+#| output: asis
+#| out-extra: ''
+
+show_testingrates("age75plus")
+```
+
+&nbsp; &nbsp; &nbsp;
+
+&nbsp; &nbsp; &nbsp;
+
+&nbsp; &nbsp; &nbsp;
+
+\newpage
+
+
+### Cumulative incidences by subgroup
+
+
+```{r}
+#| label: ci-function
+
+
+ci_theme <- function(...) {
+  theme(
+      legend.position="none",
+      axis.text.x.top=element_text(hjust=0),
+      axis.line.y = element_line(colour = "black"),
+      axis.line.x.top = element_line(colour = "black"),
+      
+      #panel.grid.minor.x = element_blank(),
+      panel.grid.minor.y = element_blank(),
+      strip.background = element_blank(),
+      strip.text = element_blank(),
+      strip.placement="outside",
+      panel.border = element_blank(),
+      panel.spacing = unit(0.8, "lines"),
+      ...
+    )
+}
+
+#colourvalues <- RColorBrewer::brewer.pal(10, "Paired")[c(1,2,5,6,3,4,7,8,9,10)]
+colourvalues <- c("#D55E00", "#009E73", "#CC79A7", "#56B4E9", "#CC79A7", "#56B4E9", "#0072B2")
+
+plot_ci_subgroup <- function(.cohort, .subgroup){
+    
+
+  if(.subgroup=="all"){
+    colour_guide <- list(guides(colour="none", fill="none", alpha="none"))
+  } else{
+    colour_guide <- list(guides(fill="none", alpha="none"))
+  }
+    
+  plot_ci <- 
+    rst[[.cohort]]$estimates %>%
+    filter(
+      subgroup==.subgroup,
+      outcome %in% outcomes,
+      subgroup %in% subgroups,
+    ) %>%
+    mutate(
+      colgroup = interaction(treatment_descr, subgroup_level_descr, sep=", "),
+      outcome_descr = fct_relabel(outcome_descr, str_wrap, width=10),
+      subgroup_level_descr = fct_inorder(subgroup_level_descr)
+    ) %>%
+    group_by(treatment_descr, subgroup_level_descr, outcome_descr) %>%
+    mutate(
+      lagrisk=lag(risk,1,0),
+    ) %>%
+    #group_by(colgroup, outcome_descr) %>%
+    ggplot(aes(group=colgroup, colour=treatment_descr, fill=treatment_descr, alpha=treatment_descr)) +
+    geom_hline(aes(yintercept=0), colour="black")+
+    #geom_step(aes(x=lagtime, y=risk*perN, linetype=treatment_descr))+
+    geom_segment(aes(x=lagtime, xend=time, y=risk*perN, yend=risk*perN, linetype=treatment_descr))+
+    geom_segment(aes(x=lagtime, xend=lagtime, y=lagrisk*perN, yend=risk*perN, linetype=treatment_descr))+
+    geom_rect(aes(xmin=lagtime, xmax=time, ymin=risk.ll*perN, ymax=risk.ul*perN), alpha=0.1, colour="transparent")+
+    facet_grid(rows=vars(outcome_descr), cols=vars(subgroup_level_descr), scales="free_y", switch="y")+
+    scale_color_brewer(type="qual", palette="Set2", na.value="grey") +
+    scale_fill_brewer(type="qual", palette="Set2", guide="none", na.value="grey") +
+    #scale_color_manual(values=colourvalues, na.value="grey") +
+    #scale_fill_manual(values=colourvalues, guide="none", na.value="grey") +
+    scale_x_continuous(breaks = seq(0,600,28), expand = expansion(mult=c(0,0.01)), label = label_number(1, 1/7))+
+    scale_y_continuous(
+      expand = expansion(mult=c(0,0.01)), 
+      #label=label_number_risk
+    )+
+    scale_alpha_discrete(range=c(0.3,0.9))+
+    coord_cartesian(xlim=c(0, NA))+
+    labs(
+      x="Weeks",
+      y=NULL,
+      #title=glue("Cumulative incidence per {perN_format}"),
+      colour=NULL,
+      alpha=NULL,
+      linetype=NULL
+    )+
+    guides(linetype="none", fill="none", alpha="none")+
+    theme_minimal(base_size = 9)+
+      theme(
+        # legend.position = c(0.05,0.1),
+        # legend.justification = c(0,0),
+        legend.position = "bottom",
+        #legend.direction = "vertical",
+        axis.text.x.top=element_text(hjust=0),
+  
+        panel.grid.minor.x = element_blank(),
+        panel.grid.minor.y = element_blank(),
+        strip.background = element_blank(),
+        strip.placement="outside",
+        strip.text.y.left = element_text(angle=0),
+  
+        panel.border = element_blank(),
+        panel.spacing = unit(0.8, "lines"),
+  
+      )+
+      NULL
+  
+  n_subgroups <-
+    rst[[.cohort]]$estimates %>%
+    filter(
+      subgroup==.subgroup
+    ) %>% 
+    `[[`("subgroup_level_descr") %>%
+    n_distinct()
+  
+  
+  # plot_combined <- patchwork::wrap_plots(
+  #   plot_ci,
+  #   #plot_rd,
+  #   #plot_rr,
+  #   #plot_irr,
+  #   ncol=2,
+  #   widths=c(n_subgroups,1)
+  # )
+  
+  ggsave(
+    filename=glue("ci_{.cohort}_{.subgroup}.png"),
+    path=output_dir_qmd,
+    plot=plot_ci,
+  )
+
+  plot_ci
+  
+}
+
+```
+
+
+#### Figure S3a.1: Cumulative incidence estimates per `r perN_format` people for the CV cohort
+
+```{r}
+#| label: figure-ci-cv-all
+#| out-width: '100%'
+#| out-height: '50%'
+#| output: asis
+#| out-extra: ''
+
+plot_ci_subgroup("cv", "all")
+```
+
+<!--       -->
+
+<!--       -->
+
+<!--       -->
+
+
+#### Figure S3a.2: Cumulative incidence estimates per `r perN_format` people by age group for the CV cohort
+
+```{r}
+#| label: figure-ci-cv-ageband
+#| out-width: '100%'
+#| out-height: '50%'
+#| output: asis
+#| out-extra: ''
+
+plot_ci_subgroup("cv", "ageband")
+```
+
+<!--       -->
+
+<!--       -->
+
+<!--       -->
+
+
+
+#### Figure S3a.3: Cumulative incidence estimates per `r perN_format` people by prior vaccine count for the CV cohort
+
+```{r}
+#| label: figure-ci-cv-vax_previous_group
+#| out-width: '100%'
+#| out-height: '50%'
+#| output: asis
+#| out-extra: ''
+
+plot_ci_subgroup("cv", "vax_previous_group")
+```
+
+<!--       -->
+
+<!--       -->
+
+<!--       -->
+
+
+
+
+#### Figure S3b.1: Cumulative incidence estimates per `r perN_format` people for the 75+ cohort
+
+```{r}
+#| label:  figure-ci-age75plus-all
+#| out-width: '100%'
+#| out-height: '50%'
+#| output: asis
+#| out-extra: ''
+
+
+plot_ci_subgroup("age75plus", "all")
+```
+
+<!--       -->
+
+<!--       -->
+
+<!--       -->
+
+
+#### Figure S3b.2: Cumulative incidence estimates per `r perN_format` people by age group for the 75+ cohort
+
+```{r}
+#| label: figure-ci-age75plus-ageband
+#| out-width: '100%'
+#| out-height: '50%'
+#| output: asis
+#| out-extra: ''
+
+plot_ci_subgroup("age75plus", "ageband")
+```
+
+<!--       -->
+
+<!--       -->
+
+<!--       -->
+
+#### Figure S3b.2: Cumulative incidence estimates per `r perN_format` people by prior vaccine count for the 75+ cohort
+
+```{r}
+#| label: figure-ci-age75plus-vax_previous_group
+#| out-width: '100%'
+#| out-height: '50%'
+#| output: asis
+#| out-extra: ''
+
+plot_ci_subgroup("age75plus", "vax_previous_group")
+```
+
+<!--       -->
+
+<!--       -->
+
+<!--       -->
+
+#### Figure S3b.4: Cumulative incidence estimates per `r perN_format` people by clinical vulnerability for the 75+ cohort
+
+```{r}
+#| label: figure-ci-age75plus-cv
+#| out-width: '100%'
+#| out-height: '50%'
+#| output: asis
+#| out-extra: ''
+
+plot_ci_subgroup("age75plus", "cv")
+```
+
+<!--       -->
+
+<!--       -->
+
+<!--       -->
+
+
+
+
+```{r}
+#| label: plot-contrasts-function
+
+#colourvalues <- RColorBrewer::brewer.pal(10, "Paired")[c(1,2,5,6,3,4,7,8,9,10)]
+colourvalues <- c("#D55E00", "#009E73", "#CC79A7", "#56B4E9", "#CC79A7", "#56B4E9", "#0072B2")
+
+
+plot_contrast_subgroup <- function(.cohort, .subgroup, coltype){
+    
+  scale_color <- 
+    if(coltype=="qual"){
+      list(
+        scale_color_brewer(type="qual", palette="Set1", na.value="grey"),
+        scale_fill_brewer(type="qual", palette="Set1", guide="none", na.value="grey")
+      )
+    } else if(coltype=="seq"){
+      list(
+        scale_color_viridis_d(na.value="grey"),
+        scale_fill_viridis_d(guide="none", na.value="grey")
+      )
+    }
+
+  
+
+  if(.subgroup=="all"){
+    colour_guide <- list(guides(colour="none", fill="none", alpha="none"))
+  } else{
+    colour_guide <- list(guides(fill="none", alpha="none"))
+  }
+
+  plot_data <- 
+    rst[[.cohort]]$contrasts_daily %>%
+    filter(
+      subgroup==.subgroup,
+      outcome %in% outcomes,
+      subgroup %in% subgroups,
+    ) %>%
+    mutate(
+      subgroup_level_descr = fct_inorder(subgroup_level_descr)
+    ) %>%
+    group_by(subgroup_level_descr, outcome_descr) %>%
+    mutate(
+      outcome_descr = fct_relabel(outcome_descr, str_wrap, width=10),
+      rr = if_else(fup_start<7, NA_real_, rr),
+      rr.ll = if_else(fup_start<7, NA_real_, rr.ll),
+      rr.ul = if_else(fup_start<7, NA_real_, rr.ul),
+      lagrd=lag(rd,1,0),
+      lagrr=lag(rr,1,1)
+    )
+  
+  plot_rd <- 
+    plot_data %>%
+    ggplot(aes(group=subgroup_level_descr, colour=subgroup_level_descr, fill=subgroup_level_descr)) +
+    geom_hline(aes(yintercept=0), colour="black")+
+    geom_segment(aes(x=fup_start, xend=fup_end, y=rd*perN, yend=rd*perN))+
+    geom_segment(aes(x=fup_start, xend=fup_start, y=lagrd*perN, yend=rd*perN))+
+    geom_rect(aes(xmin=fup_start, xmax=fup_end, ymin=rd.ll*perN, ymax=rd.ul*perN), alpha=0.1, colour="transparent")+
+    facet_grid(rows=vars(outcome_descr), scales="free_y", switch="y")+
+    scale_color +
+    scale_x_continuous(breaks = seq(0,600,28), minor_breaks = c(0,1,2,4)*7, expand = expansion(mult=c(0,0.01)), label = label_number(1, 1/7))+
+    scale_y_continuous(
+      expand = expansion(mult=c(0,0.01)), 
+      #=label_number(0.1, 10000)
+    )+
+    coord_cartesian(xlim=c(0, NA))+
+    labs(
+      x="Weeks",
+      y=NULL,
+      title="Cumulative\nrisk difference",
+      colour=NULL
+    )+
+    colour_guide+
+    theme_minimal(base_size = 9)+
+    theme(
+      # legend.position = c(0.05,0.1),
+      # legend.justification = c(0,0),
+      legend.position = "bottom",
+      #legend.direction = "vertical",
+      axis.text.x.top=element_text(hjust=0),
+      axis.line.y = element_line(colour = "black"),
+      
+      panel.grid.minor.x = element_blank(),
+      panel.grid.minor.y = element_blank(),
+      strip.background = element_blank(),
+      strip.placement="outside",
+      strip.text.y.left = element_text(angle=0),
+  
+      panel.border = element_blank(),
+      panel.spacing = unit(0.8, "lines"),
+    )+
+    NULL
+  
+  
+  plot_rr <- 
+    plot_data %>%
+    group_by(subgroup_level_descr, outcome_descr) %>%
+    ggplot(aes(group=subgroup_level_descr, colour=subgroup_level_descr, fill=subgroup_level_descr)) +
+    geom_hline(aes(yintercept=1), colour="black")+
+    geom_segment(aes(x=fup_start, xend=fup_end, y=rr, yend=rr))+
+    geom_segment(aes(x=fup_start, xend=fup_start, y=lagrr, yend=rr))+
+    geom_rect(aes(xmin=fup_start, xmax=fup_end, ymin=rr.ll, ymax=rr.ul), alpha=0.1, colour="transparent")+
+    facet_grid(rows=vars(outcome_descr), scales="free_y", switch="y")+
+    scale_color +
+    scale_x_continuous(breaks = seq(0,600,28), minor_breaks = c(0,1,2,4)*7, expand = expansion(mult=c(0,0.01)), label = label_number(1, 1/7))+
+    scale_y_log10(expand = expansion(mult=c(0,0.01)))+
+    coord_cartesian(xlim=c(0, NA))+
+    labs(
+      x="Weeks",
+      y=NULL,
+      title="Cumulative\nrisk ratio",
+      colour=NULL
+    )+
+    colour_guide+
+    theme_minimal(base_size = 9)+
+    theme(
+      legend.position="none",
+      axis.text.x.top=element_text(hjust=0),
+      axis.line.y = element_line(colour = "black"),
+      axis.line.x.top = element_line(colour = "black"),
+      
+      #panel.grid.minor.x = element_blank(),
+      panel.grid.minor.y = element_blank(),
+      strip.background = element_blank(),
+      strip.text = element_blank(),
+      strip.placement="outside",
+      panel.border = element_blank(),
+      panel.spacing = unit(0.8, "lines")
+    )+
+    NULL
+  
+  plot_irr <- 
+    rst[[.cohort]]$contrasts_cuts  %>%
+    filter(
+      subgroup==.subgroup,
+      outcome %in% outcomes,
+      subgroup %in% subgroups,
+    ) %>%
+    group_by(outcome_descr, subgroup_level_descr) %>%
+    ggplot(aes(group=subgroup_level_descr, colour=subgroup_level_descr, fill=subgroup_level_descr)) +
+    geom_hline(aes(yintercept=1), colour="black")+
+    # geom_segment(aes(x=fup_start, xend=fup_end, y=coxhr, yend=coxhr))+
+    # geom_segment(aes(x=fup_start, xend=fup_start, y=lag(coxhr), yend=coxhr))+
+    # geom_rect(aes(xmin=fup_start, xmax=fup_end, ymin=coxhr.ll, ymax=coxhr.ul), alpha=0.1, colour="transparent")+
+    geom_point(aes(x = (fup_start+fup_end)/2, y=irr), alpha=0.5, position=position_dodge(width=5))+
+    geom_linerange(aes(x = (fup_start+fup_end)/2, ymin=irr.ll, ymax=irr.ul), alpha=0.9, position=position_dodge(width=5))+
+    facet_grid(rows=vars(outcome_descr), scales="free_y")+
+    scale_color +
+    scale_x_continuous(breaks = seq(0,600,28), minor_breaks = c(0,1,2,4)*7, expand = expansion(mult=c(0,0.01)), label = label_number(1, 1/7))+
+    scale_y_log10(expand = expansion(mult=c(0,0.01)), 
+                  oob=~oob_squish(.,range=log(c(1/10,10), 10)),
+                  sec.axis = dup_axis(breaks=NULL, labels=NULL, name = "higher risk\n<- Pfizer BA.4-5 | Sanofi ->"))+
+    coord_cartesian(xlim=c(0, 16*7))+
+    colour_guide+
+    labs(
+      x="Weeks",
+      y=NULL,
+      title="Period-specific\nhazard ratio",
+      colour=NULL
+    )+
+    theme_minimal(base_size = 9)+
+    ci_theme()+
+    NULL
+  
+  
+  
+  plot_combined <- patchwork::wrap_plots(
+    plot_rd, 
+    plot_rr, 
+    plot_irr,
+    ncol=3
+  )
+  
+  ggsave(
+    filename=glue("contrasts_{.cohort}_{.subgroup}.png"),
+    path=output_dir_qmd,
+    plot=plot_combined,
+  )
+
+  plot_combined
+}
+
+```
+
+### Comparisons by subgroup
+
+
+#### Figure S4a.1: Cumulative risk difference, cumulative risk ratio, and period-specific incidence rate ratios for the CV cohort
+
+
+```{r}
+#| label: figure-contrasts-cv-all
+#| out-width: '100%'
+#| out-height: '50%'
+#| output: asis
+#| out-extra: ''
+
+plot_contrast_subgroup("cv", "all", "qual")
+```
+
+<!-- &nbsp; &nbsp; &nbsp; -->
+
+<!-- &nbsp; &nbsp; &nbsp; -->
+
+<!-- &nbsp; &nbsp; &nbsp; -->
+
+#### Figure S4a.2: Cumulative risk difference, cumulative risk ratio, and period-specific incidence rate ratios by age group for the CV cohort
+
+```{r}
+#| label: figure-contrasts-cv-ageband 
+#| out-width: '100%'
+#| out-height: '50%'
+#| output: asis
+#| out-extra: ''
+
+plot_contrast_subgroup("cv", "ageband", "qual")
+```
+
+<!-- &nbsp; &nbsp; &nbsp; -->
+
+<!-- &nbsp; &nbsp; &nbsp; -->
+
+<!-- &nbsp; &nbsp; &nbsp; -->
+
+#### Figure S4a.3: Cumulative risk difference, cumulative risk ratio, and period-specific incidence rate ratios by prior vaccine count for the CV cohort
+
+```{r}
+#| label: figure-contrasts-cv-vax_previous_group 
+#| out-width: '100%'
+#| out-height: '50%'
+#| output: asis
+#| out-extra: ''
+
+plot_contrast_subgroup("cv", "vax_previous_group", "qual")
+```
+
+<!-- &nbsp; &nbsp; &nbsp; -->
+
+<!-- &nbsp; &nbsp; &nbsp; -->
+
+<!-- &nbsp; &nbsp; &nbsp; -->
+
+
+
+#### Figure S4b.1: Cumulative risk difference, cumulative risk ratio, and period-specific incidence rate ratios for the 75+ cohort
+
+```{r}
+#| label: figure-contrasts-age7plus-all
+#| out-width: '100%'
+#| out-height: '50%'
+#| output: asis
+#| out-extra: ''
+
+plot_contrast_subgroup("age75plus", "all","qual")
+```
+
+<!-- &nbsp; &nbsp; &nbsp; -->
+
+<!-- &nbsp; &nbsp; &nbsp; -->
+
+<!-- &nbsp; &nbsp; &nbsp; -->
+
+
+#### Figure S4b.2: Cumulative risk difference, cumulative risk ratio, and period-specific incidence rate ratios by age group for the 75+ cohort
+
+```{r}
+#| label: figure-contrasts-age75plus-ageband 
+#| out-width: '100%'
+#| out-height: '50%'
+#| output: asis
+#| out-extra: ''
+
+plot_contrast_subgroup("age75plus", "ageband","qual")
+```
+
+#### Figure S4b.3: Cumulative risk difference, cumulative risk ratio, and period-specific incidence rate ratios by prior vaccine count for the 75+ cohort
+
+```{r}
+#| label: figure-contrasts-age75plus-vax_previous_group
+#| out-width: '100%'
+#| out-height: '50%'
+#| output: asis
+#| out-extra: ''
+
+plot_contrast_subgroup("age75plus", "vax_previous_group","qual")
+```
+
+
+
+
+#### Figure S4b.4: Cumulative risk difference, cumulative risk ratio, and period-specific incidence rate ratios by clinical vulnerability for the 75+ cohort
+
+```{r}
+#| label: figure-contrasts-age75plus-cv
+#| out-width: '100%'
+#| out-height: '50%'
+#| output: asis
+#| out-extra: ''
+
+plot_contrast_subgroup("age75plus", "cv","qual")
+```
+

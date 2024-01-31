@@ -1,7 +1,4 @@
 
-library("fs")
-
-
 
 ## ollection of formatting functions that may be used ----
 
@@ -39,6 +36,8 @@ label_number_rr <- function(x, scale=1){
 
 
 
+flowchart_totals_allcohorts <- read_csv(path(output_dir_os, "flowchart_totals_allcohorts_rounded.csv"))
+
 # store results for each cohort in a list,
 # accessed for example as follows:  rst$cv$contrasts
 
@@ -58,22 +57,31 @@ for(cohort in c("age75plus", "cv")){
 
     ## study flowchart ----
 
-    total_flowchart <-  read_csv(path(cohort_dir, "total_flowchart.csv"))
-    flowchart <- read_csv(path(cohort_dir, "B", "match_flowchart.csv"))
+    flowchart_totals <-
+      read_csv(path(cohort_dir, "flowchart_totals_rounded.csv"))
 
+    flowchart <-
+      read_csv(path(cohort_dir, "flowchart_rounded.csv")) %>%
+      filter(matchset =="B")
 
     ## matching coverage over time ----
 
-    match_coverage <- read_csv(path(cohort_dir, "B", "match_coverage.csv")) %>%
+    match_coverage <-
+      read_csv(path(cohort_dir, "coverage_rounded.csv")) %>%
+      filter(matchset =="B") %>%
       mutate(
         treatment_descr = fct_recoderelevel(as.character(treatment),  recoder$treatment),
       )
 
-
     ## follow-up summary data ----
 
-    followup <- read_csv(path(cohort_dir, "B", "followup_rounded.csv"))
-    followup_treatment <- read_csv(path(cohort_dir, "B", "followup_treatment_rounded.csv"))
+    followup <-
+      read_csv(path(cohort_dir, "followup_rounded.csv"))  %>%
+      filter(matchset =="B")
+
+    followup_treatment <-
+      read_csv(path(cohort_dir, "followup_treatment_rounded.csv")) %>%
+      filter(matchset =="B")
 
     followup_table <-
       bind_rows(
@@ -81,15 +89,12 @@ for(cohort in c("age75plus", "cv")){
         followup %>% mutate(treatment=2)
       ) %>%
       mutate(
-        treatment_descr = fct_recoderelevel(as.character(treatment),  c(recoder$treatment, "Both" ="2")),
+        treatment_descr = fct_recoderelevel(as.character(treatment), c(recoder$treatment, "Both" ="2")),
         outcome_descr = fct_recoderelevel(as.character(outcome),  recoder$outcome),
         subgroup_descr = fct_recoderelevel(subgroup,  recoder$subgroup),
         subgroup_level_descr = replace_na(subgroup_level_descr, ""),
-
       ) %>%
-      filter(
-        subgroup=="all"
-      ) %>%
+      filter(subgroup=="all") %>%
       mutate(
         total_weeks = label_number(0.1, 1/7)(persontime),
         mean_weeks = label_number(0.1, 1/7)(exittime_mean),
@@ -102,25 +107,23 @@ for(cohort in c("age75plus", "cv")){
 
     ## event counts data ----
 
-    eventcounts <- read_csv(path(cohort_dir, "B", "eventcounts.csv"))
+    eventcounts <-
+      read_csv(path(cohort_dir, "eventcounts_rounded.csv")) %>%
+      filter(matchset=="B")
 
 
     ## baseline characteristics ("table 1") data ----
-
-    prematch_table1 <- read_csv(path(cohort_dir, "prematch_table1.csv"))
-    match_table1 <- read_csv(path(cohort_dir, "B", "match_table1.csv"))
-
     match_table1 <-
-      bind_rows(
-        prematch_table1 %>% mutate(strategy="pre"),
-        match_table1 %>% mutate(strategy="post"),
-      ) %>%
+      read_csv(path(cohort_dir, "table1_rounded.csv"))  %>%
+      filter(matchset %in% c("prematch", "B")) %>%
       mutate(
+        matchset = if_else(matchset=="B", "postmatch", matchset),
         by=case_when(
           by=="pfizer/BA.4-5" ~ 0L,
           by=="Sanofi" ~ 1L,
         ),
         variable_levels = coalesce(variable_levels, ""), # NA to ""
+        var_label = if_else(variable=="N", "N", var_label),
         var_label = fct_inorder(var_label),
         variable = fct_inorder(variable),
         level = fct_rev(fct_inorder(str_replace(paste(var_label, variable_levels, sep=": "),  "\\:\\s$", ""))), # unique var * level value
@@ -130,9 +133,9 @@ for(cohort in c("age75plus", "cv")){
     data_smd <-
       match_table1 %>%
       filter(
-        variable != "N"
+        variable != "N",
       ) %>%
-      group_by(strategy, var_label, variable, variable_levels, level) %>%
+      group_by(matchset, var_label, variable, variable_levels, level) %>%
       mutate(
         mean = coalesce(mean,p),
         sd = coalesce(sd,sqrt(p*(1-p)))
@@ -142,11 +145,11 @@ for(cohort in c("age75plus", "cv")){
         sd = sqrt(mean(sd^2)),
         smd = diff/sd
       ) %>%
-      group_by(strategy) %>%
+      group_by(matchset) %>%
       mutate(
         variable_card = as.numeric(var_label)%%2,
       ) %>%
-      arrange(strategy, desc(level)) %>%
+      arrange(matchset, desc(level)) %>%
       mutate(
         level = fct_rev(level)
       )
@@ -155,14 +158,14 @@ for(cohort in c("age75plus", "cv")){
       match_table1 %>%
       # one column per treatment group
       pivot_wider(
-        id_cols = c(strategy, var_label, variable, variable_levels, level),
+        id_cols = c(matchset, var_label, variable, variable_levels, level),
         names_from = by,
         values_from = c(N, n, p, mean, sd, stat_display)
       ) %>%
       # add SMD stat
       left_join(
         data_smd,
-        by=c("strategy", "var_label", "variable", "variable_levels", "level")
+        by=c("matchset", "var_label", "variable", "variable_levels", "level")
       ) %>%
      # format columns
       filter(!is.na(`n_1`)) %>%
@@ -182,30 +185,37 @@ for(cohort in c("age75plus", "cv")){
 
     ## main estimates ----
 
-    matchset <- "B"
-
-
-    estimates <- read_csv(path(cohort_dir, matchset, "km_estimates_rounded.csv")) %>%
+    estimates <-
+      read_csv(path(cohort_dir, "km_estimates_rounded.csv")) %>%
       mutate(
         treatment_descr = fct_recoderelevel(as.character(treatment),  recoder$treatment),
         outcome_descr = fct_recoderelevel(as.character(outcome),  recoder$outcome),
         subgroup_descr = fct_recoderelevel(subgroup,  recoder$subgroup),
         subgroup_level_descr = replace_na(subgroup_level_descr, "")
-      )
-    contrasts_daily <- read_csv(path(cohort_dir, matchset, "contrasts_daily_rounded.csv")) %>%
-      mutate(
-        outcome_descr = fct_recoderelevel(as.character(outcome),  recoder$outcome),
-        subgroup_descr = fct_recoderelevel(subgroup,  recoder$subgroup),
-        subgroup_level_descr = replace_na(subgroup_level_descr, "")
-      )
-    contrasts_cuts <- read_csv(path(cohort_dir, matchset, "contrasts_cuts_rounded.csv")) %>%
-      mutate(
-        outcome_descr = fct_recoderelevel(as.character(outcome),  recoder$outcome),
-        subgroup_descr = fct_recoderelevel(subgroup,  recoder$subgroup),
-        subgroup_level_descr = replace_na(subgroup_level_descr, "")
-      )
+      ) %>%
+      filter(matchset =="B")
 
-    contrasts_overall <- read_csv(path(cohort_dir, matchset, "contrasts_overall_rounded.csv"))
+    contrasts_daily <-
+      read_csv(path(cohort_dir, "contrasts_daily_rounded.csv")) %>%
+      mutate(
+        outcome_descr = fct_recoderelevel(as.character(outcome),  recoder$outcome),
+        subgroup_descr = fct_recoderelevel(subgroup,  recoder$subgroup),
+        subgroup_level_descr = replace_na(subgroup_level_descr, "")
+      ) %>%
+      filter(matchset =="B")
+
+    contrasts_cuts <-
+      read_csv(path(cohort_dir, "contrasts_cuts_rounded.csv")) %>%
+      mutate(
+        outcome_descr = fct_recoderelevel(as.character(outcome),  recoder$outcome),
+        subgroup_descr = fct_recoderelevel(subgroup,  recoder$subgroup),
+        subgroup_level_descr = replace_na(subgroup_level_descr, "")
+      ) %>%
+      filter(matchset =="B")
+
+    contrasts_overall <-
+      read_csv(path(cohort_dir, "contrasts_overall_rounded.csv"))  %>%
+      filter(matchset =="B")
 
 
     contrasts_overall <-
@@ -216,9 +226,9 @@ for(cohort in c("age75plus", "cv")){
         subgroup_level_descr = fct_inorder(replace_na(subgroup_level_descr, "")),
 
         # deal with inestimable estimates
-        coxhr = if_else(coxhr>10000, Inf, coxhr),
-        coxhr.ll = if_else(coxhr.ll>10000, Inf, coxhr.ll),
-        coxhr.ul = if_else(coxhr.ul>10000, Inf, coxhr.ul),
+        irr = if_else(irr>10000, Inf, irr),
+        irr.ll = if_else(irr.ll>10000, Inf, irr.ll),
+        irr.ul = if_else(irr.ul>10000, Inf, irr.ul),
       ) %>% group_by(
         outcome,
         outcome_descr,
@@ -242,8 +252,8 @@ for(cohort in c("age75plus", "cv")){
         rd.p = pchisq(rd.Q, df=n()-1, lower.tail=FALSE),
         rr.ln.Q = sum((1/(rr.ln.se^2))*((log(rr)-weighted.mean(log(rr), 1/(rr.ln.se)^2))^2)),
         rr.ln.p = pchisq(rr.ln.Q, df=n()-1, lower.tail=FALSE),
-        coxhr.ln.Q = sum((1/(coxhr.se^2))*((log(coxhr)-weighted.mean(log(coxhr), 1/(coxhr.se)^2))^2)),
-        coxhr.ln.p = pchisq(coxhr.ln.Q, df=n()-1, lower.tail=FALSE),
+        #coxhr.ln.Q = sum((1/(coxhr.se^2))*((log(coxhr)-weighted.mean(log(coxhr), 1/(coxhr.se)^2))^2)),
+        #coxhr.ln.p = pchisq(coxhr.ln.Q, df=n()-1, lower.tail=FALSE),
         irr.ln.Q = sum((1/(irr.ln.se^2))*((log(irr)-weighted.mean(log(irr), 1/(irr.ln.se)^2))^2)),
         irr.ln.p = pchisq(irr.ln.Q, df=n()-1, lower.tail=FALSE),
       ) %>%
@@ -267,9 +277,9 @@ for(cohort in c("age75plus", "cv")){
         n.event_0=label_number_n(n.event_0),
         n.event_1=label_number_n(n.event_1),
 
-        coxhr = if_else(coxhr>10000, Inf, coxhr),
-        coxhr.ll = if_else(coxhr.ll>10000, Inf, coxhr.ll),
-        coxhr.ul = if_else(coxhr.ul>10000, Inf, coxhr.ul),
+        irr = if_else(irr>10000, Inf, irr),
+        irr.ll = if_else(irr.ll>10000, Inf, irr.ll),
+        irr.ul = if_else(irr.ul>10000, Inf, irr.ul),
 
         riskCI_0 = glue("{label_number_risk(risk_0)} ({label_number_risk(risk.ll_0)} to {label_number_risk(risk.ul_0)})"),
         riskCI_0_95 = glue("{label_number_risk(risk_0)} (95%CI {label_number_risk(risk.ll_0)} to {label_number_risk(risk.ul_0)})"),
@@ -279,12 +289,12 @@ for(cohort in c("age75plus", "cv")){
         rrCI = glue("{label_number_rr(rr)} ({label_number_rr(rr.ll)}-{label_number_rr(rr.ul)})"),
         irrCI = glue("{label_number_rr(irr)} ({label_number_rr(irr.ll)}-{label_number_rr(irr.ul)})"),
         irrCI_95 = glue("{label_number_rr(irr)} (95%CI {label_number_rr(irr.ll)} to {label_number_rr(irr.ul)})"),
-        coxhrCI = glue("{label_number_rr(coxhr)} ({label_number_rr(coxhr.ll)} to {label_number_rr(coxhr.ul)})"),
-        coxhrCI_95 = glue("{label_number_rr(coxhr)} (95%CI {label_number_rr(coxhr.ll)} to {label_number_rr(coxhr.ul)})"),
+        #coxhrCI = glue("{label_number_rr(coxhr)} ({label_number_rr(coxhr.ll)} to {label_number_rr(coxhr.ul)})"),
+        #coxhrCI_95 = glue("{label_number_rr(coxhr)} (95%CI {label_number_rr(coxhr.ll)} to {label_number_rr(coxhr.ul)})"),
 
         rd.p = if_else(rd.p<0.001, "<0.001", label_number(0.001, trim=FALSE)(rd.p)),
         rr.ln.p = if_else(rr.ln.p<0.001, "<0.001", label_number(0.001, trim=FALSE)(rr.ln.p)),
-        coxhr.ln.p = if_else(coxhr.ln.p<0.001, "<0.001", label_number(0.001, trim=FALSE)(coxhr.ln.p)),
+        #coxhr.ln.p = if_else(coxhr.ln.p<0.001, "<0.001", label_number(0.001, trim=FALSE)(coxhr.ln.p)),
         irr.ln.p = if_else(irr.ln.p<0.001, "<0.001", label_number(0.001, trim=FALSE)(irr.ln.p)),
       ) %>%
       ungroup()
@@ -297,11 +307,9 @@ for(cohort in c("age75plus", "cv")){
         subgroup == "all"
       ) %>%
       mutate(
-        coxhr = if_else(coxhr>10000, Inf, coxhr),
-        coxhr.ll = if_else(coxhr.ll>10000, Inf, coxhr.ll),
-        coxhr.ul = if_else(coxhr.ul>10000, Inf, coxhr.ul),
-        coxhrCI = glue("{label_number_rr(coxhr)} ({label_number_rr(coxhr.ll)} to {label_number_rr(coxhr.ul)})"),
-        coxhrCI_95 = glue("{label_number_rr(coxhr)} (95%CI {label_number_rr(coxhr.ll)} to {label_number_rr(coxhr.ul)})"),
+        irr = if_else(irr>10000, Inf, irr),
+        irr.ll = if_else(irr.ll>10000, Inf, irr.ll),
+        irr.ul = if_else(irr.ul>10000, Inf, irr.ul),
         irrCI = glue("{label_number_rr(irr)} ({label_number_rr(irr.ll)}-{label_number_rr(irr.ul)})"),
         irrCI_95 = glue("{label_number_rr(irr)} (95%CI {label_number_rr(irr.ll)} to {label_number_rr(irr.ul)})"),
       )
@@ -312,6 +320,14 @@ for(cohort in c("age75plus", "cv")){
   # convert temp environment to a list within rst
   rst[[cohort]] <- as.list(env)
 }
+
+
+
+match_coverage <-
+  bind_rows(
+    rst$cv$match_coverage %>% mutate(cohort="cv"),
+    rst$age75plus$match_coverage %>% mutate(cohort="age75plus"),
+  )
 
 
 match_table1 <-
@@ -325,6 +341,12 @@ match_table1_wide <-
     rst$cv$match_table1_wide %>% mutate(cohort="cv"),
     rst$age75plus$match_table1_wide %>% mutate(cohort="age75plus"),
   )
+
+data_smd <-
+  bind_rows(
+  rst$cv$data_smd %>% mutate(cohort="cv"),
+  rst$age75plus$data_smd %>% mutate(cohort="age75plus"),
+)
 
 
 contrasts_overall <-

@@ -6,10 +6,11 @@ library('lubridate')
 library('gt')
 library('patchwork')
 library('scales')
+library("fs")
 
 # where are the outputs (ie the inputs for this manuscript!) saved?
-output_dir_os <- here("output", "release-objects")
-#output_dir_os <- here("released-output", "release-objects-v2")
+#output_dir_os <- here("output", "release-objects")
+output_dir_os <- here("released-output", "release1")
 
 
 ## import functions and design elements
@@ -19,8 +20,8 @@ source(here("analysis", "design", "design.R"))
 study_dates_format <- map(study_dates, ~format(as.Date(.), "%e %B %Y"))
 
 # where should we put the objects created within this rmd script?
-output_dir_qmd <- here("write-up", "manuscript", "figures")
-fs::dir_create(output_dir_qmd)
+output_dir_qmd <- here("write-up", "manuscript", "figures_manual")
+dir_create(output_dir_qmd)
 
 # only applicable if `self-contained: yes` option is enables in yaml header
 # knitr::opts_chunk$set(
@@ -32,32 +33,31 @@ fs::dir_create(output_dir_qmd)
 
 ## define outcome sets
 
-outcomes_primary <- c(
-  "covidemergency",
+outcomes_effectiveness <- c(
+  #"covidemergency",
+  "covidcritcare",
   "covidadmitted",
-  #"covidadmittedproxy1",
-  #"covidcritcare",
   "coviddeath",
   "noncoviddeath",
   NULL
 ) %>%
   set_names(., .)
 
-# outcomes_negative <- c(
-#   #"noncoviddeath",
-#   #"fracture",
-#   NULL
-# ) %>%
-#   set_names(., .)
+ outcomes_safety <- c(
+  "pericarditis",
+  "myocarditis",
+  NULL
+) %>%
+  set_names(., .)
 
-outcomes <- outcomes_primary
+
+outcomes <- c(outcomes_effectiveness, outcomes_safety)
 
 subgroups <-
   c(
     "all",
-    "vax_prior_history",
+    "vax_previous_group",
     "ageband",
-    "prior_covid_infection",
     "cv",
     NULL
   ) %>%
