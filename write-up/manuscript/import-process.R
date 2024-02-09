@@ -1,6 +1,6 @@
 
 
-## ollection of formatting functions that may be used ----
+## Collection of formatting functions that may be used ----
 
 perN <- 1000
 perN_format <- label_number(1, 1, big.mark=",")(perN)
