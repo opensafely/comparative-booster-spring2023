@@ -793,6 +793,27 @@ contrasts_plot <-
     irr.ln.p = if_else(irr.ln.p<0.001, "<0.001", label_number(0.001, trim=FALSE)(irr.ln.p))
   )
 
+# create csv in form of Jasper plot
+contrasts_jasper_plot <- contrasts_plot %>%
+  ungroup()%>%
+  summarise(
+            Heading=outcome_descr,
+            HR1=irr,
+            LCI1=irr.ll,
+            UCI1=irr.ul,
+            ) %>%
+  replace(is.na(.),Inf) %>%
+  add_row( Heading ="",.before = 0) %>%
+  add_row(Heading = "Clinically Vulnerable", .before = 1) %>%
+  add_row(Heading ="", .after = length(outcomes) +2) %>%
+  add_row( Heading="", .after = length(outcomes) +2) %>%
+  add_row(Heading = "Aged 75 years or over", .after = length(outcomes) +3) 
+
+write_csv(contrasts_jasper_plot,fs::path(output_dir_qmd,"irr_plots.csv"),na="")
+
+# Run Jasper IRR plot script (requires https://github.com/arnhew99/Jasper?tab=readme-ov-file#jasper)
+source(here::here("write-up", "manuscript", "irr_plots_jasper_code.r"))
+
 plot_irr_lines <- contrasts_plot %>%
   ggplot(aes(y=outcome_descr)) +
   geom_vline(aes(xintercept=1), linetype="dotted", colour="darkgrey")+
@@ -800,7 +821,7 @@ plot_irr_lines <- contrasts_plot %>%
   geom_linerange(aes(xmin=irr.ll, xmax=irr.ul), position=position_dodge(width=0.3))+
   #facet_grid(rows=vars(outcome_descr), scales="free", space="free_y", switch="y")+
   facet_wrap(vars(cohort_descr), scales="free_y", ncol=1, strip.position = "top")+
-  scale_x_log10(label=label_number(0.1, style_negative="minus", big.mark=","), oob=~oob_squish(.,range=log(c(0.4,2), 10)), expand=expansion())+
+  scale_x_log10(label=label_number(0.1, style_negative="minus", big.mark=","),n.breaks =8, oob=~oob_squish(.,range=log(c(0.2,8), 10)), expand=expansion())+
   #scale_fill_brewer(type="qual", palette="Set2")+
   scale_fill_manual(values=c("transparent", "darkgrey"))+
   labs(
@@ -823,8 +844,8 @@ plot_irr_lines <- contrasts_plot %>%
     #strip.text.y.left = element_blank(),
     panel.border = element_blank(),
     panel.spacing = unit(0.5, "lines"),
-  )
-
+  ) 
+  
 plot_irr_table <- contrasts_plot %>%
   ggplot(aes(y=outcome_descr)) +
   geom_text(aes(x=0.5, label=irrCI), hjust=0.5, vjust=0.5, size=9/.pt)+
@@ -850,7 +871,7 @@ plot_irr_table <- contrasts_plot %>%
   NULL
 
 # contrasts_plot %>% select(cohort_descr, subgroup_level_descr, outcome_descr, irrCI, irr.ln.p) %>% write_csv(here("table3.csv"))
-# 
+#
 # plot_p_table <- contrasts_plot %>%
 #   ggplot() +
 #   geom_text(aes(x=0.5, y=subgroup_level_descr, label=irr.ln.p), hjust=0.5, vjust=0.5, size=9/.pt, colour="transparent")+
@@ -892,6 +913,8 @@ plot_irr_table <- contrasts_plot %>%
   )
 
 plot_combined
+
+
 
 cat("  \n\n")
 
