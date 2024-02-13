@@ -196,7 +196,6 @@ In the 75+ cohort, `r rst$age75plus$contrasts_table %>% filter(outcome=="pericar
 
 Findings in the main analyses were similar when examining subgroups, those estimated with reduced precision. Supplementary materials provide cumulative incidence plots by subgroup (Figures S3), the corresponding cumulative risk differences, cumulative risk ratios, and period-specific IRRs (Figures S4), and subgroup-specific heterogeneity tests for risk differences and risk ratios (Table S2).
 
-\newpage
 
 ## Discussion
 
@@ -222,7 +221,7 @@ Out-of-trial evidence of the effectiveness of Sanofi and Pfizer BA.4-5 vaccines 
 
 ### Conclusions
 
-During the spring 2023 COVID-19 booster programme in England, COVID-19-related hospital admissions were slightly more frequent following receipt of the Sanofi vaccine than the Pfizer BA.4-5 vaccine after matching on a number of important potential confounders. These finding were broadly consistent across subgroups, though estimated with less precision.
+During the spring 2023 COVID-19 booster programme in England, COVID-19-related hospital admissions were slightly more frequent following receipt of the Sanofi vaccine than the Pfizer BA.4-5 vaccine after matching on a number of important potential confounders. These findings were broadly consistent across subgroups, though estimated with less precision.
 
 \newpage
 
@@ -236,11 +235,11 @@ NHS England is the data controller for the NHS England OpenSAFELY COVID-19 Servi
 
 Patient data has been pseudonymised for analysis and linkage using industry standard cryptographic hashing techniques; all pseudonymised datasets transmitted for linkage onto OpenSAFELY are encrypted; access to the NHS England OpenSAFELY COVID-19 service is via a virtual private network (VPN) connection; the researchers hold contracts with NHS England and only access the platform to initiate database queries and statistical models; all database activity is logged; only aggregate statistical outputs leave the platform environment following best practice for anonymisation of results such as statistical disclosure control for low cell counts @isb1523.
 
-The service adheres to the obligations of the UK General Data Protection Regulation (UK GDPR) and the Data Protection Act 2018. The service previously operated under notices initially issued in February 2020 by the the Secretary of State under Regulation 3(4) of the Health Service (Control of Patient Information) Regulations 2002 (COPI Regulations), which required organisations to process confidential patient information for COVID-19 purposes; this set aside the requirement for patient consent @WithdrawnWithdrawnCoronavirus2022. As of 1 July 2023, the Secretary of State has requested that NHS England continue to operate the Service under the COVID-19 Directions 2020 @COVID19PublicHealth. In some cases of data sharing, the common law duty of confidence is met using, for example, patient consent or support from the Health Research Authority Confidentiality Advisory Group @ConfidentialityAdvisoryGroup.
+The service adheres to the obligations of the UK General Data Protection Regulation (UK GDPR) and the Data Protection Act 2018. The service previously operated under notices initially issued in February 2020 by the Secretary of State under Regulation 3(4) of the Health Service (Control of Patient Information) Regulations 2002 (COPI Regulations), which required organisations to process confidential patient information for COVID-19 purposes; this set aside the requirement for patient consent @WithdrawnWithdrawnCoronavirus2022. As of 1 July 2023, the Secretary of State has requested that NHS England continue to operate the Service under the COVID-19 Directions 2020 @COVID19PublicHealth. In some cases of data sharing, the common law duty of confidence is met using, for example, patient consent or support from the Health Research Authority Confidentiality Advisory Group @ConfidentialityAdvisoryGroup.
 
 Taken together, these provide the legal bases to link patient datasets using the service. GP practices, which provide access to the primary care data, are required to share relevant health information to support the public health response to the pandemic, and have been informed of how the service operates.
 
-This study was approved by the Health Research Authority (REC reference 20/LO/0651) and by London School of Hygeine and Tropical Medicine Ethics Board (reference 21863).
+This study was approved by the Health Research Authority (REC reference 20/LO/0651) and by London School of Hygiene and Tropical Medicine Ethics Board (reference 21863).
 
 ## Data access and verification
 
