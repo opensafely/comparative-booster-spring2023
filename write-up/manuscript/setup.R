@@ -1,15 +1,17 @@
-
-library('tidyverse')
-library('here')
-library('glue')
-library('lubridate')
-library('gt')
-library('patchwork')
-library('scales')
+library("tidyverse")
+library("here")
+library("glue")
+library("lubridate")
+library("gt")
+library("patchwork")
+library("scales")
 library("fs")
+library("Gmisc")
+library("grid")
+
 
 # where are the outputs (ie the inputs for this manuscript!) saved?
-#output_dir_os <- here("output", "release-objects")
+# output_dir_os <- here("output", "release-objects")
 output_dir_os <- here("released-output", "release1")
 
 
@@ -17,7 +19,7 @@ output_dir_os <- here("released-output", "release1")
 source(here("analysis", "functions", "utility.R"))
 source(here("analysis", "design", "design.R"))
 
-study_dates_format <- map(study_dates, ~format(as.Date(.), "%e %B %Y"))
+study_dates_format <- map(study_dates, ~ format(as.Date(.), "%e %B %Y"))
 
 # where should we put the objects created within this rmd script?
 output_dir_qmd <- here("write-up", "manuscript", "figures_manual")
@@ -34,7 +36,7 @@ dir_create(output_dir_qmd)
 ## define outcome sets
 
 outcomes_effectiveness <- c(
-  #"covidemergency",
+  # "covidemergency",
   "covidcritcare",
   "covidadmitted",
   "coviddeath",
@@ -43,7 +45,7 @@ outcomes_effectiveness <- c(
 ) %>%
   set_names(., .)
 
- outcomes_safety <- c(
+outcomes_safety <- c(
   "pericarditis",
   "myocarditis",
   NULL
@@ -62,5 +64,3 @@ subgroups <-
     NULL
   ) %>%
   set_names(., .)
-
-
