@@ -25,7 +25,7 @@ print.headings <- parseColHeadings(rawdata$ColHeadings, rd=rawdata)
 
 # set up the Jasper page
 type <- "JPG"
-SetPage(orient="PORTRAIT", perpage=1, type=type, filestem=path(output_dir_qmd, "irr_jasp_plots"), append_datetime=FALSE, suppress.date=TRUE, titlespace=0.05, footerspace=0.42)
+SetPage(orient="PORTRAIT", perpage=1, type=type, filestem=path(output_dir_qmd, "irr_jasp_plots"),titlespace = 0.005,blank.bottom.percent = 0, append_datetime=FALSE, suppress.date=TRUE,page_height = 7)
 
 # Set page margins: format is c(bottom, left, top, right)
 par(mar=c(8.09424320667184, 2, 8.09424320667184, 2))
@@ -77,7 +77,7 @@ text(x=0, y=locs$BlankLocs+ ylabels.offset, labels=left.labels[blank.rows], adj=
 
 # adding other columns
 # add the main title
-mainTitle("Incidence Rate Ratios", mainfont=1)
+# mainTitle("Incidence Rate Ratios", mainfont=1)
 
 # stop writing to file
 closeFile(type)
