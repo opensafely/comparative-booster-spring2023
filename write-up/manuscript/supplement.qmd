@@ -317,6 +317,13 @@ show_smd <- function(.cohort) {
     )
   
   plot_smd
+  
+  ggsave(
+    filename=glue("smd_{.cohort}.jpeg"),
+    path=output_dir_qmd,
+    plot=plot_smd,
+    width=20, height=20, units="cm"
+  )
 }
 
 ```
@@ -327,7 +334,7 @@ show_smd <- function(.cohort) {
 ```{r}
 #| label: figure-smd-cv
 #| out-width: '90%'
-#| out-height: '100%'
+#| out-height: '200%'
 #| output: asis
 #| out-extra: ''
 
@@ -338,7 +345,7 @@ show_smd("cv")
 ```{r}
 #| label: figure-smd-age75plus
 #| out-width: '90%'
-#| out-height: '100%'
+#| out-height: '200%'
 #| output: asis
 #| out-extra: ''
 
