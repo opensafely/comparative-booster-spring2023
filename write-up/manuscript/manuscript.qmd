@@ -102,7 +102,6 @@ Age was calculated as of 30 June 2023, to allow for a degree of operational flex
 ### Outcomes and follow-up
 
 We considered three effectiveness outcomes. COVID-19 hospital admission was identified using Secondary Use Service (SUS) in-patient hospital spell records with International Statistical Classification of Diseases and Related Health Problems 10th Revision (ICD-10) codes U07.1, U07.2, or U.109 as the primary or non-primary reason for admission. COVID-19 critical care admissions were any COVID-19 hospital spell with at least one day spent in critical care (including any such spells occurring subsequent to the first spell after vaccination). COVID-19 death was defined as COVID-19 ICD-10 codes (as before) mentioned anywhere on the death certificate (i.e., as an underlying or contributing cause of death). We also report on non-COVID-19 deaths.
-We considered three effectiveness outcomes. COVID-19 hospital admission was identified using Secondary Use Service (SUS) in-patient hospital spell records with International Statistical Classification of Diseases and Related Health Problems 10th Revision (ICD-10) codes U07.1, U07.2, or U.109 as the primary or non-primary reason for admission. COVID-19 critical care admissions were any COVID-19 hospital spell with at least one day spent in critical care (including any such spells occurring subsequent to the first spell after vaccination). COVID-19 death was defined as COVID-19 ICD-10 codes (as before) mentioned anywhere on the death certificate (i.e., as an underlying or contributing cause of death). We also report on non-COVID-19 deaths.
 
 We considered two safety outcomes. Pericarditis within 28 days of vaccination was identified using SUS emergency department records with pericarditis listed as the discharge diagnosis (SNOMED), and using ICD-10 coded hospital admission and death records. Myocarditis was identified similarly. Details of the codelists used to define these outcomes are available in the supplementary materials.
 
@@ -141,9 +140,7 @@ Data management and analyses were conducted using OpenSAFELY tools, Python versi
 We identified `r label_number(1, big.mark=",")(filter(flowchart_totals_allcohorts, boost_type=="any") %>% pull(n))` people aged 50 years or over who were recorded as having received a COVID-19 vaccine between `r study_dates_format$studystart_date` and `r study_dates_format$studyend_date` whilst registered at a TPP practice. This included `r label_number(1, big.mark=",")(filter(flowchart_totals_allcohorts, boost_type=="pfizerBA45") %>% pull(n))` (`r label_percent(0.1)(filter(flowchart_totals_allcohorts, boost_type=="pfizerBA45") %>% pull(pct))`) Pfizer BA.4-5 and `r label_number(1, big.mark=",")(filter(flowchart_totals_allcohorts, boost_type=="sanofi") %>% pull(n))` (`r label_percent(0.1)(filter(flowchart_totals_allcohorts, boost_type=="sanofi") %>% pull(pct))`) Sanofi recipients.
 
 We identified `r label_number(1, big.mark=",")(filter(rst$cv$flowchart_totals, boost_type=="any") %>% pull(n) %>% sum())` people in the CV cohort, and of these `r label_number(1, big.mark=",")(filter(rst$cv$flowchart_totals, boost_type=="pfizerBA45") %>% pull(n))` (`r label_percent(0.1)(filter(rst$cv$flowchart_totals, boost_type=="pfizerBA45") %>% pull(pct))`) received Pfizer BA.4-5 and `r label_number(1, big.mark=",")(filter(rst$cv$flowchart_totals, boost_type=="sanofi") %>% pull(n))` (`r label_percent(0.1)(filter(rst$cv$flowchart_totals, boost_type=="sanofi") %>% pull(pct))`) received Sanofi, with `r label_number(1, big.mark=",")(filter(rst$cv$flowchart, crit=="c4", boost_type=="pfizerBA45") %>% pull(n))` (`r label_percent(0.1)(filter(rst$cv$flowchart, crit=="c4", boost_type=="pfizerBA45") %>% pull(pct_all))`) and `r label_number(1, big.mark=",")(filter(rst$cv$flowchart, crit=="c4", boost_type=="sanofi") %>% pull(n))` (`r label_percent(0.1)(filter(rst$cv$flowchart, crit=="c4", boost_type=="sanofi") %>% pull(pct_all))`) eligible for matching respectively (Figure 1a).
-We identified `r label_number(1, big.mark=",")(filter(rst$cv$flowchart_totals, boost_type=="any") %>% pull(n) %>% sum())` people in the CV cohort, and of these `r label_number(1, big.mark=",")(filter(rst$cv$flowchart_totals, boost_type=="pfizerBA45") %>% pull(n))` (`r label_percent(0.1)(filter(rst$cv$flowchart_totals, boost_type=="pfizerBA45") %>% pull(pct))`) received Pfizer BA.4-5 and `r label_number(1, big.mark=",")(filter(rst$cv$flowchart_totals, boost_type=="sanofi") %>% pull(n))` (`r label_percent(0.1)(filter(rst$cv$flowchart_totals, boost_type=="sanofi") %>% pull(pct))`) received Sanofi, with `r label_number(1, big.mark=",")(filter(rst$cv$flowchart, crit=="c4", boost_type=="pfizerBA45") %>% pull(n))` (`r label_percent(0.1)(filter(rst$cv$flowchart, crit=="c4", boost_type=="pfizerBA45") %>% pull(pct_all))`) and `r label_number(1, big.mark=",")(filter(rst$cv$flowchart, crit=="c4", boost_type=="sanofi") %>% pull(n))` (`r label_percent(0.1)(filter(rst$cv$flowchart, crit=="c4", boost_type=="sanofi") %>% pull(pct_all))`) eligible for matching respectively (Figure 1a).
 
-`r label_number(1, big.mark=",")(filter(rst$age75plus$flowchart_totals, boost_type=="any") %>% pull(n) %>% sum())` people were in the 75+ cohort, and of these `r label_number(1, big.mark=",")(filter(rst$age75plus$flowchart_totals, boost_type=="pfizerBA45") %>% pull(n))` (`r label_percent(0.1)(filter(rst$age75plus$flowchart_totals, boost_type=="pfizerBA45") %>% pull(pct))`) received Pfizer BA.4-5 and `r label_number(1, big.mark=",")(filter(rst$age75plus$flowchart_totals, boost_type=="sanofi") %>% pull(n))` (`r label_percent(0.1)(filter(rst$age75plus$flowchart_totals, boost_type=="sanofi") %>% pull(pct))`) received Sanofi, with `r label_number(1, big.mark=",")(filter(rst$age75plus$flowchart, crit=="c4", boost_type=="pfizerBA45") %>% pull(n))` (`r label_percent(0.1)(filter(rst$age75plus$flowchart, crit=="c4", boost_type=="pfizerBA45") %>% pull(pct_all))`) and `r label_number(1, big.mark=",")(filter(rst$age75plus$flowchart, crit=="c4", boost_type=="sanofi") %>% pull(n))` (`r label_percent(0.1)(filter(rst$age75plus$flowchart, crit=="c4", boost_type=="sanofi") %>% pull(pct_all))`) eligible for matching respectively (Figure 1b).
 `r label_number(1, big.mark=",")(filter(rst$age75plus$flowchart_totals, boost_type=="any") %>% pull(n) %>% sum())` people were in the 75+ cohort, and of these `r label_number(1, big.mark=",")(filter(rst$age75plus$flowchart_totals, boost_type=="pfizerBA45") %>% pull(n))` (`r label_percent(0.1)(filter(rst$age75plus$flowchart_totals, boost_type=="pfizerBA45") %>% pull(pct))`) received Pfizer BA.4-5 and `r label_number(1, big.mark=",")(filter(rst$age75plus$flowchart_totals, boost_type=="sanofi") %>% pull(n))` (`r label_percent(0.1)(filter(rst$age75plus$flowchart_totals, boost_type=="sanofi") %>% pull(pct))`) received Sanofi, with `r label_number(1, big.mark=",")(filter(rst$age75plus$flowchart, crit=="c4", boost_type=="pfizerBA45") %>% pull(n))` (`r label_percent(0.1)(filter(rst$age75plus$flowchart, crit=="c4", boost_type=="pfizerBA45") %>% pull(pct_all))`) and `r label_number(1, big.mark=",")(filter(rst$age75plus$flowchart, crit=="c4", boost_type=="sanofi") %>% pull(n))` (`r label_percent(0.1)(filter(rst$age75plus$flowchart, crit=="c4", boost_type=="sanofi") %>% pull(pct_all))`) eligible for matching respectively (Figure 1b).
 
 Sanofi was more likely to be administered in April 2023, and Pfizer BA.4-5 more likely in May and June 2023. Prior to matching, Sanofi recipients were on average older, more likely to be recorded as resident in a care or nursing home, and less likely to have received fewer than 5 prior COVID-19 vaccine doses compared with Pfizer BA.4-5 recipients, in both cohorts. Sanofi recipients were less likely that Pfizer BA.4-5 recipients to have previously received the Pfizer/BA.1 vaccine during an earlier booster programme and more likely to have received Moderna/Omicron. Sex, deprivation levels, and ethnicity were similar in both groups prior to matching (supplementary Tables S1a and S1b).
@@ -157,16 +154,14 @@ After matching, characteristics at the start of follow-up were well-balanced bet
 #### CV cohort
 
 ````{comment}
-````{comment}
 
-````
 ````
 
 At 16 weeks there were `r rst$cv$contrasts_table %>% filter(outcome=="covidadmitted", subgroup=="all") %>% pull(n.event)` COVID-19 hospital admissions, `r rst$cv$contrasts_table %>% filter(outcome=="covidcritcare", subgroup=="all") %>% pull(n.event)` COVID-19 critical care admissions, and `r rst$cv$contrasts_table %>% filter(outcome=="coviddeath", subgroup=="all") %>% pull(n.event)` COVID-19 deaths (Table 2).
 
 The 16-week risks (cumulative incidence) per `r perN_format` people of COVID-19 hospital admissions were `r rst$cv$contrasts_table %>% filter(outcome=="covidadmitted", subgroup=="all") %>% pull(riskCI_0_95)` for those receiving Pfizer BA.4-5 and `r rst$cv$contrasts_table %>% filter(outcome=="covidadmitted", subgroup=="all") %>% pull(riskCI_1)` for Sanofi (risk difference `r rst$cv$contrasts_table %>% filter(outcome=="covidadmitted", subgroup=="all") %>% pull(rdCI_95)`) (Table 2; Figure 3). The corresponding 16-week risks per `r perN_format` people for COVID-19 critical care admission were `r rst$cv$contrasts_table %>% filter(outcome=="covidcritcare", subgroup=="all") %>% pull(riskCI_0)` for Pfizer BA.4-5 and `r rst$cv$contrasts_table %>% filter(outcome=="covidcritcare", subgroup=="all") %>% pull(riskCI_1)` for Sanofi (risk difference `r rst$cv$contrasts_table %>% filter(outcome=="covidcritcare", subgroup=="all") %>% pull(rdCI)` where values greater than zero favour Pfizer). The 16-week risks per `r perN_format` people of COVID-19 death were `r rst$cv$contrasts_table %>% filter(outcome=="coviddeath", subgroup=="all") %>% pull(riskCI_0)` for Pfizer BA.4-5 and `r rst$cv$contrasts_table %>% filter(outcome=="coviddeath", subgroup=="all") %>% pull(riskCI_1)` for Sanofi (risk difference `r rst$cv$contrasts_table %>% filter(outcome=="coviddeath", subgroup=="all") %>% pull(rdCI)`). For non-COVID-19 death, these were `r rst$cv$contrasts_table %>% filter(outcome=="noncoviddeath", subgroup=="all") %>% pull(riskCI_0)` for Pfizer BA.4-5 and `r rst$cv$contrasts_table %>% filter(outcome=="noncoviddeath", subgroup=="all") %>% pull(riskCI_1)` for Sanofi (risk difference `r rst$cv$contrasts_table %>% filter(outcome=="noncoviddeath", subgroup=="all") %>% pull(rdCI)`).
 
-IRRs (where values greater than one favour Pfizer) in the 16-week period after vaccination were `r rst$cv$contrasts_table %>% filter(outcome=="covidadmitted", subgroup=="all") %>% pull(irrCI_95)` for COVID-19 hospital admissions, `r rst$cv$contrasts_table %>% filter(outcome=="covidcritcare", subgroup=="all") %>% pull(irrCI)` for COVID-19 critical care admission, `r rst$cv$contrasts_table %>% filter(outcome=="coviddeath", subgroup=="all") %>% pull(irrCI)` for COVID-19 death, and `r rst$cv$contrasts_table %>% filter(outcome=="noncoviddeath", subgroup=="all") %>% pull(irrCI)` for non-COVID-19 death (Figure 4).
+IRRs (where values greater than one favour Pfizer) in the 16-week period after vaccination were `r rst$cv$contrasts_table %>% filter(outcome=="covidadmitted", subgroup=="all") %>% pull(irrCI_95)` for COVID-19 hospital admissions, `r rst$cv$contrasts_table %>% filter(outcome=="covidcritcare", subgroup=="all") %>% pull(irrCI)` for COVID-19 critical care admission, `r rst$cv$contrasts_table %>% filter(outcome=="coviddeath", subgroup=="all") %>% pull(irrCI)` for COVID-19 death, and `r rst$cv$contrasts_table %>% filter(outcome=="noncoviddeath", subgroup=="all") %>% pull(irrCI)` for non-COVID-19 death (Figure 3).
 
 #### 75+ cohort
 
@@ -178,7 +173,6 @@ By 16 weeks there were `r rst$age75plus$contrasts_table %>% filter(outcome=="cov
 
 The 16-week risks (cumulative incidence) per `r perN_format` people of COVID-19 hospital admissions were `r rst$age75plus$contrasts_table %>% filter(outcome=="covidadmitted", subgroup=="all") %>% pull(riskCI_0_95)` for those receiving Pfizer BA.4-5 and `r rst$age75plus$contrasts_table %>% filter(outcome=="covidadmitted", subgroup=="all") %>% pull(riskCI_1)` for Sanofi (risk difference `r rst$age75plus$contrasts_table %>% filter(outcome=="covidadmitted", subgroup=="all") %>% pull(rdCI_95)`) (Table 2; Figure 3). The corresponding 16-week risks per `r perN_format` people for COVID-19 critical care admission were `r rst$age75plus$contrasts_table %>% filter(outcome=="covidcritcare", subgroup=="all") %>% pull(riskCI_0)` for Pfizer BA.4-5 and `r rst$age75plus$contrasts_table %>% filter(outcome=="covidcritcare", subgroup=="all") %>% pull(riskCI_1)` for Sanofi (risk difference `r rst$age75plus$contrasts_table %>% filter(outcome=="covidcritcare", subgroup=="all") %>% pull(rdCI)`). The 16-week risks per `r perN_format` people of COVID-19 death were `r rst$age75plus$contrasts_table %>% filter(outcome=="coviddeath", subgroup=="all") %>% pull(riskCI_0)` for Pfizer BA.4-5 and `r rst$age75plus$contrasts_table %>% filter(outcome=="coviddeath", subgroup=="all") %>% pull(riskCI_1)` for Sanofi (risk difference `r rst$age75plus$contrasts_table %>% filter(outcome=="coviddeath", subgroup=="all") %>% pull(rdCI)`). For non-COVID-19 death, these were `r rst$age75plus$contrasts_table %>% filter(outcome=="noncoviddeath", subgroup=="all") %>% pull(riskCI_0)` for Pfizer BA.4-5 and `r rst$age75plus$contrasts_table %>% filter(outcome=="noncoviddeath", subgroup=="all") %>% pull(riskCI_1)` for Sanofi (risk difference `r rst$age75plus$contrasts_table %>% filter(outcome=="noncoviddeath", subgroup=="all") %>% pull(rdCI)`).
 
-IRRs in the 16-week period after vaccination were `r rst$age75plus$contrasts_table %>% filter(outcome=="covidadmitted", subgroup=="all") %>% pull(irrCI_95)` for COVID-19 hospital admission, `r rst$age75plus$contrasts_table %>% filter(outcome=="covidcritcare", subgroup=="all") %>% pull(irrCI)` for COVID-19 critical care admission, `r rst$age75plus$contrasts_table %>% filter(outcome=="coviddeath", subgroup=="all") %>% pull(irrCI)` for COVID-19 death, and `r rst$age75plus$contrasts_table %>% filter(outcome=="noncoviddeath", subgroup=="all") %>% pull(irrCI)` for non-COVID-19 death (Figure 3).
 IRRs in the 16-week period after vaccination were `r rst$age75plus$contrasts_table %>% filter(outcome=="covidadmitted", subgroup=="all") %>% pull(irrCI_95)` for COVID-19 hospital admission, `r rst$age75plus$contrasts_table %>% filter(outcome=="covidcritcare", subgroup=="all") %>% pull(irrCI)` for COVID-19 critical care admission, `r rst$age75plus$contrasts_table %>% filter(outcome=="coviddeath", subgroup=="all") %>% pull(irrCI)` for COVID-19 death, and `r rst$age75plus$contrasts_table %>% filter(outcome=="noncoviddeath", subgroup=="all") %>% pull(irrCI)` for non-COVID-19 death (Figure 3).
 
 During the first week after vaccination event rates were similar between vaccine groups: the estimated HR was `r rst$age75plus$contrasts_cuts_table %>% filter(outcome=="covidadmitted", subgroup=="all", fup_start==0, fup_end==7) %>% pull(irrCI_95)` for COVID-19 hospital admissions, and `r rst$age75plus$contrasts_cuts_table %>% filter(outcome=="noncoviddeath", subgroup=="all", fup_start==0, fup_end==7) %>% pull(irrCI)` for non-COVID-19 death. COVID-19 critical care admission and COVID-19 deaths were rare so Hazard Ratios could not be reliably estimated.
@@ -202,7 +196,7 @@ Findings in the main analyses were similar when examining subgroups, although es
 
 ## Discussion
 
-This observational study of COVID-19 vaccine recipients during the spring 2023 booster programme in England is, to our knowledge, the first to directly compare the Pfizer BA.4-5 and Sanofi vaccines for safety and effectiveness against severe COVID-19 outcomes. We estimated that, in both CV (N=`r label_number(1, big.mark=",")(filter(rst$cv$flowchart, crit=="c5", boost_type %in% c("pfizerBA45", "sanofi")) %>% pull(n) %>% sum())` people) and 75+ (N=`r label_number(1, big.mark=",")(filter(rst$age75plus$flowchart, crit=="c5", boost_type %in% c("pfizerBA45", "sanofi")) %>% pull(n) %>% sum())` people) cohorts, COVID-19 related hospital admissions were less frequent in those receiving the Pfizer BA.4-5 vaccine compared with Sanofi during the first 16 weeks after vaccination. For the more severe COVID-19 outcomes of critical care admission and death, there were very few events resultng in reduced power to identify differences between vaccines.
+This observational study of COVID-19 vaccine recipients during the spring 2023 booster programme in England is, to our knowledge, the first to directly compare the Pfizer BA.4-5 and Sanofi vaccines for safety and effectiveness against severe COVID-19 outcomes. We estimated that, in both CV (N=`r label_number(1, big.mark=",")(filter(rst$cv$flowchart, crit=="c5", boost_type %in% c("pfizerBA45", "sanofi")) %>% pull(n) %>% sum())` people) and 75+ (N=`r label_number(1, big.mark=",")(filter(rst$age75plus$flowchart, crit=="c5", boost_type %in% c("pfizerBA45", "sanofi")) %>% pull(n) %>% sum())` people) cohorts, COVID-19 related hospital admissions were less frequent in those receiving the Pfizer BA.4-5 vaccine compared with Sanofi during the first 16 weeks after vaccination. For the more severe COVID-19 outcomes of critical care admission and death, there were very few events resulting in reduced power to identify differences between vaccines.
 
 ### Strengths and limitations
 
@@ -469,12 +463,10 @@ cat("  \n\n")
 ```
 
 #### Figure 1a: Flow of participants into the CV cohort
-#### Figure 1a: Flow of participants into the CV cohort
 
 ![figure1a](figures_manual/flowchart_cv.png){width="60%"}
 ![figure1a](figures_manual/flowchart_cv.png){width="60%"}
 
-#### Figure 1b: Flow of participants into the 75+ cohort
 #### Figure 1b: Flow of participants into the 75+ cohort
 
 ![figure1b](figures_manual/flowchart_age75plus.png){width="40%"}
@@ -494,7 +486,6 @@ cat("  \n\n")
 
 ```{r}
 #| label: function-ci
-#| warning: false
 #| warning: false
 #| out.width: '100%'
 #| out.height: '50%'
@@ -697,12 +688,8 @@ plot_subgroup <- function(cohort, subgroup){
   
   plot_combined <- patchwork::wrap_plots(
     plot_ci#, 
-    plot_ci#, 
     #plot_rd, 
     #plot_rr, 
-    #plot_irr,
-    #ncol=2,
-    #widths=c(n_subgroups,1)
     #plot_irr,
     #ncol=2,
     #widths=c(n_subgroups,1)
@@ -742,7 +729,6 @@ plot_subgroup("cv", "all")
 #| warning: false
 #| out-width: '100%'
 #| out-height: '80%'
-#| out-height: '80%'
 
 plot_subgroup("age75plus", "all")
 ```
@@ -760,7 +746,7 @@ plot_subgroup("age75plus", "all")
 ```{r figure-contrasts-irr}
 #| echo: false
 #| warning: false
-#| out-height: 50%
+#| out-height: '50%'
 
 contrasts_plot <-
   contrasts_overall %>%
@@ -799,16 +785,14 @@ contrasts_jasper_plot <- contrasts_plot %>%
   add_row(Heading = "Aged 75 years or over", .after = length(outcomes) +3) 
 
 write_csv(contrasts_jasper_plot, fs::path(output_dir_qmd,"irr_plots.csv"),na="")
-write_csv(contrasts_jasper_plot, fs::path(output_dir_qmd,"irr_plots.csv"),na="")
 
 # Run Jasper IRR plot script (requires https://github.com/arnhew99/Jasper?tab=readme-ov-file#jasper)
-#source(here::here("write-up", "manuscript", "irr_plots_jasper_code.r"))
 #source(here::here("write-up", "manuscript", "irr_plots_jasper_code.r"))
 
 plot_irr_lines <- contrasts_plot %>%
   ggplot(aes(y=outcome_descr)) +
   geom_vline(aes(xintercept=1), linetype="dotted", colour="darkgrey")+
-   geom_point(aes(x=irr), position=position_dodge(width=0.1))+
+  geom_point(aes(x=irr), position=position_dodge(width=0.1))+
   geom_linerange(aes(xmin=irr.ll, xmax=irr.ul), position=position_dodge(width=0.1))+
   #facet_grid(rows=vars(outcome_descr), scales="free", space="free_y", switch="y")+
   facet_wrap(vars(cohort_descr), scales="free_y", ncol=1, strip.position = "top")+
@@ -816,7 +800,6 @@ plot_irr_lines <- contrasts_plot %>%
   #scale_fill_brewer(type="qual", palette="Set2")+
   scale_fill_manual(values=c("transparent", "darkgrey"))+
   labs(
-    #subtitle="\n\n\nIncidence Rate Ratios",
     #subtitle="\n\n\nIncidence Rate Ratios",
     x="<- favours Sanofi  |  favours Pfizer BA.4-5 ->",
     y=NULL
@@ -835,7 +818,6 @@ plot_irr_lines <- contrasts_plot %>%
     #strip.text.y.left = element_text(angle=0),
     #strip.text.y.left = element_blank(),
     panel.border = element_blank(),
-    panel.spacing = unit(0.4, "lines"),
     panel.spacing = unit(0.4, "lines"),
   ) 
   
@@ -895,15 +877,12 @@ plot_irr_table <- contrasts_plot %>%
     plot_irr_table,
     ncol=2,
     widths=c(2,0.9)
-    ncol=2,
-    widths=c(2,0.9)
   )
 
   ggsave(
     filename=glue("irr_pvals.jpeg"),
     path=output_dir_qmd,
     plot=plot_combined,
-    width=20, height=15, units="cm"
     width=20, height=15, units="cm"
   )
 
