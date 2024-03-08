@@ -2,7 +2,7 @@ import json
 from pathlib import Path
 
 from ehrql import Dataset, case, days, years, when, minimum_of
-from ehrql.tables.beta.tpp import (
+from ehrql.tables.tpp import (
   patients, 
   practice_registrations, 
   addresses,
@@ -13,7 +13,7 @@ from ehrql.tables.beta.tpp import (
   ons_deaths,
   sgss_covid_all_tests as covid_tests,
   emergency_care_attendances as emergency,
-  hospital_admissions as admissions,
+  apcs as admissions,
 )
 from variables_lib import (
     create_sequential_variables,
@@ -283,7 +283,7 @@ primary_care_covid_events = events.where(
 dataset.hscworker = vaxx_job.where(vaxx_job.is_healthcare_worker).exists_for_patient()
 
 # # TPP care home flag
-dataset.care_home_tpp = address.care_home_is_potential_match.if_null_then(False)
+dataset.care_home_tpp = address.care_home_is_potential_match.when_null_then(False)
 # Patients in long-stay nursing and residential care
 dataset.care_home_code = has_prior_event(codelists.carehome)
 
@@ -306,7 +306,7 @@ dataset.bmi = case(
     when((bmi_value >= 35.0) & (bmi_value < 40.0)).then("Obese II (35-39.9)"),
     # Set maximum to avoid any impossibly extreme values being classified as obese
     when((bmi_value >= 40.0) & (bmi_value < 100.0)).then("Obese III (40+)"),
-    default="Not obese", # assume missing is non-obese
+    otherwise="Not obese", # assume missing is non-obese
 )
 
 
@@ -388,7 +388,7 @@ dataset.asthma = case(
     & (astrxm2e2_date.is_before(astrxm2l1_date + days(730)))).then(True),  
   when((astdx & astrxm1_date.is_not_null())
     & (astrxm2e3_date.is_before(astrxm2l2_date + days(730)))).then(True),
-  default=False
+  otherwise=False
 )
 
 # redfine Asthma as per green book
@@ -415,7 +415,7 @@ dataset.asthma_simple = case(
   when(astadm).then(True),
   #TODO add asthma admission from SUS data too?
   when(astdx & astrx_inhaled & (astrx_oral_count>=2)).then(True),
-  default=False
+  otherwise=False
 )
 
 # Chronic Neurological Disease including Significant Learning Disorder
@@ -436,7 +436,7 @@ bmi_event = last_prior_event(codelists.bmi, where=(events.numeric_value != 0.0))
 dataset.sev_obesity = case(
     when(sev_obesity_event.date > bmi_event.date).then(True),
     when(bmi_event.numeric_value >= 40.0).then(True),
-    default=False
+    otherwise=False
 )
 
 # Pregnancy delivery code date
@@ -471,7 +471,7 @@ dataset.preg_group = case(
       pregA_date.is_not_null() &
       pregA_date.is_on_or_after(pregAdel_date))
     ).then(True),
-    default=False
+    otherwise=False
 )
 
 # Diabetes and diabetes resolution code date
@@ -491,7 +491,7 @@ dataset.diabetes = case(
     when(diab_date.is_not_null() & dmres_date.is_null()).then(True),
     when(addis).then(True),
     when(gdiab_group).then(True),
-    default=False
+    otherwise=False
 )
 
 # Severe Mental Illness codes
@@ -502,7 +502,7 @@ smhres_date = last_prior_event(codelists.smhres).date
 dataset.sev_mental = case(
     when(smhres_date < sev_mental_date).then(True),
     when(sev_mental_date.is_not_null() & smhres_date.is_null()).then(True),
-    default=False
+    otherwise=False
 )
 
 # Chronic heart disease codes
@@ -518,7 +518,7 @@ ckd35_date = last_prior_event(codelists.ckd35).date
 dataset.chronic_kidney_disease = case(
     when(ckd).then(True),
     when((ckd35_date >= ckd15_date)).then(True),
-    default=False
+    otherwise=False
 )
 
 # Chronic Liver disease codes

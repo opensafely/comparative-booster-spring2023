@@ -19,7 +19,7 @@ actions:
   ## # # # # # # # # # # # # # # # # # # # 
 
   extract:
-    run: ehrql:v0 generate-dataset analysis/dataset_definition.py --output output/extracts/extract.arrow
+    run: ehrql:v1 generate-dataset analysis/dataset_definition.py --output output/extracts/extract.arrow
       --dummy-data-file analysis/dummydata/dummyextract.arrow
     needs: []
     outputs:

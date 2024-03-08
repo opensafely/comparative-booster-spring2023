@@ -1,9 +1,9 @@
 import operator
 from functools import reduce
 
-from databuilder.codes import CTV3Code, ICD10Code
+from ehrql.codes import CTV3Code, ICD10Code
 from ehrql import case, days, when
-from ehrql.tables.beta import tpp as schema
+from ehrql.tables import tpp as schema
 
 
 def any_of(conditions):
@@ -45,7 +45,7 @@ def date_deregistered_from_all_supported_practices():
     # 9999-12-31. We convert these, and any other far-future dates, to NULL.
     return case(
         when(max_dereg_date.is_before("3000-01-01")).then(max_dereg_date),
-        default=None,
+        otherwise=None,
     )
 
 def most_recent_bmi(*, minimum_age_at_measurement, where=True):
