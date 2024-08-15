@@ -77,5 +77,5 @@ https://jobs.opensafely.org/datalab/covid-19-vaccine-effectiveness/comparative-b
 
 ## Pre-print
 
-Not yet pre-printed
+https://doi.org/10.1101/2024.03.15.24304277
 
