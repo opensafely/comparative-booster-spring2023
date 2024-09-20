@@ -29,6 +29,37 @@ fs::dir_create(here("output", "data"))
 ## Import extracted dataset ----
 data_extract <- read_feather(here("output", "extracts", "extract.arrow"))
 
+
+## overwrite random vaccine product strings with actual product names
+
+# define random categorical value generator
+# from: https://github.com/wjchulme/dd4d/blob/main/R/rcat.R
+rcat <- function(n, levels, p){
+  sample(x=levels, size=n, replace=TRUE, prob=p)
+}
+
+if(Sys.getenv("OPENSAFELY_BACKEND") %in% c("expectations", "")){
+
+  data_extract <- data_extract %>%
+    mutate(
+      covid_vax_type_1 = if_else(!is.na(covid_vax_1_date), rcat(n=n(), c("pfizer","az"), c(0.5,0.5)), NA_character_),
+      covid_vax_type_2 = if_else(runif(n())<0.98, covid_vax_type_1, "az"),
+      covid_vax_type_3 = if_else(!is.na(covid_vax_3_date), rcat(n=n(), c("pfizer","moderna"), c(0.5,0.5)), NA_character_),
+      covid_vax_type_4 = if_else(!is.na(covid_vax_4_date), rcat(n=n(), c("pfizer","moderna"), c(0.5,0.5)), NA_character_),
+      covid_vax_type_5 = if_else(!is.na(covid_vax_5_date), rcat(n=n(), c("pfizer","sanofi"), c(0.5,0.5)), NA_character_),
+      covid_vax_type_6 = if_else(!is.na(covid_vax_6_date), rcat(n=n(), c("pfizer","sanofi"), c(0.5,0.5)), NA_character_),
+      covid_vax_type_7 = if_else(!is.na(covid_vax_7_date), rcat(n=n(), c("pfizer","sanofi"), c(0.5,0.5)), NA_character_),
+      covid_vax_type_8 = if_else(!is.na(covid_vax_8_date), rcat(n=n(), c("pfizer","sanofi"), c(0.5,0.5)), NA_character_),
+      covid_vax_type_9 = if_else(!is.na(covid_vax_9_date), rcat(n=n(), c("pfizer","sanofi"), c(0.5,0.5)), NA_character_),
+      covid_vax_type_10 = if_else(!is.na(covid_vax_10_date), rcat(n=n(), c("pfizer","sanofi"), c(0.5,0.5)), NA_character_),
+      boost_type = rcat(n=n(), c("pfizerBA45","sanofi"), c(0.5,0.5))
+    ) %>%
+    mutate(across(starts_with("covid_vax_type_"), ~factor(., names(vax_product_lookup), vax_product_lookup))) %>%
+    mutate(boost_type = factor(boost_type, names(vax_product_lookup), vax_product_lookup))
+}
+
+
+
 ## Process extracted dataset ----
 data_processed <- data_extract %>%
   mutate(
@@ -166,33 +197,6 @@ data_processed <- data_extract %>%
 
   )
 
-
-
-## overwrite random vaccine product strings with actual product names
-
-# define random categorical value generator
-# from: https://github.com/wjchulme/dd4d/blob/main/R/rcat.R
-rcat <- function(n, levels, p){
-  sample(x=levels, size=n, replace=TRUE, prob=p)
-}
-
-if(Sys.getenv("OPENSAFELY_BACKEND") %in% c("expectations", "")){
-
-  data_processed <- data_processed %>%
-  mutate(
-    covid_vax_type_1 = if_else(!is.na(covid_vax_1_date), rcat(n=n(), c("pfizer","az"), c(0.5,0.5)), NA_character_),
-    covid_vax_type_2 = if_else(runif(n())<0.98, covid_vax_type_1, "az"),
-    covid_vax_type_3 = if_else(!is.na(covid_vax_3_date), rcat(n=n(), c("pfizer","moderna"), c(0.5,0.5)), NA_character_),
-    covid_vax_type_4 = if_else(!is.na(covid_vax_4_date), rcat(n=n(), c("pfizer","moderna"), c(0.5,0.5)), NA_character_),
-    covid_vax_type_5 = if_else(!is.na(covid_vax_5_date), rcat(n=n(), c("pfizer","sanofi"), c(0.5,0.5)), NA_character_),
-    covid_vax_type_6 = if_else(!is.na(covid_vax_6_date), rcat(n=n(), c("pfizer","sanofi"), c(0.5,0.5)), NA_character_),
-    covid_vax_type_7 = if_else(!is.na(covid_vax_7_date), rcat(n=n(), c("pfizer","sanofi"), c(0.5,0.5)), NA_character_),
-    covid_vax_type_8 = if_else(!is.na(covid_vax_8_date), rcat(n=n(), c("pfizer","sanofi"), c(0.5,0.5)), NA_character_),
-    covid_vax_type_9 = if_else(!is.na(covid_vax_9_date), rcat(n=n(), c("pfizer","sanofi"), c(0.5,0.5)), NA_character_),
-    covid_vax_type_10 = if_else(!is.na(covid_vax_10_date), rcat(n=n(), c("pfizer","sanofi"), c(0.5,0.5)), NA_character_)
-  ) %>%
-    mutate(across(starts_with("covid_vax_type_"), ~factor(., names(vax_product_lookup), vax_product_lookup)))
-}
 
 # Process vaccination dates ----
 
