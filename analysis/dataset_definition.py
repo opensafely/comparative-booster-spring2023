@@ -77,7 +77,7 @@ registered = practice_registrations.for_patient_on(boost_date)
 
 dataset = Dataset()
 
-dataset.configure_dummy_data(population_size=10000)
+dataset.configure_dummy_data(population_size=100000)
 
 dataset.boost_date = boost_date
 
